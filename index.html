@@ -616,6 +616,16 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <img id="brand-logo-sidebar" alt="C@P Consultoria" style="max-width:150px;width:100%;height:auto;display:block;" />
       <button class="menu-toggle" id="menu-toggle-btn" onclick="alternarMenu()" title="Recolher menu">«</button>
     </div>
+
+    <!-- ══ SELETOR GLOBAL DE EMPRESA ══ -->
+    <div id="empresa-switch" style="padding:10px 14px 12px;border-bottom:1px solid #e7e5e4;background:#fff8f3;">
+      <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#9a3412;margin-bottom:5px;">Empresa</label>
+      <select id="empresa-ativa" onchange="trocarEmpresa(this.value)"
+              style="width:100%;padding:8px 10px;font-size:13px;font-weight:600;border:1.5px solid #ea580c;border-radius:6px;background:#fff;color:#3A3B3D;cursor:pointer;">
+        <option value="">🏢 Consolidado (todas)</option>
+      </select>
+    </div>
+
     <nav class="nav">
       <!-- Dashboard -->
       <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard" style="margin-bottom:8px;">
@@ -741,6 +751,10 @@ th.ef-th { padding:8px 8px 8px 12px; }
 
       <!-- Admin -->
       <div class="nav-label" id="nav-label-admin" style="display:none;margin-top:8px;">Administração</div>
+      <div class="nav-item" id="nav-item-empresas" onclick="showPage('empresas')" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="9" y1="12" x2="9" y2="12.01"/><line x1="9" y1="15" x2="9" y2="15.01"/></svg>
+        Empresas
+      </div>
       <div class="nav-item" id="nav-item-usuarios" onclick="showPage('usuarios')" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Gestão de Usuários
@@ -1041,6 +1055,42 @@ th.ef-th { padding:8px 8px 8px 12px; }
       </div>
     </div>
 
+
+    <!-- ══ EMPRESAS ══ -->
+    <div class="page" id="page-empresas">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Empresas <span class="admin-only-badge">🔒 Admin</span></div>
+          <div class="page-sub" style="margin-bottom:0">Cadastro das empresas do grupo. Cada lançamento é vinculado a uma empresa; use o seletor no topo do menu para filtrar as telas ou ver o consolidado.</div>
+        </div>
+        <button class="btn-novo" id="btn-nova-empresa" onclick="toggleFormPanel('form-empresa',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova
+        </button>
+      </div>
+      <div class="form-panel" id="form-empresa" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Nova Empresa</div>
+          <div class="grid3">
+            <div class="form-group"><label>Nome / Razão Social *</label><input id="emp-nome" type="text" placeholder="Ex: Auto Center CAP Ltda" /></div>
+            <div class="form-group"><label>Apelido (aparece no seletor)</label><input id="emp-apelido" type="text" placeholder="Ex: Auto Center" /></div>
+            <div class="form-group"><label>CNPJ</label><input id="emp-cnpj" type="text" placeholder="00.000.000/0000-00" /></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveEmpresa()">Cadastrar Empresa</button>
+            <button class="btn btn-secondary" onclick="clearEmpresaForm()">Limpar</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Empresas Cadastradas</div>
+        <div class="table-scroll"><table><thead><tr>
+          <th>Nome / Razão Social</th><th>Apelido</th><th>CNPJ</th><th>Situação</th>
+          <th style="text-align:right">Lançamentos</th><th>Ações</th>
+        </tr></thead><tbody id="tb-empresas">
+          <tr><td colspan="6" class="empty-state">Nenhuma empresa cadastrada.</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
 
     <!-- ══ GESTÃO DE USUÁRIOS ══ -->
     <div class="page" id="page-usuarios">
@@ -1532,6 +1582,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="card">
         <div class="card-title">Novo Lançamento</div>
         <div class="grid3">
+          <div class="form-group"><label>Empresa *</label><select id="dfc-lan-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
           <div class="form-group"><label>Data *</label><input id="dfc-lan-data" type="date" /></div>
           <div class="form-group"><label>Categoria *</label>
             <select id="dfc-lan-cat"><option value="">Selecione...</option></select>
@@ -1584,7 +1635,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
 
     <!-- ══ DFC DEMONSTRATIVO ══ -->
     <div class="page" id="page-dfc-demonstrativo">
-      <div class="page-title">Demonstrativo de Fluxo de Caixa</div>
+      <div class="page-title">Demonstrativo de Fluxo de Caixa <span class="empresa-tag"></span></div>
       <div class="page-sub">Visão mensal com acumulado do ano</div>
 
       <!-- Filtro Ano -->
@@ -1683,7 +1734,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
 
     <!-- ══ DRE DEMONSTRATIVO ══ -->
     <div class="page" id="page-dre-demonstrativo">
-      <div class="page-header"><div><div class="page-title">Demonstração de Resultado do Exercício (DRE)</div><div class="page-sub" style="margin-bottom:0">Visão mensal de Janeiro a Dezembro com acumulado do ano</div></div><button class="btn-pdf" onclick="imprimirDre()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button></div>
+      <div class="page-header"><div><div class="page-title">Demonstração de Resultado do Exercício (DRE) <span class="empresa-tag"></span></div><div class="page-sub" style="margin-bottom:0">Visão mensal de Janeiro a Dezembro com acumulado do ano</div></div><button class="btn-pdf" onclick="imprimirDre()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button></div>
 
       <!-- Filtro Ano -->
       <div class="card" style="padding:14px 20px;margin-bottom:16px;">
@@ -1864,6 +1915,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="card">
         <div class="card-title">Nova Transferência</div>
         <div class="grid3">
+          <div class="form-group"><label>Empresa *</label><select id="transf-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
+        </div>
+        <div class="grid3">
           <div class="form-group"><label>Conta de Origem *</label>
             <select id="transf-origem"><option value="">Selecione...</option></select>
           </div>
@@ -1918,7 +1972,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
 
     <!-- ══ DASHBOARD ══ -->
     <div class="page active" id="page-dashboard">
-      <div class="page-title">Dashboard</div>
+      <div class="page-title">Dashboard <span class="empresa-tag"></span></div>
       <div class="page-sub">Indicadores e análise de desempenho</div>
 
       <!-- Filtros dos KPIs -->
@@ -2110,6 +2164,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <button onclick="closeModal('modal-novo-lanc')" style="background:none;border:none;cursor:pointer;color:#a8a29e;font-size:22px;line-height:1;padding:4px;" title="Fechar">✕</button>
     </div>
     <div class="grid3">
+      <div class="form-group"><label>Empresa *</label><select id="l-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
+    </div>
+    <div class="grid3">
       <div class="form-group"><label>Data da Compra *</label><input id="l-dtcompra" type="date" /></div>
       <div class="form-group"><label>Previsão de Pagamento</label><input id="l-dtprev" type="date" /></div>
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="l-nf" type="text" placeholder="000000" /></div>
@@ -2178,6 +2235,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
       <div class="modal-title" style="margin-bottom:0;">💰 Novo Lançamento — Recebimento</div>
       <button onclick="closeModal('modal-novo-lr')" style="background:none;border:none;cursor:pointer;color:#a8a29e;font-size:22px;line-height:1;padding:4px;" title="Fechar">✕</button>
+    </div>
+    <div class="grid3">
+      <div class="form-group"><label>Empresa *</label><select id="lr-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Data da Venda *</label><input id="lr-dtvenda" type="date" /></div>
@@ -2329,6 +2389,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
   <div class="modal">
     <div class="modal-title">Editar Lançamento — Receber</div>
     <input type="hidden" id="edit-lr-id" />
+    <div class="grid3">
+      <div class="form-group"><label>Empresa *</label><select id="elr-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
+    </div>
     <div class="grid3">
       <div class="form-group"><label>Data da Venda</label><input id="elr-dtvenda" type="date" /></div>
       <div class="form-group"><label>Prev. Recebimento</label><input id="elr-dtprev" type="date" /></div>
@@ -2557,10 +2620,38 @@ th.ef-th { padding:8px 8px 8px 12px; }
 </div>
 
 <!-- ══ MODAL EDITAR LANÇAMENTO ══ -->
+<!-- ══ MODAL EDITAR EMPRESA ══ -->
+<div class="modal-overlay" id="modal-empresa">
+  <div class="modal">
+    <div class="modal-title">Editar Empresa</div>
+    <input type="hidden" id="edit-emp-id" />
+    <div class="grid3">
+      <div class="form-group"><label>Nome / Razão Social *</label><input id="edit-emp-nome" type="text" /></div>
+      <div class="form-group"><label>Apelido</label><input id="edit-emp-apelido" type="text" /></div>
+      <div class="form-group"><label>CNPJ</label><input id="edit-emp-cnpj" type="text" /></div>
+    </div>
+    <div class="grid3">
+      <div class="form-group"><label>Situação</label>
+        <select id="edit-emp-ativo">
+          <option value="sim">Ativa</option>
+          <option value="nao">Inativa (some do seletor)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-empresa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="updateEmpresa()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-lanc">
   <div class="modal">
     <div class="modal-title">Editar Lançamento</div>
     <input type="hidden" id="edit-lanc-id" />
+    <div class="grid3">
+      <div class="form-group"><label>Empresa *</label><select id="edit-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
+    </div>
     <div class="grid3">
       <div class="form-group"><label>Data da Compra</label><input id="edit-dtcompra" type="date" /></div>
       <div class="form-group"><label>Previsão de Pagamento</label><input id="edit-dtprev" type="date" /></div>
@@ -3132,8 +3223,45 @@ let db = {
   bancos: [],
   transferencias: [],
   pedidos_cancelados: [],
-  reposicoes: []
+  reposicoes: [],
+  empresas: []
 };
+
+// ══════════════════════════════════════════
+// MULTI-EMPRESA
+// Cada lançamento carrega um `empresa_id`. O seletor no topo do menu
+// define a empresa ativa: quando vazio ("Consolidado"), o sistema busca
+// tudo; quando preenchido, o filtro é aplicado direto na consulta ao
+// Supabase — assim TODAS as telas já recebem os dados só daquela empresa,
+// sem precisar de um filtro separado em cada tabela.
+// ══════════════════════════════════════════
+const EMPRESA_KEY = 'cap_empresa_ativa';
+
+// Tabelas que guardam movimento e, portanto, pertencem a uma empresa.
+// Cadastros (clientes, fornecedores, produtos, bancos, grupos DRE/DFC,
+// metas, perfis) são compartilhados entre todas as empresas.
+const TABELAS_POR_EMPRESA = [
+  'lancamentos','lancreceber','dfc_lancamentos','transferencias',
+  'faturamento','recebimentos','pedidos_cancelados','reposicoes'
+];
+
+function empresaAtual() {
+  try { return localStorage.getItem(EMPRESA_KEY) || ''; } catch(e) { return ''; }
+}
+
+function empresaNome(id) {
+  if (!id) return 'Consolidado';
+  const e = db.empresas.find(x => x.id === id);
+  return e ? (e.apelido || e.nome) : '(empresa removida)';
+}
+
+// Sufixo de filtro usado nas consultas ao Supabase
+function filtroEmpresaQuery(tabela) {
+  const emp = empresaAtual();
+  if (!emp) return '';
+  if (!TABELAS_POR_EMPRESA.includes(tabela)) return '';
+  return `&empresa_id=eq.${encodeURIComponent(emp)}`;
+}
 
 // saveDB e loadDB agora são no-op — dados vão direto ao Supabase
 function saveDB() { /* Supabase — sem localStorage */ }
@@ -3147,7 +3275,8 @@ async function fetchAll(table, order='') {
   const limit = 1000;
   const PARALELO = 4;
   const orderParam = order ? `order=${order}&` : '';
-  const pagina = off => sbFetch(table, 'GET', null, `?${orderParam}limit=${limit}&offset=${off}`);
+  const fEmp = filtroEmpresaQuery(table);
+  const pagina = off => sbFetch(table, 'GET', null, `?${orderParam}limit=${limit}&offset=${off}${fEmp}`);
 
   const primeira = await pagina(0);
   if (!primeira || primeira.length === 0) return [];
@@ -3194,7 +3323,8 @@ async function loadAllData() {
       // Guardadas na tabela "config" que já existe — sem tabela nova.
       sbFetch('config', 'GET', null, '?key=in.(formas_pagamento,formas_recebimento,motivos_cancelamento,motivos_reposicao)'), // 14
       fetchAll('pedidos_cancelados', 'dt_cancelamento'), // 15
-      fetchAll('reposicoes', 'dt_reposicao') // 16
+      fetchAll('reposicoes', 'dt_reposicao'), // 16
+      fetchAll('empresas', 'nome') // 17 — nunca filtrado por empresa
     ]);
 
     const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
@@ -3221,6 +3351,7 @@ async function loadAllData() {
     });
     db.pedidos_cancelados = val(15) || [];
     db.reposicoes = val(16) || [];
+    db.empresas = val(17) || [];
     const dreGruposRes = val(12);
     db.dre_grupos    = dreGruposRes || [];
     window._dreGruposError = (dreGruposRes === null || dreGruposRes === undefined);
@@ -3229,6 +3360,8 @@ async function loadAllData() {
     db.recebimentos = (val(4) || []).map(x => ({...x, val: x.valor ?? x.val ?? 0}));
     db.metas = {};
     (val(5) || []).forEach(m => { db.metas[m.tipo] = { val: m.val, inicio: m.inicio, fim: m.fim }; });
+    popularSeletorEmpresa();
+    populateEmpresaSelects();
     bumpDbVer(); // [OTIMIZADO] dados novos => reconstrói índices e parcelas
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
@@ -3350,7 +3483,7 @@ function _finalizarLogin(found) {
   if (sll) sll.textContent = prev ? 'Último acesso: ' + fmtTs(prev.ts) : 'Primeiro acesso';
   // Mostrar/ocultar nav admin
   const isAdmin = found.role === 'admin';
-  ['nav-label-admin','nav-item-usuarios'].forEach(id => {
+  ['nav-label-admin','nav-item-usuarios','nav-item-empresas'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = isAdmin ? '' : 'none';
   });
@@ -3404,9 +3537,11 @@ function paginaVisivel(p) {
   return !!el && el.classList.contains('active');
 }
 
+let _paginaAtual = 'dashboard';
+
 function showPage(p) {
-  // Verificar permissão (exceto admin e página usuarios)
-  if (p !== 'usuarios' && currentUser && currentUser.role !== 'admin') {
+  // Verificar permissão (exceto admin e páginas de administração)
+  if (p !== 'usuarios' && p !== 'empresas' && currentUser && currentUser.role !== 'admin') {
     const allowed = currentUser.pages || [];
     if (!allowed.includes(p)) { alert('Acesso não permitido para seu perfil.'); return; }
   }
@@ -3414,7 +3549,8 @@ function showPage(p) {
   document.querySelectorAll('.nav-item, .nav-sub-item').forEach(el => el.classList.remove('active'));
   const pg = document.getElementById('page-' + p);
   if(pg) pg.classList.add('active');
-  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  if (typeof event !== 'undefined' && event && event.currentTarget) event.currentTarget.classList.add('active');
+  _paginaAtual = p;
   if (p === 'dashboard')    { carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
   if (p === 'lancamentos')    renderLancamentos();
   if (p === 'apagar')         renderApagar();
@@ -3438,6 +3574,42 @@ function showPage(p) {
   if (p === 'dre-demonstrativo') { carregarVarEstoque().then(carregarDreGrupoClasses).then(renderDre); }
   if (p === 'dre-analise-cat')   { popularCategoriasAnalise(); renderAnaliseCategoria(); }
   if (p === 'usuarios')          renderUsuariosAdmin();
+  if (p === 'empresas')          renderEmpresas();
+}
+
+// Redesenha a tela em que o usuário está — usado depois de trocar de empresa,
+// quando todos os dados em memória foram recarregados.
+function renderPaginaAtual() {
+  const p = _paginaAtual || 'dashboard';
+  const nav = document.getElementById('nav-' + p) || document.getElementById('nav-item-' + p);
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  const pg = document.getElementById('page-' + p);
+  if (pg) pg.classList.add('active');
+  if (nav) nav.classList.add('active');
+  if (p === 'dashboard')    { carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
+  if (p === 'lancamentos')    renderLancamentos();
+  if (p === 'apagar')         renderApagar();
+  if (p === 'pagas')          renderPagas();
+  if (p === 'bancos')         { renderBancos(); renderFluxoBancoDiario(); }
+  if (p === 'transferencias') { populateTransfSelects(); renderTransferencias(); }
+  if (p === 'fluxo-futuro')   renderFluxoFuturo();
+  if (p === 'fornecedores')   renderFornecedores();
+  if (p === 'produtos')       renderProdutos();
+  if (p === 'clientes')       renderClientes();
+  if (p === 'prodvenda')      renderProdVenda();
+  if (p === 'lancreceber')    renderLancReceber();
+  if (p === 'areceber')       renderAReceber();
+  if (p === 'recebido')       renderRecebido();
+  if (p === 'pedidoscancelados') renderPedidosCancelados();
+  if (p === 'reposicao')         renderReposicoes();
+  if (p === 'dfc-categorias')    renderDfcCategorias();
+  if (p === 'dfc-lancamentos')   renderDfcLancamentos();
+  if (p === 'dfc-demonstrativo') renderDfc();
+  if (p === 'dre-grupos')        { carregarDreGrupoClasses().then(renderDreGrupos); }
+  if (p === 'dre-demonstrativo') { carregarVarEstoque().then(carregarDreGrupoClasses).then(renderDre); }
+  if (p === 'dre-analise-cat')   { popularCategoriasAnalise(); renderAnaliseCategoria(); }
+  if (p === 'usuarios')          renderUsuariosAdmin();
+  if (p === 'empresas')          renderEmpresas();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3850,6 +4022,220 @@ async function deleteProduto(id) {
 }
 
 // ══════════════════════════════════════════
+// EMPRESAS (multi-empresa)
+// ══════════════════════════════════════════
+
+// Só empresas ativas aparecem para escolha; as inativas continuam
+// existindo para não quebrar lançamentos antigos.
+function empresasAtivas() {
+  return (db.empresas || []).filter(e => e.ativo !== false && e.ativo !== 'nao');
+}
+
+// Preenche o seletor global no topo do menu.
+function popularSeletorEmpresa() {
+  const sel = document.getElementById('empresa-ativa');
+  if (!sel) return;
+  const atual = empresaAtual();
+  sel.innerHTML = '<option value="">🏢 Consolidado (todas)</option>' +
+    empresasAtivas().map(e => `<option value="${e.id}">${e.apelido || e.nome}</option>`).join('');
+  // Se a empresa salva não existe mais, volta para consolidado.
+  const existe = atual === '' || empresasAtivas().some(e => e.id === atual);
+  if (!existe) { try { localStorage.removeItem(EMPRESA_KEY); } catch(e) {} }
+  sel.value = existe ? atual : '';
+  pintarSeletorEmpresa();
+  atualizarTagsEmpresa();
+}
+
+// Etiqueta que aparece ao lado do título das telas de análise (DRE, DFC,
+// Dashboard), deixando claro se o número na tela é de uma empresa só ou
+// do consolidado do grupo.
+function atualizarTagsEmpresa() {
+  const emp = empresaAtual();
+  const txt = emp ? empresaNome(emp) : 'Consolidado';
+  const cor = emp ? '#ea580c' : '#57534e';
+  const fundo = emp ? '#fff1e6' : '#f5f5f4';
+  document.querySelectorAll('.empresa-tag').forEach(el => {
+    el.textContent = (emp ? '🏢 ' : '📊 ') + txt;
+    el.style.cssText = `display:inline-block;margin-left:10px;padding:3px 12px;border-radius:20px;
+      font-size:12px;font-weight:600;vertical-align:middle;background:${fundo};color:${cor};
+      border:1px solid ${emp ? '#fed7aa' : '#e7e5e4'};`;
+  });
+}
+
+// Consolidado fica com visual diferente para não confundir com uma empresa.
+function pintarSeletorEmpresa() {
+  const sel = document.getElementById('empresa-ativa');
+  const box = document.getElementById('empresa-switch');
+  if (!sel || !box) return;
+  if (sel.value) {
+    box.style.background = '#fff8f3';
+    sel.style.borderColor = '#ea580c';
+    sel.style.color = '#3A3B3D';
+  } else {
+    box.style.background = '#f5f5f4';
+    sel.style.borderColor = '#a8a29e';
+    sel.style.color = '#57534e';
+  }
+}
+
+// Preenche todos os selects de empresa dos formulários (class="sel-empresa"),
+// já deixando marcada a empresa ativa quando houver uma.
+function populateEmpresaSelects() {
+  const atual = empresaAtual();
+  document.querySelectorAll('select.sel-empresa').forEach(sel => {
+    const anterior = sel.value;
+    sel.innerHTML = '<option value="">Selecione...</option>' +
+      empresasAtivas().map(e => `<option value="${e.id}">${e.apelido || e.nome}</option>`).join('');
+    sel.value = anterior || atual || '';
+  });
+}
+
+// Troca a empresa ativa: salva a escolha, recarrega os dados já filtrados
+// no Supabase e redesenha a tela em que o usuário está.
+async function trocarEmpresa(id) {
+  try {
+    if (id) localStorage.setItem(EMPRESA_KEY, id);
+    else localStorage.removeItem(EMPRESA_KEY);
+  } catch(e) {}
+  pintarSeletorEmpresa();
+  atualizarTagsEmpresa();
+  await loadAllData();
+  renderPaginaAtual();
+}
+
+// Empresa que deve ser gravada em um lançamento novo.
+// Se o usuário está no consolidado, ele precisa escolher no formulário.
+function empresaDoForm(selectId) {
+  const sel = document.getElementById(selectId);
+  const val = sel ? sel.value : '';
+  if (val) return val;
+  const atual = empresaAtual();
+  if (atual) return atual;
+  alert('Selecione a empresa deste lançamento.\n\nVocê está no modo "Consolidado", então é preciso indicar a qual empresa o registro pertence.');
+  if (sel) sel.focus();
+  return null;
+}
+
+// ── CRUD ────────────────────────────────────
+
+function clearEmpresaForm() {
+  ['emp-nome','emp-apelido','emp-cnpj'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
+async function saveEmpresa() {
+  const nome = document.getElementById('emp-nome').value.trim();
+  if (!nome) { alert('Informe o nome da empresa.'); return; }
+  const nova = {
+    id: uid(),
+    nome,
+    apelido: document.getElementById('emp-apelido').value.trim(),
+    cnpj: document.getElementById('emp-cnpj').value.trim(),
+    ativo: true
+  };
+  const ok = await sbFetch('empresas', 'POST', nova);
+  if (!ok) { alert('❌ Erro ao salvar. Verifique se a tabela "empresas" foi criada no Supabase (rode o script SQL) e se o GRANT foi aplicado.'); return; }
+  db.empresas.push(nova);
+  clearEmpresaForm();
+  popularSeletorEmpresa();
+  populateEmpresaSelects();
+  renderEmpresas();
+}
+
+function editEmpresa(id) {
+  const e = db.empresas.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('edit-emp-id').value = e.id;
+  document.getElementById('edit-emp-nome').value = e.nome || '';
+  document.getElementById('edit-emp-apelido').value = e.apelido || '';
+  document.getElementById('edit-emp-cnpj').value = e.cnpj || '';
+  document.getElementById('edit-emp-ativo').value = (e.ativo === false || e.ativo === 'nao') ? 'nao' : 'sim';
+  openModal('modal-empresa');
+}
+
+async function updateEmpresa() {
+  const id = document.getElementById('edit-emp-id').value;
+  const e = db.empresas.find(x => x.id === id);
+  if (!e) return;
+  const nome = document.getElementById('edit-emp-nome').value.trim();
+  if (!nome) { alert('Informe o nome da empresa.'); return; }
+  e.nome    = nome;
+  e.apelido = document.getElementById('edit-emp-apelido').value.trim();
+  e.cnpj    = document.getElementById('edit-emp-cnpj').value.trim();
+  e.ativo   = document.getElementById('edit-emp-ativo').value === 'sim';
+  await sbFetch('empresas', 'PATCH', {
+    nome: e.nome, apelido: e.apelido, cnpj: e.cnpj, ativo: e.ativo
+  }, `?id=eq.${e.id}`);
+  closeModal('modal-empresa');
+  popularSeletorEmpresa();
+  populateEmpresaSelects();
+  renderEmpresas();
+}
+
+// Conta quantos registros já estão vinculados à empresa. Serve tanto para
+// mostrar na tabela quanto para impedir exclusão de empresa em uso.
+function contarRegistrosEmpresa(id) {
+  const listas = [
+    db.lancamentos, db.lancreceber, db.dfc_lans, db.transferencias,
+    db.faturamento, db.recebimentos, db.pedidos_cancelados, db.reposicoes
+  ];
+  return listas.reduce((tot, lista) =>
+    tot + (lista || []).filter(x => (x.empresa_id || '') === id).length, 0);
+}
+
+async function deleteEmpresa(id) {
+  const usados = contarRegistrosEmpresa(id);
+  if (usados > 0) {
+    alert(`Não é possível excluir: existem ${usados} registro(s) vinculados a esta empresa` +
+          (empresaAtual() ? '' : '') +
+          '.\n\nSe quiser tirá-la do seletor sem perder o histórico, edite a empresa e marque como "Inativa".');
+    return;
+  }
+  if (!confirm('Excluir esta empresa?')) return;
+  await sbFetch('empresas', 'DELETE', null, `?id=eq.${id}`);
+  db.empresas = db.empresas.filter(x => x.id !== id);
+  if (empresaAtual() === id) { try { localStorage.removeItem(EMPRESA_KEY); } catch(e) {} }
+  popularSeletorEmpresa();
+  populateEmpresaSelects();
+  renderEmpresas();
+}
+
+function renderEmpresas() {
+  const tb = document.getElementById('tb-empresas');
+  if (!tb) return;
+  const lista = db.empresas || [];
+  if (!lista.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma empresa cadastrada. Clique em “Nova” para começar.</td></tr>';
+    return;
+  }
+  // A contagem só é confiável no consolidado, porque em uma empresa
+  // específica os dados em memória já vêm filtrados.
+  const consolidado = !empresaAtual();
+  tb.innerHTML = lista.map(e => {
+    const ativa = !(e.ativo === false || e.ativo === 'nao');
+    const qtd = consolidado ? contarRegistrosEmpresa(e.id) : '—';
+    return `<tr>
+      <td style="font-weight:600">${e.nome || ''}</td>
+      <td>${e.apelido || '—'}</td>
+      <td>${e.cnpj || '—'}</td>
+      <td><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+        background:${ativa ? '#dcfce7' : '#f5f5f4'};color:${ativa ? '#166534' : '#78716c'}">
+        ${ativa ? 'Ativa' : 'Inativa'}</span></td>
+      <td style="text-align:right">${qtd}</td>
+      <td>
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="editEmpresa('${e.id}')">Editar</button>
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;color:#b91c1c" onclick="deleteEmpresa('${e.id}')">Excluir</button>
+      </td>
+    </tr>`;
+  }).join('');
+  if (!consolidado) {
+    tb.innerHTML += `<tr><td colspan="6" style="text-align:center;padding:12px;background:#fffbeb;color:#92400e;font-size:12px">
+      A contagem de lançamentos só aparece no modo <strong>Consolidado</strong>. Troque o seletor de empresa no topo do menu para vê-la.</td></tr>`;
+  }
+}
+
+// ══════════════════════════════════════════
 // LANÇAMENTOS
 // ══════════════════════════════════════════
 // Regra de negócio: todo lançamento marcado como Pago/Recebido precisa ter
@@ -3872,9 +4258,12 @@ async function saveLancamento() {
   const pago = document.getElementById('l-pago').value;
   const banco = document.getElementById('l-banco').value;
   if (!validarBancoObrigatorio(pago, banco)) return;
+  const empresa_id = empresaDoForm('l-empresa');
+  if (empresa_id === null) return;
   const parcelas = parseInt(document.getElementById('l-parcelas').value)||1;
   const lanc = {
     id: uid(),
+    empresa_id,
     dtcompra,
     dtprev: document.getElementById('l-dtprev').value,
     nf: document.getElementById('l-nf').value,
@@ -4052,6 +4441,9 @@ async function updateLancamento() {
   const pago = document.getElementById('edit-pago').value;
   const banco = document.getElementById('edit-banco') ? document.getElementById('edit-banco').value : (l.banco||'');
   if (!validarBancoObrigatorio(pago, banco)) return;
+  const _empEdit = empresaDoForm('edit-empresa');
+  if (_empEdit === null) return;
+  l.empresa_id = _empEdit;
   l.dtcompra = document.getElementById('edit-dtcompra').value;
   l.dtprev = document.getElementById('edit-dtprev').value;
   l.nf = document.getElementById('edit-nf').value;
@@ -4068,6 +4460,7 @@ async function updateLancamento() {
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('edit-parcela-dates', l.parcelas) : null;
   l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('edit-parcela-dates', l.parcelas) : null;
   await sbFetch('lancamentos', 'PATCH', {
+    empresa_id: l.empresa_id,
     dtcompra: l.dtcompra, dtprev: l.dtprev, nf: l.nf,
     forn: l.forn, prod: l.prod, valor: l.valor,
     parcelas: l.parcelas, financeiro: l.financeiro,
@@ -5029,7 +5422,7 @@ async function backupLancamentos() {
 
 // Busca, direto do banco, todas as tabelas de dados do sistema.
 async function buscarDadosCompletos() {
-  const nomes = ['fornecedores','produtos','lancamentos','faturamento','recebimentos',
+  const nomes = ['empresas','fornecedores','produtos','lancamentos','faturamento','recebimentos',
     'metas','clientes','prodvenda','lancreceber','dfc_categorias','dfc_lancamentos',
     'bancos','dre_grupos','transferencias','pedidos_cancelados','reposicoes'];
   const results = await Promise.allSettled(nomes.map(t => fetchAll(t)));
@@ -5351,16 +5744,30 @@ function clearPagasFiltros() {
 // ══════════════════════════════════════════
 // FATURAMENTO / RECEBIMENTOS
 // ══════════════════════════════════════════
+// Faturamento e recebimentos são valores mensais por empresa: no modo
+// Consolidado não dá para saber a qual empresa o número pertence, então
+// pedimos que o usuário escolha uma empresa antes de lançar.
+function exigirEmpresaAtiva(oQue) {
+  const emp = empresaAtual();
+  if (!emp) {
+    alert(`Selecione uma empresa no topo do menu antes de lançar ${oQue}.\n\nNo modo "Consolidado" não é possível saber a qual empresa o valor pertence.`);
+    return null;
+  }
+  return emp;
+}
+
 async function saveFaturamento() {
   const mes = document.getElementById('fat-mes').value;
   const val = parseFloat(document.getElementById('fat-val').value);
   if(!mes || !val) { alert('Informe o mês e o valor.'); return; }
-  const exist = db.faturamento.find(x=>x.mes===mes);
+  const empresa_id = exigirEmpresaAtiva('o faturamento');
+  if (!empresa_id) return;
+  const exist = db.faturamento.find(x=>x.mes===mes && (x.empresa_id||'')===empresa_id);
   if(exist) {
     exist.val = val;
-    await sbFetch('faturamento', 'PATCH', {valor:val}, `?mes=eq.${mes}`);
+    await sbFetch('faturamento', 'PATCH', {valor:val}, `?mes=eq.${mes}&empresa_id=eq.${encodeURIComponent(empresa_id)}`);
   } else {
-    const rec = {id:uid(), mes, valor:val};
+    const rec = {id:uid(), empresa_id, mes, valor:val};
     await sbFetch('faturamento', 'POST', rec);
     rec.val = val; // compatibilidade interna
     db.faturamento.push(rec);
@@ -5372,12 +5779,14 @@ async function saveRecebimento() {
   const mes = document.getElementById('rec-mes').value;
   const val = parseFloat(document.getElementById('rec-val').value);
   if(!mes || !val) { alert('Informe o mês e o valor.'); return; }
-  const exist = db.recebimentos.find(x=>x.mes===mes);
+  const empresa_id = exigirEmpresaAtiva('o recebimento');
+  if (!empresa_id) return;
+  const exist = db.recebimentos.find(x=>x.mes===mes && (x.empresa_id||'')===empresa_id);
   if(exist) {
     exist.val = val;
-    await sbFetch('recebimentos', 'PATCH', {valor:val}, `?mes=eq.${mes}`);
+    await sbFetch('recebimentos', 'PATCH', {valor:val}, `?mes=eq.${mes}&empresa_id=eq.${encodeURIComponent(empresa_id)}`);
   } else {
-    const rec = {id:uid(), mes, valor:val};
+    const rec = {id:uid(), empresa_id, mes, valor:val};
     await sbFetch('recebimentos', 'POST', rec);
     rec.val = val;
     db.recebimentos.push(rec);
@@ -6747,7 +7156,7 @@ function applyNavPermissions() {
     const match = onclick.match(/showPage\('([\w-]+)'\)/);
     if (!match) return;
     const pg = match[1];
-    if (pg === 'usuarios') return;
+    if (pg === 'usuarios' || pg === 'empresas') return;
     if (isAdmin) { item.style.display = ''; return; }
     item.style.display = allowed.includes(pg) ? '' : 'none';
   });
@@ -7152,8 +7561,10 @@ async function saveLancReceber() {
   const recebido=document.getElementById('lr-recebido').value;
   const banco=document.getElementById('lr-banco').value;
   if (!validarBancoObrigatorio(recebido, banco)) return;
+  const empresa_id = empresaDoForm('lr-empresa');
+  if (empresa_id === null) return;
   const parcelas=parseInt(document.getElementById('lr-parcelas').value)||1;
-  const lanc={ id:uid(), dtvenda,
+  const lanc={ id:uid(), empresa_id, dtvenda,
     dtprev:document.getElementById('lr-dtprev').value,
     nf:document.getElementById('lr-nf').value,
     cliente, prod:document.getElementById('lr-prod').value,
@@ -7313,6 +7724,9 @@ async function updateLancReceber() {
   const recebido=document.getElementById('elr-recebido').value;
   const banco = document.getElementById('elr-banco') ? document.getElementById('elr-banco').value : (l.banco||'');
   if (!validarBancoObrigatorio(recebido, banco)) return;
+  const _empLR = empresaDoForm('elr-empresa');
+  if (_empLR === null) return;
+  l.empresa_id = _empLR;
   l.dtvenda=document.getElementById('elr-dtvenda').value;
   l.dtprev=document.getElementById('elr-dtprev').value;
   l.nf=document.getElementById('elr-nf').value;
@@ -7328,7 +7742,7 @@ async function updateLancReceber() {
   l.cat_dre = document.getElementById('elr-catdre') ? document.getElementById('elr-catdre').value : (l.cat_dre||'');
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('elr-parcela-dates', l.parcelas) : null;
   l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('elr-parcela-dates', l.parcelas) : null;
-  await sbFetch('lancreceber','PATCH',{dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
+  await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
   closeModal('modal-lancreceber'); renderLancReceber();
 }
 async function deleteLancReceber(id) {
@@ -7882,7 +8296,9 @@ async function saveDfcLancamento() {
   const cat   = document.getElementById('dfc-lan-cat').value;
   const valor = parseFloat(document.getElementById('dfc-lan-valor').value);
   if (!data || !cat || !valor) { alert('Preencha data, categoria e valor.'); return; }
-  const rec = { id: uid(), data, cat, valor,
+  const empresa_id = empresaDoForm('dfc-lan-empresa');
+  if (empresa_id === null) return;
+  const rec = { id: uid(), empresa_id, data, cat, valor,
     desc: document.getElementById('dfc-lan-desc').value,
     recorrente: document.getElementById('dfc-lan-recorrente').value,
     obs: document.getElementById('dfc-lan-obs').value };
@@ -9797,7 +10213,9 @@ async function saveTransferencia() {
   if (origem === destino) { alert('A conta de origem deve ser diferente da conta de destino.'); return; }
   if (!valor || valor <= 0) { alert('Informe um valor de transferência maior que zero.'); return; }
   if (!data) { alert('Informe a data da transferência.'); return; }
-  const rec = { id: uid(), data, origem, destino, valor, obs: obs || '' };
+  const empresa_id = empresaDoForm('transf-empresa');
+  if (empresa_id === null) return;
+  const rec = { id: uid(), empresa_id, data, origem, destino, valor, obs: obs || '' };
   const res = await sbFetch('transferencias', 'POST', rec);
   if (!res) { alert('Erro ao salvar! Verifique se a tabela "transferencias" existe no Supabase e o RLS está configurado.'); return; }
   db.transferencias.push(rec);
@@ -10937,7 +11355,8 @@ async function importarLinha(tipo, r) {
 
   if(tipo === 'pagar') {
     const lanc = {
-      id: uid(), dtcompra: r.dataRef, dtprev: r.venc, nf: r.nf||'',
+      id: uid(), empresa_id: empresaAtual() || null,
+      dtcompra: r.dataRef, dtprev: r.venc, nf: r.nf||'',
       forn: idAlvo, prod: '', valor: r.valor, parcelas: 1,
       financeiro: 'sim', pago: 'nao', tipo_pag: '', banco: '',
       cat_dre: r.catId || '', obs: (r.obs||'') + ' (importado via conciliação bancária)',
@@ -10948,7 +11367,8 @@ async function importarLinha(tipo, r) {
     db.lancamentos.push(lanc);
   } else {
     const lanc = {
-      id: uid(), dtvenda: r.dataRef, dtprev: r.venc, nf: r.nf||'',
+      id: uid(), empresa_id: empresaAtual() || null,
+      dtvenda: r.dataRef, dtprev: r.venc, nf: r.nf||'',
       cliente: idAlvo, prod: '', valor: r.valor, parcelas: 1,
       financeiro: 'sim', recebido: 'nao', tipo_pag: '', banco: '',
       cat_dre: r.catId || '', juros: null, obs: (r.obs||'') + ' (importado via conciliação bancária)',
@@ -11312,6 +11732,7 @@ async function confirmarCancelamento() {
   const registro = {
     id: uid(),
     lanc_orig_id: l.id,
+    empresa_id: l.empresa_id || empresaAtual() || null,
     cliente: l.cliente || '',
     prod: l.prod || '',
     valor: l.valor || 0,
@@ -11491,6 +11912,7 @@ async function restaurarPedidoCancelado(id) {
   if (!confirm('Restaurar este pedido para Contas a Receber?')) return;
   const lanc = {
     id: p.lanc_orig_id || uid(),
+    empresa_id: p.empresa_id || empresaAtual() || null,
     cliente: p.cliente || '', prod: p.prod || '',
     valor: p.valor || 0, parcelas: p.parcelas || 1,
     dtvenda: p.dtvenda || null, dtprev: p.dtprev || null,
@@ -11593,6 +12015,7 @@ async function confirmarReposicao() {
   const registro = {
     id: uid(),
     lanc_orig_id: l.id,
+    empresa_id: l.empresa_id || empresaAtual() || null,
     cliente: l.cliente || '',
     prod: l.prod || '',
     valor: l.valor || 0,
@@ -11772,6 +12195,7 @@ async function restaurarReposicao(id) {
   if (!confirm('Restaurar este pedido para Contas a Receber?')) return;
   const lanc = {
     id: p.lanc_orig_id || uid(),
+    empresa_id: p.empresa_id || empresaAtual() || null,
     cliente: p.cliente || '', prod: p.prod || '',
     valor: p.valor || 0, parcelas: p.parcelas || 1,
     dtvenda: p.dtvenda || null, dtprev: p.dtprev || null,
@@ -11801,7 +12225,7 @@ async function excluirReposicao(id) {
 function imprimirReposicoes() { imprimirPagina('reposicao'); }
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-08-06 · troca-categoria-em-massa';
+window.APP_BUILD = '2026-08-09 · multi-empresa';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
