@@ -198,12 +198,19 @@ th.ef-th { padding:8px 8px 8px 12px; }
 .ef-combo-trigger-text.ef-combo-placeholder { color:#a8a29e; }
 .ef-combo-trigger-arrow { color:#a8a29e; font-size:10px; flex-shrink:0; }
 .ef-combo-panel { background:#fff; border:1px solid var(--border2); border-radius:8px; box-shadow:0 12px 32px rgba(15,30,58,0.2); z-index:600; font-size:13px; overflow:hidden; }
-.ef-combo-search { padding:8px; border-bottom:1px solid #f5f4f2; }
+.ef-combo-search { padding:8px; border-bottom:1px solid #f5f4f2; flex-shrink:0; }
 .ef-combo-search input { width:100%; padding:7px 9px; font-size:13px; }
-.ef-combo-list { max-height:240px; overflow-y:auto; }
-.ef-combo-item { padding:8px 12px; cursor:pointer; color:#1f2937; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ef-combo-list { flex:1 1 auto; min-height:0; max-height:320px; overflow-y:auto; }
+.ef-combo-item { padding:8px 12px; cursor:pointer; color:#1f2937; line-height:1.35; word-break:break-word; }
 .ef-combo-item:hover { background:#faf9f7; }
 .ef-combo-item.ef-combo-item-sel { background:var(--accent-light); font-weight:600; color:var(--accent); }
+/* Nome principal + qualificador (ex.: grupo da DRE) em segunda linha */
+.ef-combo-item-nome { display:block; }
+.ef-combo-item-sub {
+  display:block; font-size:11px; color:#a8a29e; font-weight:500;
+  margin-top:2px; text-transform:uppercase; letter-spacing:.3px;
+}
+.ef-combo-item.ef-combo-item-sel .ef-combo-item-sub { color:#c2703f; }
 .ef-combo-empty { padding:10px 12px; color:#a8a29e; }
 .ef-combo-item-novo { color:var(--accent); font-weight:600; border-bottom:1px solid #f5f4f2; background:#faf9f8; }
 .ef-combo-item-novo:hover { background:var(--accent-light); }
@@ -518,6 +525,32 @@ th.ef-th { padding:8px 8px 8px 12px; }
   max-height: 1400px;
   opacity: 1;
 }
+/* ── FRASE DO DIA (Dashboard) ── */
+.frase-dia {
+  position:relative;
+  background:linear-gradient(135deg,#fff8f3 0%,#fff1e6 100%);
+  border:1px solid #fed7aa; border-left:4px solid #ea580c;
+  border-radius:var(--radius2);
+  padding:18px 24px 18px 56px;
+  margin:0 0 20px;
+}
+.frase-dia::before {
+  content:'"'; position:absolute; left:20px; top:6px;
+  font-size:44px; line-height:1; color:#ea580c; opacity:.35;
+  font-family:Georgia,'Times New Roman',serif;
+}
+.frase-dia-txt {
+  font-size:15px; line-height:1.55; color:#3A3B3D; font-weight:500;
+  font-style:italic; margin-bottom:8px;
+}
+.frase-dia-autor {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; font-weight:700; color:#ea580c;
+  text-transform:uppercase; letter-spacing:.5px;
+}
+.frase-dia-data { font-weight:500; color:#a8a29e; text-transform:none; letter-spacing:0; }
+@media (max-width:700px){ .frase-dia { padding:16px 18px 16px 46px; } .frase-dia-txt { font-size:14px; } }
+
 /* Botão "+" de cadastro rápido ao lado dos campos de seleção */
 .label-add { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .btn-add-inline {
@@ -2003,6 +2036,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="page-title">Dashboard <span class="empresa-tag"></span></div>
       <div class="page-sub">Indicadores e análise de desempenho</div>
 
+      <!-- Frase do dia — troca automaticamente a cada dia -->
+      <div id="frase-do-dia" class="frase-dia"></div>
+
       <!-- Filtros dos KPIs -->
       <div class="card" style="padding:14px 20px;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
@@ -2205,7 +2241,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Valor Total (R$) *</label><input id="l-valor" type="number" step="0.01" placeholder="0,00" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','l-catdre')">+</button></label><select id="l-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group" style="grid-column:span 2"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','l-catdre')">+</button></label><select id="l-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Número de Parcelas</label>
@@ -2278,7 +2314,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Valor Total (R$) *</label><input id="lr-valor" type="number" step="0.01" placeholder="0,00" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','lr-catdre')">+</button></label><select id="lr-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group" style="grid-column:span 2"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','lr-catdre')">+</button></label><select id="lr-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Número de Parcelas</label>
@@ -2431,7 +2467,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Valor Total</label><input id="elr-valor" type="number" step="0.01" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','elr-catdre')">+</button></label><select id="elr-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group" style="grid-column:span 2"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','elr-catdre')">+</button></label><select id="elr-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Parcelas</label>
@@ -2742,7 +2778,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Valor Total</label><input id="edit-valor" type="number" step="0.01" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','edit-catdre')">+</button></label><select id="edit-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group" style="grid-column:span 2"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','edit-catdre')">+</button></label><select id="edit-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Parcelas</label>
@@ -3632,7 +3668,7 @@ function showPage(p) {
   if(pg) pg.classList.add('active');
   if (typeof event !== 'undefined' && event && event.currentTarget) event.currentTarget.classList.add('active');
   _paginaAtual = p;
-  if (p === 'dashboard')    { carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
+  if (p === 'dashboard')    { renderFraseDoDia(); carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
   if (p === 'lancamentos')    renderLancamentos();
   if (p === 'apagar')         renderApagar();
   if (p === 'pagas')          renderPagas();
@@ -3667,7 +3703,7 @@ function renderPaginaAtual() {
   const pg = document.getElementById('page-' + p);
   if (pg) pg.classList.add('active');
   if (nav) nav.classList.add('active');
-  if (p === 'dashboard')    { carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
+  if (p === 'dashboard')    { renderFraseDoDia(); carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard); setTimeout(loadMetaInputs, 100); }
   if (p === 'lancamentos')    renderLancamentos();
   if (p === 'apagar')         renderApagar();
   if (p === 'pagas')          renderPagas();
@@ -4100,6 +4136,143 @@ async function deleteProduto(id) {
   await sbFetch('produtos', 'DELETE', null, `?id=eq.${id}`);
   db.produtos = db.produtos.filter(x=>x.id!==id);
   renderProdutos();
+}
+
+// ══════════════════════════════════════════
+// FRASE DO DIA — Dashboard
+// Frases autorais da C@P Consultoria sobre gestão financeira.
+// A escolha é determinística pelo dia: todo mundo vê a mesma frase no
+// mesmo dia, e ela troca sozinha à meia-noite. Com 90 frases, o ciclo
+// leva cerca de três meses para repetir.
+// ══════════════════════════════════════════
+const FRASES_CAP = [
+  'Lucro no papel não paga boleto. Fluxo de caixa, sim.',
+  'Quem não mede o custo, decide o preço no escuro.',
+  'Faturar muito e sobrar pouco é sinal de margem doente, não de mercado difícil.',
+  'A DRE conta a história do mês; o caixa conta a história de amanhã.',
+  'Reduzir despesa é bom. Entender por que ela existe é melhor.',
+  'Preço não se copia do concorrente: se calcula a partir do seu custo.',
+  'Todo desconto dado sem conta feita sai do seu lucro, não do faturamento.',
+  'Empresa que não separa caixa da empresa do caixa do dono cresce sem perceber que está encolhendo.',
+  'Estoque parado é dinheiro seu dormindo na prateleira.',
+  'O ponto de equilíbrio não é uma meta: é o mínimo para continuar existindo.',
+  'Prazo de recebimento maior que prazo de pagamento é uma dívida disfarçada.',
+  'Quem controla o custo variável defende a margem; quem controla o fixo defende a empresa.',
+  'Vender mais para uma operação que dá prejuízo só acelera o problema.',
+  'A inadimplência começa na venda mal negociada, não no vencimento.',
+  'Número que ninguém acompanha vira enfeite de relatório.',
+  'Antes de cortar custo, descubra qual custo gera receita.',
+  'Margem de contribuição é o que sobra para pagar a estrutura. Conheça a sua.',
+  'Capital de giro não é reserva de emergência: é combustível da operação.',
+  'Se você não sabe o custo por serviço, não sabe qual cliente dá lucro.',
+  'Empresa saudável não é a que mais vende, é a que mais converte venda em caixa.',
+  'Parcelar sem calcular o custo do dinheiro é financiar o cliente do próprio bolso.',
+  'O relatório certo na hora errada não muda decisão nenhuma.',
+  'Cada categoria mal classificada é uma decisão tomada com o dado errado.',
+  'Controlar o financeiro não engessa a empresa: dá a ela liberdade de escolher.',
+  'Crescimento sem caixa é a forma mais rápida de quebrar faturando bem.',
+  'Renegociar dívida é bom. Entender o que gerou a dívida é essencial.',
+  'Quem lança tudo no mesmo lugar não tem controle, tem histórico.',
+  'A conta que você adia hoje volta maior amanhã.',
+  'O bom gestor não decora números: sabe onde encontrá-los.',
+  'Rentabilidade é margem vezes giro. Melhorar um sem olhar o outro é meio caminho.',
+  'Comprar barato sem prazo pode custar mais caro que comprar caro com prazo.',
+  'A projeção de caixa transforma susto em planejamento.',
+  'Despesa recorrente pequena, multiplicada por doze, deixa de ser pequena.',
+  'Nenhum sistema conserta processo ruim: ele apenas mostra o erro mais rápido.',
+  'Se o preço não cobre custo, imposto e estrutura, não é preço: é doação.',
+  'Conciliar o banco todo dia custa minutos. Não conciliar custa meses.',
+  'A meta sem acompanhamento é só um desejo com número.',
+  'Cliente que atrasa sempre não é cliente fiel: é risco recorrente.',
+  'Guardar nota fiscal organiza o passado; classificar lançamento organiza o futuro.',
+  'A pior variação de estoque é a que ninguém percebeu.',
+  'Empresa não morre de prejuízo: morre de falta de caixa.',
+  'Todo custo fixo é uma aposta no seu faturamento futuro.',
+  'Analise o que caiu, mas investigue o que subiu sem explicação.',
+  'O melhor momento para organizar o financeiro foi no ano passado. O segundo melhor é hoje.',
+  'Terceirizar tarefa é possível; terceirizar responsabilidade pelo número, não.',
+  'Comparar mês contra mês mostra tendência; comparar contra a meta mostra desempenho.',
+  'Desconto é ferramenta de negociação, não hábito comercial.',
+  'Sem centro de custo, você sabe quanto gastou, mas não onde.',
+  'Reserva de caixa não é dinheiro parado: é tempo comprado para decidir bem.',
+  'A informação financeira só vira gestão quando alguém age a partir dela.',
+  'Antecipar recebível é vender o futuro para socorrer o presente. Use com critério.',
+  'Toda decisão de compra é também uma decisão de caixa.',
+  'Se todo mês fecha no limite, o problema não é o mês: é o modelo.',
+  'Registre o lançamento no dia em que ele acontece, não no dia em que você lembra.',
+  'A DRE mostra o resultado; a análise por categoria mostra a causa.',
+  'Aumentar preço assusta uma vez. Trabalhar sem margem dói todo mês.',
+  'A conta que mais pesa costuma ser a que ninguém revisa há anos.',
+  'Cobrar bem é parte do bom atendimento, não o oposto dele.',
+  'Sem previsão de vencimentos, todo mês é surpresa.',
+  'A eficiência aparece no CPV; a disciplina aparece na despesa administrativa.',
+  'Quem não classifica o custo em fixo e variável não calcula ponto de equilíbrio.',
+  'Faturamento é vaidade, lucro é sanidade, caixa é sobrevivência.',
+  'Melhor um relatório simples que você lê do que um completo que você ignora.',
+  'Erro de lançamento não some: só muda de lugar no relatório.',
+  'Gestão financeira não é sobre gastar menos, é sobre gastar melhor.',
+  'Antes de buscar crédito, descubra se o problema é falta de caixa ou excesso de custo.',
+  'Cada dia a mais no prazo de recebimento é um dia a mais de capital seu financiando o cliente.',
+  'A empresa organizada negocia melhor: com banco, com fornecedor e com cliente.',
+  'Conheça seus cinco maiores custos de cor. Eles decidem seu resultado.',
+  'Orçamento não é camisa de força: é combinado feito antes da pressão.',
+  'Quem confere o extrato descobre cedo o que outros descobrem tarde.',
+  'Nem toda receita é lucro, e nem toda despesa é desperdício.',
+  'Vender para quem não paga é aumentar custo, não faturamento.',
+  'O detalhe que você não lança hoje é a dúvida que você não responde amanhã.',
+  'Análise sem periodicidade é opinião; com periodicidade, vira método.',
+  'Prazo médio de estoque e prazo médio de recebimento definem quanto giro você precisa.',
+  'A margem some aos poucos: um desconto aqui, um frete ali, um retrabalho acolá.',
+  'Empresa com dado confiável decide rápido. Empresa sem dado decide por instinto.',
+  'Separe o urgente do relevante: o caixa é urgente, a margem é relevante.',
+  'Fornecedor bem pago vira parceiro na hora do aperto.',
+  'Todo processo manual repetido é um erro esperando a hora certa.',
+  'O que não tem responsável não tem controle.',
+  'Revise seus contratos recorrentes uma vez por ano. Sempre há surpresa.',
+  'Investimento se paga; despesa se consome. Saber a diferença muda o balanço.',
+  'A melhor hora de renegociar é antes de precisar.',
+  'Fechar o mês em dia é o que permite planejar o próximo.',
+  'Retrabalho é custo invisível que aparece na margem, não na conta de luz.',
+  'Não existe empresa pequena demais para ter controle financeiro.',
+  'Quem acompanha o indicador semanalmente corrige a rota; quem olha no fim do ano só constata.',
+  'Disciplina financeira é o que transforma um bom mês em um bom ano.',
+  'O número não julga ninguém: ele só mostra onde agir.'
+];
+
+// Dia do ano (1 a 366) — base para escolher a frase.
+function _diaDoAno(d) {
+  const inicio = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - inicio) / 86400000);
+}
+
+// Combina ano e dia para que a sequência não se repita igual todo ano.
+function fraseDoDia(data) {
+  const d = data || new Date();
+  const idx = (_diaDoAno(d) + d.getFullYear() * 7) % FRASES_CAP.length;
+  return FRASES_CAP[idx];
+}
+
+function renderFraseDoDia() {
+  const el = document.getElementById('frase-do-dia');
+  if (!el) return;
+  const hoje = new Date();
+  const dataFmt = hoje.toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+  el.innerHTML =
+    `<div class="frase-dia-txt">${fraseDoDia(hoje)}</div>` +
+    `<div class="frase-dia-autor">C@P Consultoria` +
+    `<span class="frase-dia-data">· ${dataFmt}</span></div>`;
+  agendarTrocaFraseDoDia();
+}
+
+// Se o sistema ficar aberto durante a virada do dia, troca a frase sozinho.
+let _timerFrase = null;
+function agendarTrocaFraseDoDia() {
+  if (_timerFrase) clearTimeout(_timerFrase);
+  const agora = new Date();
+  const amanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1, 0, 0, 5);
+  _timerFrase = setTimeout(renderFraseDoDia, amanha - agora);
 }
 
 // ══════════════════════════════════════════
@@ -5083,7 +5256,33 @@ function enhanceSearchableSelect(select, opts) {
       if (opts.criarNovo && termoBruto && !opcoes.some(o => normText(o.label) === termo)) {
         novoHtml = `<div class="ef-combo-item ef-combo-item-novo" data-criar="1">➕ Cadastrar novo: "${termoBruto.replace(/"/g, '&quot;')}"</div>`;
       }
-      const listaHtml = filtradas.map(o => `<div class="ef-combo-item${o.value === select.value ? ' ef-combo-item-sel' : ''}" data-value="${o.value.replace(/"/g, '&quot;')}">${o.label || '(vazio)'}</div>`).join('');
+      // Rótulos no formato "Nome (Qualificador)" — usados pelas categorias,
+      // que trazem o grupo da DRE entre parênteses — ficam ilegíveis quando
+      // cortados numa linha só. Aqui o qualificador vira uma segunda linha.
+      // Percorre de trás para frente contando parênteses, para achar o bloco
+      // final mesmo quando o próprio nome tem parênteses no meio
+      // (ex.: "Empréstimos (Receitas) (EMPRÉSTIMOS (RECEITAS))").
+      const separarQualificador = (t) => {
+        const txt = (t || '').trimEnd();
+        if (!txt.endsWith(')')) return [txt, ''];
+        let nivel = 0, ini = -1;
+        for (let i = txt.length - 1; i >= 0; i--) {
+          const c = txt[i];
+          if (c === ')') nivel++;
+          else if (c === '(') { nivel--; if (nivel === 0) { ini = i; break; } }
+        }
+        if (ini <= 0) return [txt, ''];
+        const nome = txt.slice(0, ini).trimEnd();
+        const sub  = txt.slice(ini + 1, -1).trim();
+        if (!nome || !sub) return [txt, ''];
+        return [nome, sub];
+      };
+      const montarLabel = (txt) => {
+        const [nome, sub] = separarQualificador(txt || '(vazio)');
+        return `<span class="ef-combo-item-nome">${nome}</span>` +
+               (sub ? `<span class="ef-combo-item-sub">${sub}</span>` : '');
+      };
+      const listaHtml = filtradas.map(o => `<div class="ef-combo-item${o.value === select.value ? ' ef-combo-item-sel' : ''}" data-value="${o.value.replace(/"/g, '&quot;')}">${montarLabel(o.label)}</div>`).join('');
       lista.innerHTML = novoHtml + (listaHtml || (novoHtml ? '' : '<div class="ef-combo-empty">Nenhum resultado</div>'));
     }
     renderLista('');
@@ -5116,11 +5315,34 @@ function enhanceSearchableSelect(select, opts) {
       if (e.key === 'Enter') { const primeiro = lista.querySelector('.ef-combo-item'); if (primeiro) primeiro.click(); }
     });
 
+    // O painel pode ser mais largo que o campo: os rótulos de categoria são
+    // longos e ficavam cortados quando o painel copiava a largura do select.
     const rect = trigger.getBoundingClientRect();
+    const LARGURA_MIN = 340;
+    const largura = Math.min(
+      Math.max(rect.width, LARGURA_MIN),
+      window.innerWidth - 16
+    );
+    // Alinha pela esquerda do campo, mas puxa de volta se passar da borda.
+    let esquerda = rect.left;
+    if (esquerda + largura > window.innerWidth - 8) esquerda = window.innerWidth - largura - 8;
+    if (esquerda < 8) esquerda = 8;
+    // Abre para cima quando não há espaço suficiente embaixo.
+    const ALTURA_MAX = 380;
+    const espacoAbaixo = window.innerHeight - rect.bottom;
+    const abrirParaCima = espacoAbaixo < 240 && rect.top > espacoAbaixo;
     painel.style.position = 'fixed';
-    painel.style.top = Math.min(rect.bottom + 4, window.innerHeight - 280) + 'px';
-    painel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8)) + 'px';
-    painel.style.width = Math.max(rect.width, 220) + 'px';
+    painel.style.width = largura + 'px';
+    painel.style.left = esquerda + 'px';
+    if (abrirParaCima) {
+      painel.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+      painel.style.maxHeight = Math.min(ALTURA_MAX, rect.top - 12) + 'px';
+    } else {
+      painel.style.top = (rect.bottom + 4) + 'px';
+      painel.style.maxHeight = Math.min(ALTURA_MAX, espacoAbaixo - 12) + 'px';
+    }
+    painel.style.display = 'flex';
+    painel.style.flexDirection = 'column';
     setTimeout(() => { busca.focus(); document.addEventListener('click', outsideClick, true); }, 0);
   }
 
@@ -10726,6 +10948,7 @@ async function initApp() {
   // até o usuário clicar em outra tela e voltar. Isso fazia as Metas do DRE
   // (medidores e o modal "Definir Metas") parecerem vazias/"não salvas" logo
   // após o login, mesmo com os dados corretos já gravados no Supabase.
+  renderFraseDoDia();
   carregarDreMetas().then(carregarVarEstoque).then(carregarDreGrupoClasses).then(renderDashboard);
   setTimeout(loadMetaInputs, 100);
   setTimeout(renderAnaliseFluxo, 500); // garantir após dados carregados
@@ -12494,7 +12717,7 @@ async function excluirReposicao(id) {
 function imprimirReposicoes() { imprimirPagina('reposicao'); }
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-08-09 · cadastro-rapido-e-janelas';
+window.APP_BUILD = '2026-08-09 · combo-categoria-legivel';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
