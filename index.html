@@ -518,6 +518,21 @@ th.ef-th { padding:8px 8px 8px 12px; }
   max-height: 1400px;
   opacity: 1;
 }
+/* Botão "+" de cadastro rápido ao lado dos campos de seleção */
+.label-add { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.btn-add-inline {
+  border:1px solid #fed7aa; background:#fff1e6; color:#ea580c;
+  width:22px; height:22px; min-width:22px; border-radius:6px; cursor:pointer;
+  font-size:15px; font-weight:700; line-height:1; padding:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:.15s; font-family:inherit;
+}
+.btn-add-inline:hover { background:#ea580c; color:#fff; border-color:#ea580c; }
+
+/* Painel de cadastro promovido a modal (ver abrirFormModal) */
+#modal-form-generico-body .form-panel { max-height:none; overflow:visible; opacity:1; }
+#modal-form-generico-body .form-panel > .card { border:none; box-shadow:none; padding:0; margin:0; }
+#modal-form-generico-body .form-panel > .card > .card-title { display:none; }
 
 /* ── CALENDÁRIO DASHBOARD ── */
 .cal-wrap { width:100%; }
@@ -1562,6 +1577,22 @@ th.ef-th { padding:8px 8px 8px 12px; }
       </div><!-- /form-panel -->
       <div class="card">
         <div class="card-title">Categorias Cadastradas</div>
+        <div class="filter-row">
+          <div class="form-group" style="min-width:260px"><label>Buscar</label>
+            <input type="text" id="dfccat-busca" oninput="renderDfcCategorias()" placeholder="Nome, grupo ou observação..." />
+          </div>
+          <div class="form-group"><label>Grupo</label>
+            <select id="dfccat-fgrupo" onchange="renderDfcCategorias()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Tipo</label>
+            <select id="dfccat-ftipo" onchange="renderDfcCategorias()">
+              <option value="">Todos</option>
+              <option value="entrada">Entrada (+)</option>
+              <option value="saida">Saída (−)</option>
+            </select>
+          </div>
+          <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearDfcCatFiltros()">Limpar</button></div>
+        </div>
         <div class="table-scroll"><table><thead><tr id="th-dfc-cats-row">
           <th>Nome</th><th>Grupo</th><th>Tipo</th><th>Obs</th><th>Ações</th>
         </tr></thead><tbody id="tb-dfc-cats">
@@ -1584,7 +1615,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
         <div class="grid3">
           <div class="form-group"><label>Empresa *</label><select id="dfc-lan-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
           <div class="form-group"><label>Data *</label><input id="dfc-lan-data" type="date" /></div>
-          <div class="form-group"><label>Categoria *</label>
+          <div class="form-group"><label class="label-add">Categoria *<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','dfc-lan-cat')">+</button></label>
             <select id="dfc-lan-cat"><option value="">Selecione...</option></select>
           </div>
           <div class="form-group"><label>Valor (R$) *</label><input id="dfc-lan-valor" type="number" step="0.01" placeholder="0,00" /></div>
@@ -1915,9 +1946,6 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="card">
         <div class="card-title">Nova Transferência</div>
         <div class="grid3">
-          <div class="form-group"><label>Empresa *</label><select id="transf-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
-        </div>
-        <div class="grid3">
           <div class="form-group"><label>Conta de Origem *</label>
             <select id="transf-origem"><option value="">Selecione...</option></select>
           </div>
@@ -2172,12 +2200,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="l-nf" type="text" placeholder="000000" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Fornecedor *</label><select id="l-forn"><option value="">Selecione...</option></select></div>
-      <div class="form-group"><label>Produto *</label><select id="l-prod"><option value="">Selecione...</option></select></div>
+      <div class="form-group"><label class="label-add">Fornecedor *<button type="button" class="btn-add-inline" title="Cadastrar novo fornecedor" onclick="abrirCadastroRapido('fornecedor','l-forn')">+</button></label><select id="l-forn"><option value="">Selecione...</option></select></div>
+      <div class="form-group"><label class="label-add">Produto<button type="button" class="btn-add-inline" title="Cadastrar novo produto" onclick="abrirCadastroRapido('produto','l-prod')">+</button></label><select id="l-prod"><option value="">Nenhum (opcional)</option></select></div>
       <div class="form-group"><label>Valor Total (R$) *</label><input id="l-valor" type="number" step="0.01" placeholder="0,00" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Categoria</label><select id="l-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','l-catdre')">+</button></label><select id="l-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Número de Parcelas</label>
@@ -2245,12 +2273,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="lr-nf" type="text" placeholder="000000" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Cliente *</label><select id="lr-cliente"><option value="">Selecione...</option></select></div>
-      <div class="form-group"><label>Produto de Venda</label><select id="lr-prod"><option value="">Selecione...</option></select></div>
+      <div class="form-group"><label class="label-add">Cliente *<button type="button" class="btn-add-inline" title="Cadastrar novo cliente" onclick="abrirCadastroRapido('cliente','lr-cliente')">+</button></label><select id="lr-cliente"><option value="">Selecione...</option></select></div>
+      <div class="form-group"><label class="label-add">Produto de Venda<button type="button" class="btn-add-inline" title="Cadastrar novo produto de venda" onclick="abrirCadastroRapido('prodvenda','lr-prod')">+</button></label><select id="lr-prod"><option value="">Selecione...</option></select></div>
       <div class="form-group"><label>Valor Total (R$) *</label><input id="lr-valor" type="number" step="0.01" placeholder="0,00" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Categoria</label><select id="lr-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','lr-catdre')">+</button></label><select id="lr-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Número de Parcelas</label>
@@ -2398,12 +2426,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº Nota Fiscal</label><input id="elr-nf" type="text" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Cliente</label><select id="elr-cliente"></select></div>
-      <div class="form-group"><label>Produto</label><select id="elr-prod"></select></div>
+      <div class="form-group"><label class="label-add">Cliente<button type="button" class="btn-add-inline" title="Cadastrar novo cliente" onclick="abrirCadastroRapido('cliente','elr-cliente')">+</button></label><select id="elr-cliente"></select></div>
+      <div class="form-group"><label class="label-add">Produto<button type="button" class="btn-add-inline" title="Cadastrar novo produto de venda" onclick="abrirCadastroRapido('prodvenda','elr-prod')">+</button></label><select id="elr-prod"></select></div>
       <div class="form-group"><label>Valor Total</label><input id="elr-valor" type="number" step="0.01" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Categoria</label><select id="elr-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','elr-catdre')">+</button></label><select id="elr-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Parcelas</label>
@@ -2620,6 +2648,57 @@ th.ef-th { padding:8px 8px 8px 12px; }
 </div>
 
 <!-- ══ MODAL EDITAR LANÇAMENTO ══ -->
+<!-- ══ MODAL DE CADASTRO RÁPIDO ══
+     Abre por cima do modal de lançamento para cadastrar fornecedor, produto,
+     cliente, produto de venda ou categoria sem perder o que já foi digitado.
+     Ao salvar, o novo registro já fica selecionado no campo de origem. -->
+<div class="modal-overlay" id="modal-rapido" style="z-index:300;">
+  <div class="modal" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div class="modal-title" id="rapido-titulo" style="margin-bottom:0;">Cadastro rápido</div>
+      <button onclick="closeModal('modal-rapido')" style="background:none;border:none;cursor:pointer;color:#a8a29e;font-size:22px;line-height:1;padding:4px;" title="Fechar">✕</button>
+    </div>
+    <input type="hidden" id="rapido-tipo" />
+    <input type="hidden" id="rapido-destino" />
+    <div class="form-group"><label id="rapido-label-nome">Nome *</label>
+      <input id="rapido-nome" type="text" placeholder="Digite o nome" onkeydown="if(event.key==='Enter')salvarCadastroRapido()" />
+    </div>
+    <div class="form-group" id="rapido-grupo-wrap" style="display:none">
+      <label>Grupo da DRE *</label>
+      <select id="rapido-grupo"><option value="">Selecione...</option></select>
+    </div>
+    <div class="form-group" id="rapido-tipomov-wrap" style="display:none">
+      <label>Tipo</label>
+      <select id="rapido-tipomov">
+        <option value="saida">Saída (−)</option>
+        <option value="entrada">Entrada (+)</option>
+      </select>
+    </div>
+    <div style="font-size:12px;color:#a8a29e;margin-top:-4px;">
+      Você pode completar os demais dados depois, na tela de cadastro completa.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-rapido')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCadastroRapido()">Salvar e usar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL GENÉRICO DE CADASTRO ══
+     Reaproveita os painéis de formulário já existentes (form-forn, form-cli,
+     form-bnk, form-empresa): o painel é movido para dentro deste modal ao
+     abrir e devolvido ao lugar original ao fechar. Assim o cadastro vira uma
+     janela, sem duplicar campos nem quebrar os ids usados pelo JS. -->
+<div class="modal-overlay" id="modal-form-generico">
+  <div class="modal" style="width:760px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+      <div class="modal-title" id="modal-form-generico-title" style="margin-bottom:0;">Cadastro</div>
+      <button onclick="fecharFormModal()" style="background:none;border:none;cursor:pointer;color:#a8a29e;font-size:22px;line-height:1;padding:4px;" title="Fechar">✕</button>
+    </div>
+    <div id="modal-form-generico-body"></div>
+  </div>
+</div>
+
 <!-- ══ MODAL EDITAR EMPRESA ══ -->
 <div class="modal-overlay" id="modal-empresa">
   <div class="modal">
@@ -2658,12 +2737,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº Nota Fiscal</label><input id="edit-nf" type="text" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Fornecedor</label><select id="edit-forn"></select></div>
-      <div class="form-group"><label>Produto</label><select id="edit-prod"></select></div>
+      <div class="form-group"><label class="label-add">Fornecedor<button type="button" class="btn-add-inline" title="Cadastrar novo fornecedor" onclick="abrirCadastroRapido('fornecedor','edit-forn')">+</button></label><select id="edit-forn"></select></div>
+      <div class="form-group"><label class="label-add">Produto<button type="button" class="btn-add-inline" title="Cadastrar novo produto" onclick="abrirCadastroRapido('produto','edit-prod')">+</button></label><select id="edit-prod"></select></div>
       <div class="form-group"><label>Valor Total</label><input id="edit-valor" type="number" step="0.01" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Categoria</label><select id="edit-catdre"><option value="">Nenhuma</option></select></div>
+      <div class="form-group"><label class="label-add">Categoria<button type="button" class="btn-add-inline" title="Cadastrar nova categoria" onclick="abrirCadastroRapido('categoria','edit-catdre')">+</button></label><select id="edit-catdre"><option value="">Nenhuma</option></select></div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Parcelas</label>
@@ -3240,8 +3319,10 @@ const EMPRESA_KEY = 'cap_empresa_ativa';
 // Tabelas que guardam movimento e, portanto, pertencem a uma empresa.
 // Cadastros (clientes, fornecedores, produtos, bancos, grupos DRE/DFC,
 // metas, perfis) são compartilhados entre todas as empresas.
+// Transferências ficam de fora: são movimentos entre contas próprias,
+// que são compartilhadas entre todas as empresas.
 const TABELAS_POR_EMPRESA = [
-  'lancamentos','lancreceber','dfc_lancamentos','transferencias',
+  'lancamentos','lancreceber','dfc_lancamentos',
   'faturamento','recebimentos','pedidos_cancelados','reposicoes'
 ];
 
@@ -3811,7 +3892,7 @@ async function saveFornecedor() {
   const result = await sbFetch('fornecedores', 'POST', rec);
   if(!result) { alert('\u274c Erro ao salvar fornecedor. Verifique sua conex\u00e3o e tente novamente.'); return; }
   db.fornecedores.push(rec);
-  clearFornecedor(); renderFornecedores(); populateFornSelects();
+  clearFornecedor(); renderFornecedores(); populateFornSelects(); fecharFormModalSeAberto('form-forn');
 }
 
 function clearFornecedor() {
@@ -4022,6 +4103,99 @@ async function deleteProduto(id) {
 }
 
 // ══════════════════════════════════════════
+// CADASTRO RÁPIDO (a partir dos modais de lançamento)
+// Permite criar fornecedor, produto, cliente, produto de venda ou categoria
+// sem sair do lançamento que está sendo digitado.
+// ══════════════════════════════════════════
+const CAD_RAPIDO = {
+  fornecedor: { titulo:'Novo Fornecedor',        label:'Nome do fornecedor *', tabela:'fornecedores',   lista:'fornecedores' },
+  produto:    { titulo:'Novo Produto (Compra)',  label:'Nome do produto *',    tabela:'produtos',       lista:'produtos' },
+  cliente:    { titulo:'Novo Cliente',           label:'Nome do cliente *',    tabela:'clientes',       lista:'clientes' },
+  prodvenda:  { titulo:'Novo Produto de Venda',  label:'Nome do produto *',    tabela:'prodvenda',      lista:'prodvenda' },
+  categoria:  { titulo:'Nova Categoria',         label:'Nome da categoria *',  tabela:'dfc_categorias', lista:'dfc_cats' }
+};
+
+// tipo: chave de CAD_RAPIDO | destinoId: id do <select> que deve receber o novo registro
+function abrirCadastroRapido(tipo, destinoId) {
+  const cfg = CAD_RAPIDO[tipo];
+  if (!cfg) return;
+  document.getElementById('rapido-tipo').value = tipo;
+  document.getElementById('rapido-destino').value = destinoId || '';
+  document.getElementById('rapido-titulo').textContent = cfg.titulo;
+  document.getElementById('rapido-label-nome').textContent = cfg.label;
+  document.getElementById('rapido-nome').value = '';
+  // Categoria precisa de grupo e tipo; os demais só do nome.
+  const ehCat = (tipo === 'categoria');
+  document.getElementById('rapido-grupo-wrap').style.display   = ehCat ? '' : 'none';
+  document.getElementById('rapido-tipomov-wrap').style.display = ehCat ? '' : 'none';
+  if (ehCat) {
+    const sel = document.getElementById('rapido-grupo');
+    const grupos = [...db.dre_grupos]
+      .filter(g => g.tipo === 'entrada' || g.tipo === 'saida')
+      .sort((a,b) => (a.ordem||0) - (b.ordem||0));
+    sel.innerHTML = '<option value="">Selecione...</option>' +
+      grupos.map(g => `<option value="${g.id}">${g.nome}</option>`).join('');
+    // Chute pelo contexto: campo de contas a receber => entrada
+    const dest = destinoId || '';
+    document.getElementById('rapido-tipomov').value =
+      (dest.startsWith('lr-') || dest.startsWith('elr-')) ? 'entrada' : 'saida';
+  }
+  openModal('modal-rapido');
+  setTimeout(() => document.getElementById('rapido-nome').focus(), 80);
+}
+
+async function salvarCadastroRapido() {
+  const tipo = document.getElementById('rapido-tipo').value;
+  const cfg = CAD_RAPIDO[tipo];
+  if (!cfg) return;
+  const nome = document.getElementById('rapido-nome').value.trim();
+  if (!nome) { alert('Informe o nome.'); return; }
+
+  let rec;
+  if (tipo === 'categoria') {
+    const grupo = document.getElementById('rapido-grupo').value;
+    if (!grupo) { alert('Selecione o grupo da DRE desta categoria.'); return; }
+    rec = { id: uid(), nome, grupo, tipo: document.getElementById('rapido-tipomov').value, obs: '' };
+  } else if (tipo === 'fornecedor' || tipo === 'cliente') {
+    rec = { id: uid(), nome, cnpj:'', contato:'', tel:'', email:'', cat:'', obs:'' };
+  } else { // produto / prodvenda
+    rec = { id: uid(), nome, sku:'', unidade:'', cat:'', preco:0, obs:'' };
+    if (tipo === 'produto') rec.forn = '';
+  }
+
+  const ok = await sbFetch(cfg.tabela, 'POST', rec);
+  if (!ok) { alert('❌ Erro ao salvar. Verifique sua conexão e tente novamente.'); return; }
+  db[cfg.lista].push(rec);
+
+  // Recarrega os selects e as listas afetadas
+  if (tipo === 'fornecedor') { populateFornSelects(); renderFornecedores(); }
+  if (tipo === 'produto')    { populateProdSelects(); renderProdutos(); }
+  if (tipo === 'cliente')    { populateClienteSelects(); renderClientes(); }
+  if (tipo === 'prodvenda')  { populateProdVendaSelects(); renderProdVenda(); }
+  if (tipo === 'categoria')  {
+    populateDreCatSelects();
+    if (typeof populateDfcCatSelects === 'function') populateDfcCatSelects();
+    if (typeof populateDfcCatProdSelects === 'function') populateDfcCatProdSelects();
+    if (typeof popularCategoriasAnalise === 'function') popularCategoriasAnalise();
+    renderDfcCategorias();
+  }
+
+  // Já deixa o registro novo selecionado no campo de onde o usuário veio
+  const destinoId = document.getElementById('rapido-destino').value;
+  if (destinoId) {
+    const el = document.getElementById(destinoId);
+    if (el) { el.value = rec.id; el.dispatchEvent(new Event('change')); }
+  }
+  closeModal('modal-rapido');
+}
+
+// Botão "+" padrão ao lado de um campo de seleção.
+function btnCadastroRapido(tipo, destinoId, titulo) {
+  return `<button type="button" class="btn-add-inline" title="${titulo}"
+    onclick="abrirCadastroRapido('${tipo}','${destinoId}')">+</button>`;
+}
+
+// ══════════════════════════════════════════
 // EMPRESAS (multi-empresa)
 // ══════════════════════════════════════════
 
@@ -4138,6 +4312,7 @@ async function saveEmpresa() {
   if (!ok) { alert('❌ Erro ao salvar. Verifique se a tabela "empresas" foi criada no Supabase (rode o script SQL) e se o GRANT foi aplicado.'); return; }
   db.empresas.push(nova);
   clearEmpresaForm();
+  fecharFormModalSeAberto('form-empresa');
   popularSeletorEmpresa();
   populateEmpresaSelects();
   renderEmpresas();
@@ -4177,7 +4352,7 @@ async function updateEmpresa() {
 // mostrar na tabela quanto para impedir exclusão de empresa em uso.
 function contarRegistrosEmpresa(id) {
   const listas = [
-    db.lancamentos, db.lancreceber, db.dfc_lans, db.transferencias,
+    db.lancamentos, db.lancreceber, db.dfc_lans,
     db.faturamento, db.recebimentos, db.pedidos_cancelados, db.reposicoes
   ];
   return listas.reduce((tot, lista) =>
@@ -4255,6 +4430,7 @@ async function saveLancamento() {
   const prod = document.getElementById('l-prod').value;
   const valor = parseFloat(document.getElementById('l-valor').value);
   if(!dtcompra || !forn || !valor) { alert('Preencha data da compra, fornecedor e valor.'); return; }
+  // Produto é opcional: serviços e despesas avulsas não têm produto associado.
   const pago = document.getElementById('l-pago').value;
   const banco = document.getElementById('l-banco').value;
   if (!validarBancoObrigatorio(pago, banco)) return;
@@ -7403,7 +7579,7 @@ async function saveCliente() {
   const rCl = await sbFetch('clientes','POST',rec);
   if(!rCl) { alert('❌ Erro ao salvar cliente. Verifique sua conexão e tente novamente.'); return; }
   db.clientes.push(rec);
-  clearCliente(); renderClientes(); populateClienteSelects();
+  clearCliente(); renderClientes(); populateClienteSelects(); fecharFormModalSeAberto('form-cli');
 }
 function clearCliente() {
   ['cl-nome','cl-cnpj','cl-contato','cl-tel','cl-email','cl-obs'].forEach(id=>document.getElementById(id).value='');
@@ -8254,8 +8430,43 @@ function clearDfcCategoria() {
   document.getElementById('dfc-cat-form-title').textContent = 'Nova Categoria';
   document.getElementById('dfc-cat-btn-salvar').textContent = 'Salvar Categoria';
 }
+function clearDfcCatFiltros() {
+  ['dfccat-busca','dfccat-fgrupo','dfccat-ftipo'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  renderDfcCategorias();
+}
+
+// Preenche o select de Grupo do filtro com os grupos que já têm categorias.
+function popularFiltroGrupoCategorias() {
+  const el = document.getElementById('dfccat-fgrupo');
+  if (!el) return;
+  const val = el.value;
+  const usados = [...new Set(db.dfc_cats.map(c => c.grupo).filter(Boolean))];
+  const grupos = usados
+    .map(id => db.dre_grupos.find(g => g.id === id))
+    .filter(Boolean)
+    .sort((a,b) => (a.ordem||0) - (b.ordem||0));
+  el.innerHTML = '<option value="">Todos</option>' +
+    grupos.map(g => `<option value="${g.id}">${g.nome}</option>`).join('');
+  if (val) el.value = val;
+}
+
 function renderDfcCategorias() {
   const tb = document.getElementById('tb-dfc-cats');
+  popularFiltroGrupoCategorias();
+  const busca  = normText((document.getElementById('dfccat-busca')||{}).value || '');
+  const fGrupo = (document.getElementById('dfccat-fgrupo')||{}).value || '';
+  const fTipo  = (document.getElementById('dfccat-ftipo')||{}).value || '';
+  const filtradas = db.dfc_cats.filter(c => {
+    if (fGrupo && c.grupo !== fGrupo) return false;
+    if (fTipo && c.tipo !== fTipo) return false;
+    if (busca) {
+      const alvo = normText(`${c.nome||''} ${getDfcGrupoLabel(c.grupo)||''} ${c.obs||''}`);
+      if (!alvo.includes(busca)) return false;
+    }
+    return true;
+  });
   const colsDfcCat = [
     { key:'nome', label:'Nome', get:c=>c.nome },
     { key:'grupo', label:'Grupo', get:c=>getDfcGrupoLabel(c.grupo) },
@@ -8263,9 +8474,13 @@ function renderDfcCategorias() {
     { key:'obs', label:'Obs', get:c=>c.obs||null },
     { key:'acoes', label:'Ações', get:()=>'', noFilter:true }
   ];
-  const listDfcCat = efMount('dfccats','th-dfc-cats-row',colsDfcCat,db.dfc_cats,renderDfcCategorias);
+  const listDfcCat = efMount('dfccats','th-dfc-cats-row',colsDfcCat,filtradas,renderDfcCategorias);
   if (!listDfcCat.length) {
-    tb.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhuma categoria cadastrada.</td></tr>'; return;
+    const temFiltro = busca || fGrupo || fTipo;
+    tb.innerHTML = `<tr><td colspan="5" class="empty-state">${temFiltro
+      ? 'Nenhuma categoria encontrada com esses filtros.'
+      : 'Nenhuma categoria cadastrada.'}</td></tr>`;
+    return;
   }
   tb.innerHTML = listDfcCat.map(cat => {
     const tipoLabel = cat.tipo === 'entrada'
@@ -10120,7 +10335,7 @@ async function saveBanco() {
   const res = await sbFetch('bancos','POST',rec);
   if (!res) { alert('Erro ao salvar! Verifique se a tabela "bancos" existe no Supabase e o RLS está configurado.'); return; }
   db.bancos.push(rec);
-  clearBanco(); renderBancos(); populateBancoSelects(); renderFluxoBancoDiario(); renderDashboard();
+  clearBanco(); renderBancos(); populateBancoSelects(); renderFluxoBancoDiario(); renderDashboard(); fecharFormModalSeAberto('form-bnk');
 }
 function clearBanco() {
   ['bnk-nome','bnk-banco','bnk-agencia','bnk-conta','bnk-obs'].forEach(id=>document.getElementById(id).value='');
@@ -10213,9 +10428,9 @@ async function saveTransferencia() {
   if (origem === destino) { alert('A conta de origem deve ser diferente da conta de destino.'); return; }
   if (!valor || valor <= 0) { alert('Informe um valor de transferência maior que zero.'); return; }
   if (!data) { alert('Informe a data da transferência.'); return; }
-  const empresa_id = empresaDoForm('transf-empresa');
-  if (empresa_id === null) return;
-  const rec = { id: uid(), empresa_id, data, origem, destino, valor, obs: obs || '' };
+  // Transferência é movimento entre contas próprias, que são compartilhadas
+  // entre as empresas — por isso não é vinculada a nenhuma empresa.
+  const rec = { id: uid(), data, origem, destino, valor, obs: obs || '' };
   const res = await sbFetch('transferencias', 'POST', rec);
   if (!res) { alert('Erro ao salvar! Verifique se a tabela "transferencias" existe no Supabase e o RLS está configurado.'); return; }
   db.transferencias.push(rec);
@@ -10646,7 +10861,60 @@ async function importarPlanilha() {
 }
 
 
+// ══════════════════════════════════════════
+// CADASTROS EM JANELA (form-panel promovido a modal)
+// Estes painéis abrem como janela em vez de expandir dentro da página.
+// O valor do mapa é o título mostrado no topo da janela.
+// ══════════════════════════════════════════
+const PAINEIS_MODAL = {
+  'form-forn':    'Novo Fornecedor',
+  'form-cli':     'Novo Cliente',
+  'form-bnk':     'Nova Conta / Banco',
+  'form-empresa': 'Nova Empresa'
+};
+
+let _formModalAtual = null;
+
+// Move o painel para dentro do modal, deixando um marcador no lugar original
+// para conseguir devolvê-lo exatamente onde estava ao fechar.
+function abrirFormModal(panelId, titulo) {
+  const panel = document.getElementById(panelId);
+  const overlay = document.getElementById('modal-form-generico');
+  const body = document.getElementById('modal-form-generico-body');
+  if (!panel || !overlay || !body) return;
+  if (_formModalAtual) fecharFormModal();
+  const marca = document.createComment('form-panel-origem:' + panelId);
+  panel.parentNode.insertBefore(marca, panel);
+  body.appendChild(panel);
+  panel.classList.add('open');
+  const tit = document.getElementById('modal-form-generico-title');
+  if (tit) tit.textContent = titulo || PAINEIS_MODAL[panelId] || 'Cadastro';
+  overlay.classList.add('open');
+  _formModalAtual = { panelId, marca };
+}
+
+function fecharFormModal() {
+  if (!_formModalAtual) return;
+  const { panelId, marca } = _formModalAtual;
+  const panel = document.getElementById(panelId);
+  if (panel && marca && marca.parentNode) {
+    marca.parentNode.insertBefore(panel, marca);
+    marca.remove();
+    panel.classList.remove('open');
+  }
+  const overlay = document.getElementById('modal-form-generico');
+  if (overlay) overlay.classList.remove('open');
+  _formModalAtual = null;
+}
+
+// Fecha a janela de cadastro depois de salvar, se ela estiver aberta.
+function fecharFormModalSeAberto(panelId) {
+  if (_formModalAtual && (!panelId || _formModalAtual.panelId === panelId)) fecharFormModal();
+}
+
 function toggleFormPanel(panelId, btn) {
+  // Painéis registrados em PAINEIS_MODAL abrem como janela
+  if (PAINEIS_MODAL[panelId]) { abrirFormModal(panelId, PAINEIS_MODAL[panelId]); return; }
   const panel = document.getElementById(panelId);
   const isOpen = panel.classList.contains('open');
   panel.classList.toggle('open', !isOpen);
@@ -10657,6 +10925,7 @@ function toggleFormPanel(panelId, btn) {
 // Força a abertura de um form-panel (usado ao clicar em "Editar" numa linha,
 // para garantir que o formulário fique visível mesmo se estiver recolhido).
 function abrirFormPanel(panelId, btnId) {
+  if (PAINEIS_MODAL[panelId]) { abrirFormModal(panelId, PAINEIS_MODAL[panelId]); return; }
   const panel = document.getElementById(panelId);
   const btn = document.getElementById(btnId);
   if (panel) panel.classList.add('open');
@@ -12225,7 +12494,7 @@ async function excluirReposicao(id) {
 function imprimirReposicoes() { imprimirPagina('reposicao'); }
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-08-09 · multi-empresa';
+window.APP_BUILD = '2026-08-09 · cadastro-rapido-e-janelas';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
