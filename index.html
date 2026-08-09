@@ -5463,7 +5463,7 @@ async function gerarBackupCompleto() {
 
   const conteudo = { geradoEm: agora.toISOString(), ...dados };
   const jsonString = JSON.stringify(conteudo, null, 2);
-  const nomeArquivo = `backup-eleve-${dataStr}.json`;
+  const nomeArquivo = `backup-autocenter-${dataStr}.json`;
 
   baixarBackupLocal(nomeArquivo, jsonString);
 
