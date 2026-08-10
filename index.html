@@ -356,6 +356,16 @@ th.ef-th { padding:8px 8px 8px 12px; }
 .dre-cell-click:hover { background:#eef3fa; }
 .fluxo-risco td { background:#fef2f2 !important; }
 
+/* ── DRE: linhas de categoria (rastreamento por categoria, expansível) ── */
+.dre-toggle-cat { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; margin-right:6px; background:none; border:none; cursor:pointer; color:#a8a29e; font-size:9px; padding:0; vertical-align:middle; border-radius:4px; transition:.15s; }
+.dre-toggle-cat:hover { color:#ea580c; background:#fff1e6; }
+.dre-toggle-spacer { display:inline-block; width:22px; }
+.dre-cat-row td { font-size:11px; border-bottom:1px dashed #f5f4f2; }
+.dre-cat-row td:first-child { padding-left:52px; color:#a8a29e; font-weight:400; }
+.dre-cat-row:hover td:first-child { color:#57534e; }
+#dre-tabela-wrap .dre-cat-row td { font-size:10px; padding-top:2px; padding-bottom:2px; }
+#dre-tabela-wrap .dre-cat-row td:first-child { padding-left:36px; }
+
 
 /* ── CALENDÁRIO — RECEBER ── */
 .cal-val-rec      { font-size:10.5px; font-weight:600; color:#1e6fad; background:#dbeafe; border-radius:5px; padding:2px 5px; margin-top:2px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1828,6 +1838,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-12" checked onchange="renderDre()" />Dez</label>
           <button class="btn btn-secondary btn-sm" onclick="dreMesesTodos(true)">Marcar todos</button>
           <button class="btn btn-secondary btn-sm" onclick="dreMesesTodos(false)">Ocultar todos</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
+          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Categorias:</span>
+          <button class="btn btn-secondary btn-sm" onclick="dreCategoriasTodas(true)">▾ Expandir todas</button>
+          <button class="btn btn-secondary btn-sm" onclick="dreCategoriasTodas(false)">▸ Recolher todas</button>
+          <span style="font-size:12px;color:#a8a29e;">Clique no ▸ ao lado de cada conta para ver o detalhamento por categoria</span>
         </div>
       </div>
 
@@ -9477,6 +9493,13 @@ function limparFiltrosAnaliseCategoria() {
 let _dreItensCache = null;
 let _dreAnoCache = null;
 
+// Cache dos lançamentos por CATEGORIA (drill-down das linhas de categoria
+// expandidas dentro de cada grupo do DRE) e conjunto de grupos atualmente
+// expandidos na tela (persiste entre re-renderizações, ex.: ao trocar o ano
+// ou marcar/desmarcar meses, mantendo aberto o que o usuário já abriu).
+let _dreCatItensCache = null;
+let _dreGruposExpandidos = new Set();
+
 // ── VARIAÇÃO DE ESTOQUE (valor digitado manualmente no DRE) ───────
 // A linha "Variação do Estoque" não vem de lançamentos: o usuário digita
 // o valor mês a mês, positivo ou negativo. Guardamos em memória e na
@@ -9591,6 +9614,16 @@ function renderDre() {
   // "somente classificados" está desmarcado), para o DRE bater com o total vendido.
   const grupoBaseId = (gruposValor.find(g => g.tipo === 'entrada') || gruposValor[0] || {}).id;
 
+  // Rastreamento por CATEGORIA (independente do grupo): valoresMesCat[mes][catId]
+  // = valor bruto lançado (mesmo sinal usado pelo grupo); itensMesCat[mes][catId]
+  // = lançamentos que compõem o valor (drill-down das linhas de categoria).
+  // "Sem categoria" (SEM_CAT) só é usado dentro do grupo-base (Receita Bruta),
+  // espelhando exatamente a mesma regra de fallback usada para o grupo.
+  const SEM_CAT = '__sem_categoria__';
+  const valoresMesCat = {};
+  const itensMesCat = {};
+  for (let m = 1; m <= 12; m++) { valoresMesCat[m] = {}; itensMesCat[m] = {}; }
+
   // 1. Lançamentos a Receber (competência = data da venda)
   db.lancreceber.forEach(l => {
     const dtRef = l.dtvenda || l.dtcompra;
@@ -9605,12 +9638,20 @@ function renderDre() {
     // Venda sem grupo de DRE => conta como Receita Bruta (grupo-base)
     if (!grupoId && !somenteClassificados) grupoId = grupoBaseId;
     if (grupoId && valoresMes[m][grupoId] !== undefined) {
-      valoresMes[m][grupoId] += (l.valor || 0);
-      itensMes[m][grupoId].push({
+      const item = {
         tipo: 'receber', data: dtRef, nome: getClienteNome(l.cliente),
         prod: l.prod ? getProdVendaNome(l.prod) : '', valor: l.valor || 0,
         status: l.recebido === 'sim' ? 'Recebido' : 'A Receber'
-      });
+      };
+      valoresMes[m][grupoId] += (l.valor || 0);
+      itensMes[m][grupoId].push(item);
+      // Categoria da venda; sem categoria definida, entra como "Sem categoria"
+      // (só faz sentido dentro do grupo-base, onde a venda caiu por fallback)
+      const catKey = catId || (grupoId === grupoBaseId ? SEM_CAT : null);
+      if (catKey) {
+        valoresMesCat[m][catKey] = (valoresMesCat[m][catKey] || 0) + (l.valor || 0);
+        (itensMesCat[m][catKey] = itensMesCat[m][catKey] || []).push(item);
+      }
     }
   });
 
@@ -9626,12 +9667,17 @@ function renderDre() {
     if (!catId) { if (somenteClassificados) return; }
     const grupoId = catId ? getDreCatGrupo(catId) : null;
     if (grupoId && valoresMes[m][grupoId] !== undefined) {
-      valoresMes[m][grupoId] += (l.valor || 0);
-      itensMes[m][grupoId].push({
+      const item = {
         tipo: 'pagar', data: dtRef, nome: getFornNome(l.forn),
         prod: l.prod ? getProdNome(l.prod) : '', valor: l.valor || 0,
         status: l.pago === 'sim' ? 'Pago' : 'A Pagar'
-      });
+      };
+      valoresMes[m][grupoId] += (l.valor || 0);
+      itensMes[m][grupoId].push(item);
+      if (catId) {
+        valoresMesCat[m][catId] = (valoresMesCat[m][catId] || 0) + (l.valor || 0);
+        (itensMesCat[m][catId] = itensMesCat[m][catId] || []).push(item);
+      }
     }
   });
 
@@ -9662,6 +9708,16 @@ function renderDre() {
   // Guarda para o drill-down (abrirDetalheDreGrupo), acessível após o render
   _dreItensCache = itensMes;
   _dreAnoCache = ano;
+  _dreCatItensCache = itensMesCat;
+
+  // Categorias cadastradas para cada grupo de Entrada/Saída (usadas nas
+  // linhas expansíveis de categoria dentro do grupo)
+  const categoriasPorGrupo = {};
+  gruposValor.forEach(g => { categoriasPorGrupo[g.id] = db.dfc_cats.filter(c => c.grupo === g.id).sort((a,b) => a.nome.localeCompare(b.nome)); });
+  const valorBrutoCat = (catId, col) => {
+    if (col === 'total') { let s = 0; mesesVisiveis.forEach(m => s += (valoresMesCat[m][catId] || 0)); return s; }
+    return valoresMesCat[col][catId] || 0;
+  };
 
   // Meses visíveis: respeita os checkboxes "Meses visíveis" do topo da tela.
   // O "DRE Acumulada" agora soma só os meses atualmente visíveis (ex.: se só
@@ -9709,6 +9765,24 @@ function renderDre() {
 
   const mesesHeader = mesesVisiveis.map(m => `<th>${MESES_ABR[m]}</th>`).join('') + '<th class="dfc-col-total">DRE Acumulada</th>';
 
+  // Linha de uma categoria, exibida dentro do grupo expandido (herda o sinal
+  // do grupo-pai, para que a soma das categorias bata com a linha do grupo).
+  const linhaCategoria = (catId, nomeCat, grupoTipo) => {
+    const sinal = grupoTipo === 'entrada' ? 1 : -1;
+    const cells = mesesVisiveis.map(mes => {
+      const v = sinal * valorBrutoCat(catId, mes);
+      if (Math.abs(v) >= 0.005) {
+        return `<td class="dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}',${mes})" title="Ver lançamentos desta categoria">${fmtDreVal(v)}</td>`;
+      }
+      return `<td>${fmtDreVal(v)}</td>`;
+    }).join('');
+    const totalVal = sinal * valorBrutoCat(catId, 'total');
+    const totalCell = Math.abs(totalVal) >= 0.005
+      ? `<td class="dfc-col-total dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}','total')" title="Ver lançamentos desta categoria">${fmtDreVal(totalVal)}</td>`
+      : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`;
+    return `<tr class="dre-cat-row"><td>${nomeCat}</td>${cells}${totalCell}</tr>`;
+  };
+
   const linhaValor = (g, cls, clicavel) => {
     const cells = mesesVisiveis.map(mes => {
       const v = linhaCalc[g.id][mes];
@@ -9721,7 +9795,29 @@ function renderDre() {
     const totalCell = (clicavel && Math.abs(totalVal) >= 0.005)
       ? `<td class="dfc-col-total dre-cell-click" onclick="abrirDetalheDreGrupo('${g.id}','total')" title="Ver lançamentos desta conta">${fmtDreVal(totalVal)}</td>`
       : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`;
-    return `<tr class="${cls}"><td>${g.nome}</td>${cells}${totalCell}</tr>`;
+
+    // Rastreamento por categoria: linhas de categoria expansíveis dentro do
+    // grupo, com drill-down clicável e opção de recolher/expandir. "Sem
+    // categoria" só é exibida no grupo-base (Receita Bruta), quando houver
+    // vendas sem categoria definida caindo ali por fallback.
+    const catsDoGrupo = clicavel ? (categoriasPorGrupo[g.id] || []) : [];
+    let temSemCategoria = false;
+    if (clicavel && g.id === grupoBaseId) {
+      for (let m = 1; m <= 12; m++) { if ((valoresMesCat[m][SEM_CAT] || 0) > 0.005) { temSemCategoria = true; break; } }
+    }
+    const temFilhos = catsDoGrupo.length > 0 || temSemCategoria;
+    const expandido = temFilhos && _dreGruposExpandidos.has(g.id);
+
+    const toggleHtml = temFilhos
+      ? `<button type="button" class="dre-toggle-cat" onclick="toggleDreGrupoCat('${g.id}')" title="${expandido ? 'Recolher' : 'Expandir'} categorias">${expandido ? '▾' : '▸'}</button>`
+      : (clicavel ? '<span class="dre-toggle-spacer"></span>' : '');
+
+    let html = `<tr class="${cls}"><td>${toggleHtml}${g.nome}</td>${cells}${totalCell}</tr>`;
+    if (temFilhos && expandido) {
+      catsDoGrupo.forEach(c => { html += linhaCategoria(c.id, c.nome, g.tipo); });
+      if (temSemCategoria) html += linhaCategoria(SEM_CAT, 'Sem categoria', g.tipo);
+    }
+    return html;
   };
   const linhaPercentual = (g) => {
     const cells = mesesVisiveis.map(mes => `<td>${fmtDrePercent(linhaCalc[g.id][mes])}</td>`).join('');
@@ -9810,6 +9906,23 @@ function dreMesesTodos(mostrar) {
   for (let m = 1; m <= 12; m++) {
     const chk = document.getElementById('dre-mes-' + m);
     if (chk) chk.checked = mostrar;
+  }
+  renderDre();
+}
+
+// ── Recolher/expandir as linhas de categoria dentro do DRE ────────
+// Clique no ▸/▾ ao lado do nome do grupo alterna só aquele grupo;
+// os botões "Expandir/Recolher todas" afetam todos os grupos de uma vez.
+function toggleDreGrupoCat(grupoId) {
+  if (_dreGruposExpandidos.has(grupoId)) _dreGruposExpandidos.delete(grupoId);
+  else _dreGruposExpandidos.add(grupoId);
+  renderDre();
+}
+
+function dreCategoriasTodas(mostrar) {
+  _dreGruposExpandidos.clear();
+  if (mostrar) {
+    (db.dre_grupos || []).forEach(g => { if (g.tipo === 'entrada' || g.tipo === 'saida') _dreGruposExpandidos.add(g.id); });
   }
   renderDre();
 }
@@ -10139,6 +10252,64 @@ function abrirDetalheDreGrupo(grupoId, mes) {
 
   const titleEl = document.getElementById('dre-detalhe-title');
   if (titleEl) titleEl.textContent = `${nomeGrupo} — ${periodoTxt}`;
+
+  const total = itens.reduce((s, it) => s + it.valor, 0);
+  const totalConfirmado = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
+  const totalPendente = total - totalConfirmado;
+
+  const kpisEl = document.getElementById('dre-detalhe-kpis');
+  if (kpisEl) {
+    kpisEl.innerHTML = `
+      <div class="card kpi"><div class="kpi-val">${itens.length}</div><div class="kpi-lbl">Lançamentos</div></div>
+      <div class="card kpi"><div class="kpi-val">${fmtBRL(total)}</div><div class="kpi-lbl">Total do período</div></div>
+      <div class="card kpi"><div class="kpi-val" style="color:#166534">${fmtBRL(totalConfirmado)}</div><div class="kpi-lbl">Já confirmado</div></div>
+      <div class="card kpi"><div class="kpi-val" style="color:#d97706">${fmtBRL(totalPendente)}</div><div class="kpi-lbl">Ainda pendente</div></div>`;
+  }
+
+  const tbody = document.getElementById('dre-detalhe-tbody');
+  if (tbody) {
+    if (!itens.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum lançamento encontrado.</td></tr>';
+    } else {
+      tbody.innerHTML = itens.map(it => {
+        let badge;
+        if (it.status === 'Recebido' || it.status === 'Pago') badge = `<span class="badge badge-green">${it.status}</span>`;
+        else if (it.status === 'A Receber') badge = `<span class="badge" style="background:#dbeafe;color:#1e6fad;font-weight:600">${it.status}</span>`;
+        else badge = `<span class="badge badge-red">${it.status}</span>`;
+        return `<tr>
+          <td>${fmtDate(it.data)}</td>
+          <td>${it.nome || '—'}</td>
+          <td>${it.prod || '—'}</td>
+          <td>${badge}</td>
+          <td style="font-family:DM Mono,monospace;text-align:right">${fmtBRL(it.valor)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  openModal('modal-dre-detalhe');
+}
+
+// Drill-down da linha de CATEGORIA (dentro de um grupo expandido do DRE):
+// clique no valor abre o detalhe dos lançamentos daquela categoria naquele
+// mês (ou 'total' para o ano inteiro). Reaproveita o mesmo modal do DRE.
+function abrirDetalheDreCategoria(catId, mes) {
+  if (!_dreCatItensCache) return;
+  const nomeCat = catId === '__sem_categoria__' ? 'Sem categoria (Receita Bruta)' : getDfcCatNome(catId);
+
+  let itens = [];
+  let periodoTxt = '';
+  if (mes === 'total') {
+    for (let m = 1; m <= 12; m++) itens = itens.concat(_dreCatItensCache[m][catId] || []);
+    periodoTxt = `Ano ${_dreAnoCache}`;
+  } else {
+    itens = _dreCatItensCache[mes][catId] || [];
+    periodoTxt = `${meses[mes]} / ${_dreAnoCache}`;
+  }
+  itens = [...itens].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+
+  const titleEl = document.getElementById('dre-detalhe-title');
+  if (titleEl) titleEl.textContent = `${nomeCat} — ${periodoTxt}`;
 
   const total = itens.reduce((s, it) => s + it.valor, 0);
   const totalConfirmado = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
@@ -11272,10 +11443,13 @@ function imprimirDre() {
   const ano = anoEl ? anoEl.value : '';
   const titulo = 'DRE — Demonstração de Resultado do Exercício' + (ano ? ' — ' + ano : '');
 
-  // Clona a tabela e remove a interatividade do drill-down (não faz sentido no PDF)
+  // Clona a tabela e remove a interatividade do drill-down (não faz sentido no PDF).
+  // As linhas de categoria só saem impressas se estiverem expandidas na tela
+  // no momento do PDF (o botão ▸/▾ vira só um marcador visual, sem clique).
   const cloneTable = table.cloneNode(true);
   cloneTable.querySelectorAll('[onclick]').forEach(el => el.removeAttribute('onclick'));
   cloneTable.querySelectorAll('.dre-cell-click').forEach(el => el.classList.remove('dre-cell-click'));
+  cloneTable.querySelectorAll('.dre-toggle-cat').forEach(el => { el.outerHTML = ''; });
 
   const dataHoje = new Date().toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const tableHtml = '<table>' + cloneTable.innerHTML + '</table>';
@@ -11295,6 +11469,8 @@ function imprimirDre() {
     'td:first-child { text-align:left; font-family:Arial,sans-serif; font-size:10.5px; }',
     '.dfc-col-total { background:#faf9f7; font-weight:700; }',
     '.dfc-row-sub td:first-child { padding-left:20px; color:#57534e; }',
+    '.dre-cat-row td { font-size:9px; }',
+    '.dre-cat-row td:first-child { padding-left:34px; color:#a8a29e; }',
     '.dre-row-subtotal td { font-weight:700; border-top:1px solid #d6d3d1; border-bottom:1px solid #d6d3d1; }',
     '.dre-row-subtotal td:first-child { text-transform:uppercase; letter-spacing:.3px; color:#ea580c; }',
     '.dre-row-percent td { color:#a8a29e; font-style:italic; font-size:9px; border-bottom:1px dashed #faf9f7; }',
@@ -12717,7 +12893,7 @@ async function excluirReposicao(id) {
 function imprimirReposicoes() { imprimirPagina('reposicao'); }
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-08-09 · combo-categoria-legivel';
+window.APP_BUILD = '2026-08-10 · dre-categorias-expansiveis';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
