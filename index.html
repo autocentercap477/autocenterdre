@@ -51,8 +51,8 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:v
 }
 .login-logo-wrap { margin-bottom:28px; }
 .login-logo-svg { display:inline-block; }
-.eleve-wordmark { font-size:36px; font-weight:700; letter-spacing:-1px; color:#ea580c; line-height:1; font-family:'Plus Jakarta Sans',sans-serif; }
-.eleve-sub-tag { font-size:10px; letter-spacing:3px; color:#a8a29e; text-transform:uppercase; font-weight:500; margin-top:4px; }
+.n477-wordmark { font-size:36px; font-weight:700; letter-spacing:-1px; color:#ea580c; line-height:1; font-family:'Plus Jakarta Sans',sans-serif; }
+.n477-sub-tag { font-size:10px; letter-spacing:3px; color:#a8a29e; text-transform:uppercase; font-weight:500; margin-top:4px; }
 .login-title { font-size:17px; font-weight:600; margin-bottom:4px; color:#1f2937; }
 .login-sub { font-size:13px; color:#a8a29e; margin-bottom:32px; }
 .login-box input:not([type=checkbox]) {
@@ -2081,12 +2081,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <span style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Filtro dos Gráficos:</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <label style="margin:0;font-size:12px;white-space:nowrap;">Ano</label>
-            <select id="dash-ano" onchange="localStorage.setItem('eleve_dash_ano', this.value); renderDashCharts();" style="width:120px;">
+            <select id="dash-ano" onchange="localStorage.setItem('477_dash_ano', this.value); renderDashCharts();" style="width:120px;">
             </select>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <label style="margin:0;font-size:12px;white-space:nowrap;">Mês</label>
-            <select id="dash-mes" onchange="localStorage.setItem('eleve_dash_mes', this.value); renderDashCharts();" style="width:130px;">
+            <select id="dash-mes" onchange="localStorage.setItem('477_dash_mes', this.value); renderDashCharts();" style="width:130px;">
               <option value="">Todos</option>
               <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
               <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
@@ -3176,7 +3176,7 @@ async function loadPerfis() {
 }
 
 // Log de logins
-const LOGIN_LOG_KEY = 'eleve_login_log';
+const LOGIN_LOG_KEY = '477_login_log';
 function getLoginLog() {
   try {
     const raw = JSON.parse(localStorage.getItem(LOGIN_LOG_KEY) || '[]');
@@ -3217,7 +3217,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 // senha são validados pelo próprio Supabase Auth; este arquivo nunca
 // vê nem guarda a senha em lugar nenhum.
 // ═══════════════════════════════════════════
-const AUTH_SESSION_KEY = 'eleve_auth_session';
+const AUTH_SESSION_KEY = '477_auth_session';
 
 function salvarSessaoAuth(s) {
   localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
@@ -3304,9 +3304,9 @@ async function sbFetch(table, method='GET', body=null, params='') {
     const res = await fetch(url, opts);
     if (!res.ok) {
       const err = await res.text();
-      console.error(`[ELEVE] sbFetch ${method} ${table} erro ${res.status}:`, err);
+      console.error(`[477] sbFetch ${method} ${table} erro ${res.status}:`, err);
       // Exibe no console de forma destacada para facilitar diagnóstico
-      console.warn(`[ELEVE] Dado NÃO salvo no banco! Tabela: ${table} | Status: ${res.status} | Detalhe:`, err);
+      console.warn(`[477] Dado NÃO salvo no banco! Tabela: ${table} | Status: ${res.status} | Detalhe:`, err);
       return null;
     }
     if (method === 'DELETE' || method === 'PATCH') return true;
@@ -3535,14 +3535,14 @@ function toggleLembrar() {
   const lembrar = document.getElementById('lembrar-senha').checked;
   if(lembrar) {
     const u = document.getElementById('login-user').value;
-    if(u) localStorage.setItem('eleve_saved_user', u);
+    if(u) localStorage.setItem('477_saved_user', u);
   } else {
-    localStorage.removeItem('eleve_saved_user');
+    localStorage.removeItem('477_saved_user');
   }
 }
 
 function loadSavedLogin() {
-  const u = localStorage.getItem('eleve_saved_user');
+  const u = localStorage.getItem('477_saved_user');
   if(u) {
     document.getElementById('login-user').value = u;
     document.getElementById('lembrar-senha').checked = true;
@@ -3587,7 +3587,7 @@ function _finalizarLogin(found) {
   currentUser = found;
   // Salva usuário se "Lembrar" estiver marcado (a senha não é mais guardada localmente)
   if(document.getElementById('lembrar-senha') && document.getElementById('lembrar-senha').checked) {
-    localStorage.setItem('eleve_saved_user', found.user);
+    localStorage.setItem('477_saved_user', found.user);
   }
   addLoginLog(found.user, found.nome);
   document.getElementById('login-screen').style.display = 'none';
@@ -3735,7 +3735,7 @@ function renderPaginaAtual() {
 // o conteúdo usa a largura inteira; ela volta ao encostar o mouse na
 // borda esquerda ou ao clicar no ☰. A preferência fica salva no navegador.
 // ══════════════════════════════════════════════════════════
-const MENU_KEY = 'eleve_menu_oculto';
+const MENU_KEY = '477_menu_oculto';
 
 function alternarMenu() {
   const oculto = !document.body.classList.contains('menu-oculto');
@@ -3839,11 +3839,11 @@ function populateYearSelects() {
     if(val) s.value = val;
   });
   const ds = document.getElementById('dash-ano');
-  const savedAno = localStorage.getItem('eleve_dash_ano');
+  const savedAno = localStorage.getItem('477_dash_ano');
   ds.innerHTML = sorted.map(y=>`<option value="${y}">${y}</option>`).join('');
   ds.value = savedAno || curYear;
   const dm = document.getElementById('dash-mes');
-  if (dm) { const savedMes = localStorage.getItem('eleve_dash_mes'); if (savedMes) dm.value = savedMes; }
+  if (dm) { const savedMes = localStorage.getItem('477_dash_mes'); if (savedMes) dm.value = savedMes; }
   const ks = document.getElementById('kpi-ano');
   if(ks) {
     const kval = ks.value;
@@ -4974,7 +4974,7 @@ function efMount(tableKey, theadId, cols, list, rerenderFn) {
 // corpo somem juntos e nada mais na tela precisa mudar.
 // A escolha fica salva no navegador, por tabela.
 // ══════════════════════════════════════════════════════════
-const EF_COLS_KEY = 'eleve_colunas_ocultas';
+const EF_COLS_KEY = '477_colunas_ocultas';
 
 function _efCarregarOcultas() {
   try { return JSON.parse(localStorage.getItem(EF_COLS_KEY)) || {}; } catch(e) { return {}; }
@@ -6344,12 +6344,12 @@ let _dashRelData = {};
 function salvarFiltrosDash() {
   const ano = document.getElementById('kpi-ano') ? document.getElementById('kpi-ano').value : '';
   const mes = document.getElementById('kpi-mes') ? document.getElementById('kpi-mes').value : '';
-  localStorage.setItem('eleve_dash_filtros', JSON.stringify({ ano, mes }));
+  localStorage.setItem('477_dash_filtros', JSON.stringify({ ano, mes }));
 }
 
 function restaurarFiltrosDash() {
   try {
-    const saved = JSON.parse(localStorage.getItem('eleve_dash_filtros') || '{}');
+    const saved = JSON.parse(localStorage.getItem('477_dash_filtros') || '{}');
     const anoEl = document.getElementById('kpi-ano');
     const mesEl = document.getElementById('kpi-mes');
     if (anoEl && saved.ano) anoEl.value = saved.ano;
@@ -6962,7 +6962,7 @@ function limparFiltrosKpi() {
   const m = document.getElementById('kpi-mes');
   if(a) a.value = '';
   if(m) m.value = '';
-  localStorage.removeItem('eleve_dash_filtros');
+  localStorage.removeItem('477_dash_filtros');
   renderDashboard();
 }
 
@@ -10706,7 +10706,7 @@ async function deleteTransferencia(id) {
 // ══════════════════════════════════════════════════════════════════
 // JUROS POR ATRASO
 // ══════════════════════════════════════════════════════════════════
-const JUROS_KEY = 'eleve_juros_global';
+const JUROS_KEY = '477_juros_global';
 
 function getJurosGlobal() {
   return parseFloat(localStorage.getItem(JUROS_KEY)) || 0;
