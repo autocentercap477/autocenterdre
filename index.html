@@ -5570,9 +5570,12 @@ async function confirmarPago() {
   const l = db.lancamentos.find(x=>x.id===id);
   if(!l) return;
   const n = l.parcelas || 1;
+  // Guarda o estado anterior para poder reverter caso a gravação no banco falhe.
+  const anterior = { banco: l.banco, tipo_pag: l.tipo_pag, parcela_datas: l.parcela_datas, pago: l.pago, dtpago: l.dtpago };
   l.banco = banco;
   l.tipo_pag = tipoPag;
 
+  let ok;
   if (n > 1) {
     // Lançamento parcelado: marca só a parcela selecionada, guardando o status
     // por parcela dentro de parcela_datas para não afetar as demais parcelas.
@@ -5583,12 +5586,20 @@ async function confirmarPago() {
     // manter compatibilidade com Dashboard/DFC, que ainda leem esses campos.
     l.pago = todasPagas ? 'sim' : 'nao';
     l.dtpago = todasPagas ? dtpago : '';
-    await sbFetch('lancamentos', 'PATCH', {parcela_datas: l.parcela_datas, pago: l.pago, dtpago: l.dtpago, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
+    ok = await sbFetch('lancamentos', 'PATCH', {parcela_datas: l.parcela_datas, pago: l.pago, dtpago: l.dtpago, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
   } else {
     l.pago = 'sim';
     l.dtpago = dtpago;
-    await sbFetch('lancamentos', 'PATCH', {pago:'sim', dtpago, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
+    ok = await sbFetch('lancamentos', 'PATCH', {pago:'sim', dtpago, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
   }
+
+  if (!ok) {
+    // Gravação falhou: reverte o estado local para não mostrar "pago" sem ter salvo.
+    Object.assign(l, anterior);
+    alert('❌ Não foi possível salvar o pagamento no banco de dados. Verifique sua conexão e tente novamente.');
+    return;
+  }
+
   closeModal('modal-pago'); renderApagar(); renderPagas();
 }
 
@@ -5914,19 +5925,28 @@ async function estornarPago(id, parcIdx) {
   const l = db.lancamentos.find(x=>x.id===id);
   if(!l) return;
   const n = l.parcelas || 1;
+  const anterior = { parcela_datas: l.parcela_datas, pago: l.pago, dtpago: l.dtpago };
 
+  let ok;
   if (n > 1) {
     l.parcela_datas = _setParcelaPagoStatus(l, parcIdx, false, '');
     // Como pelo menos uma parcela voltou a ficar em aberto, o lançamento
     // como um todo não pode mais ser considerado "pago".
     l.pago = 'nao';
     l.dtpago = '';
-    await sbFetch('lancamentos', 'PATCH', {parcela_datas: l.parcela_datas, pago:'nao', dtpago:''}, `?id=eq.${id}`);
+    ok = await sbFetch('lancamentos', 'PATCH', {parcela_datas: l.parcela_datas, pago:'nao', dtpago:''}, `?id=eq.${id}`);
   } else {
     l.pago = 'nao';
     l.dtpago = '';
-    await sbFetch('lancamentos', 'PATCH', {pago:'nao', dtpago:''}, `?id=eq.${id}`);
+    ok = await sbFetch('lancamentos', 'PATCH', {pago:'nao', dtpago:''}, `?id=eq.${id}`);
   }
+
+  if (!ok) {
+    Object.assign(l, anterior);
+    alert('❌ Não foi possível desfazer o pagamento no banco de dados. Verifique sua conexão e tente novamente.');
+    return;
+  }
+
   renderPagas(); renderApagar();
 }
 
@@ -8385,9 +8405,12 @@ async function confirmarRecebido() {
   if(!banco){ alert('Selecione o banco/conta em que o valor foi recebido.'); return; }
   const l=db.lancreceber.find(x=>x.id===id); if(!l) return;
   const n = l.parcelas || 1;
+  // Guarda o estado anterior para poder reverter caso a gravação no banco falhe.
+  const anterior = { banco: l.banco, tipo_pag: l.tipo_pag, parcela_datas: l.parcela_datas, recebido: l.recebido, dtrecebido: l.dtrecebido };
   l.banco = banco;
   l.tipo_pag = tipoPag;
 
+  let ok;
   if (n > 1) {
     // Lançamento parcelado: marca só a parcela selecionada.
     l.parcela_datas = _setParcelaPagoStatus(l, parcIdx, true, dtrecebido);
@@ -8395,27 +8418,44 @@ async function confirmarRecebido() {
     const todasRecebidas = pagos.slice(0, n).every(p => p === true);
     l.recebido = todasRecebidas ? 'sim' : 'nao';
     l.dtrecebido = todasRecebidas ? dtrecebido : '';
-    await sbFetch('lancreceber', 'PATCH', {parcela_datas: l.parcela_datas, recebido: l.recebido, dtrecebido: l.dtrecebido, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
+    ok = await sbFetch('lancreceber', 'PATCH', {parcela_datas: l.parcela_datas, recebido: l.recebido, dtrecebido: l.dtrecebido, banco, tipo_pag: tipoPag}, `?id=eq.${id}`);
   } else {
     l.recebido='sim'; l.dtrecebido=dtrecebido;
-    await sbFetch('lancreceber','PATCH',{recebido:'sim',dtrecebido,banco,tipo_pag:tipoPag},`?id=eq.${id}`);
+    ok = await sbFetch('lancreceber','PATCH',{recebido:'sim',dtrecebido,banco,tipo_pag:tipoPag},`?id=eq.${id}`);
   }
+
+  if (!ok) {
+    // Gravação falhou: reverte o estado local para não mostrar "recebido" sem ter salvo.
+    Object.assign(l, anterior);
+    alert('❌ Não foi possível salvar o recebimento no banco de dados. Verifique sua conexão e tente novamente.');
+    return;
+  }
+
   closeModal('modal-recebido'); renderAReceber(); renderRecebido(); renderDashboard();
 }
 async function estornarRecebido(id, parcIdx) {
   if(!confirm('Desfazer o recebimento desta parcela?')) return;
   const l=db.lancreceber.find(x=>x.id===id); if(!l) return;
   const n = l.parcelas || 1;
+  const anterior = { parcela_datas: l.parcela_datas, recebido: l.recebido, dtrecebido: l.dtrecebido };
 
+  let ok;
   if (n > 1) {
     l.parcela_datas = _setParcelaPagoStatus(l, parcIdx, false, '');
     l.recebido = 'nao';
     l.dtrecebido = '';
-    await sbFetch('lancreceber', 'PATCH', {parcela_datas: l.parcela_datas, recebido:'nao', dtrecebido:''}, `?id=eq.${id}`);
+    ok = await sbFetch('lancreceber', 'PATCH', {parcela_datas: l.parcela_datas, recebido:'nao', dtrecebido:''}, `?id=eq.${id}`);
   } else {
     l.recebido='nao'; l.dtrecebido='';
-    await sbFetch('lancreceber','PATCH',{recebido:'nao',dtrecebido:''},`?id=eq.${id}`);
+    ok = await sbFetch('lancreceber','PATCH',{recebido:'nao',dtrecebido:''},`?id=eq.${id}`);
   }
+
+  if (!ok) {
+    Object.assign(l, anterior);
+    alert('❌ Não foi possível desfazer o recebimento no banco de dados. Verifique sua conexão e tente novamente.');
+    return;
+  }
+
   renderRecebido(); renderAReceber(); renderDashboard();
 }
 
