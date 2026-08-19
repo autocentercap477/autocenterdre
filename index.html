@@ -3396,6 +3396,20 @@ function filtroEmpresaQuery(tabela) {
   return `&empresa_id=eq.${encodeURIComponent(emp)}`;
 }
 
+// Os arrays em `db` (db.lancamentos, db.lancreceber, etc.) só devem conter
+// registros da empresa ativa no momento em que foram carregados (ou tudo,
+// se estiver no "Consolidado"). Ao CRIAR ou EDITAR um lançamento, o
+// formulário permite escolher uma empresa diferente da que está ativa no
+// seletor do topo (isso é necessário no modo Consolidado). Se o registro
+// salvo não pertence à empresa ativa, ele NÃO pode ficar no array local,
+// senão aparece na tela mesmo estando filtrado para outra empresa/consolidado
+// só se atualizar a página. Use esta função depois de salvar/editar para
+// decidir se o registro deve continuar no array em memória.
+function pertenceEmpresaAtiva(empresa_id) {
+  const atual = empresaAtual();
+  return !atual || empresa_id === atual;
+}
+
 // saveDB e loadDB agora são no-op — dados vão direto ao Supabase
 function saveDB() { /* Supabase — sem localStorage */ }
 function loadDB() { /* Supabase — sem localStorage */ }
@@ -4644,8 +4658,13 @@ async function saveLancamento() {
   };
   const rL = await sbFetch('lancamentos', 'POST', lanc);
   if(!rL) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
-  db.lancamentos.push(lanc);
+  // Só mantém no array em memória (e portanto visível na tela) se pertencer
+  // à empresa ativa no seletor — senão ele foi salvo corretamente no banco,
+  // mas só deve aparecer quando essa outra empresa (ou o Consolidado) for selecionada.
+  const pertence = pertenceEmpresaAtiva(lanc.empresa_id);
+  if (pertence) db.lancamentos.push(lanc);
   clearLancamento(); closeModal('modal-novo-lanc'); renderLancamentos(); renderApagar(); renderPagas(); populateYearSelects();
+  if (!pertence) alert(`✅ Lançamento salvo em "${empresaNome(lanc.empresa_id)}". Ele não aparece aqui porque essa não é a empresa ativa no momento.`);
 }
 
 function clearLancamento() {
@@ -4824,7 +4843,7 @@ async function updateLancamento() {
   l.cat_dre  = document.getElementById('edit-catdre')   ? document.getElementById('edit-catdre').value   : (l.cat_dre||'');
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('edit-parcela-dates', l.parcelas) : null;
   l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('edit-parcela-dates', l.parcelas) : null;
-  await sbFetch('lancamentos', 'PATCH', {
+  const okU = await sbFetch('lancamentos', 'PATCH', {
     empresa_id: l.empresa_id,
     dtcompra: l.dtcompra, dtprev: l.dtprev, nf: l.nf,
     forn: l.forn, prod: l.prod, valor: l.valor,
@@ -4833,6 +4852,10 @@ async function updateLancamento() {
     cat_dre: l.cat_dre,
     parcela_datas: l.parcela_datas
   }, `?id=eq.${l.id}`);
+  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados. Verifique sua conexão e tente novamente.'); return; }
+  // Se a empresa foi trocada para uma diferente da ativa no seletor, o
+  // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
+  if (!pertenceEmpresaAtiva(l.empresa_id)) db.lancamentos = db.lancamentos.filter(x => x.id !== l.id);
   closeModal('modal-lanc'); renderLancamentos();
 }
 
@@ -8013,9 +8036,11 @@ async function saveLancReceber() {
     parcela_datas: parcelas > 1 ? buildParcelaDatasPayload('lr-parcela-dates', parcelas) : null };
   const rLR = await sbFetch('lancreceber','POST',lanc);
   if(!rLR) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
-  db.lancreceber.push(lanc);
+  const pertence = pertenceEmpresaAtiva(lanc.empresa_id);
+  if (pertence) db.lancreceber.push(lanc);
   clearLancReceber(); closeModal('modal-novo-lr'); renderLancReceber(); renderAReceber(); renderRecebido();
   populateYearSelectsReceber(); renderDashboard();
+  if (!pertence) alert(`✅ Lançamento salvo em "${empresaNome(lanc.empresa_id)}". Ele não aparece aqui porque essa não é a empresa ativa no momento.`);
 }
 function clearLancReceber() {
   ['lr-dtvenda','lr-dtprev','lr-nf','lr-obs'].forEach(id=>document.getElementById(id).value='');
@@ -8176,7 +8201,11 @@ async function updateLancReceber() {
   l.cat_dre = document.getElementById('elr-catdre') ? document.getElementById('elr-catdre').value : (l.cat_dre||'');
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('elr-parcela-dates', l.parcelas) : null;
   l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('elr-parcela-dates', l.parcelas) : null;
-  await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
+  const okU = await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
+  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados. Verifique sua conexão e tente novamente.'); return; }
+  // Se a empresa foi trocada para uma diferente da ativa no seletor, o
+  // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
+  if (!pertenceEmpresaAtiva(l.empresa_id)) db.lancreceber = db.lancreceber.filter(x => x.id !== l.id);
   closeModal('modal-lancreceber'); renderLancReceber();
 }
 async function deleteLancReceber(id) {
@@ -8795,9 +8824,12 @@ async function saveDfcLancamento() {
     desc: document.getElementById('dfc-lan-desc').value,
     recorrente: document.getElementById('dfc-lan-recorrente').value,
     obs: document.getElementById('dfc-lan-obs').value };
-  await sbFetch('dfc_lancamentos','POST',rec);
-  db.dfc_lans.push(rec);
+  const okD = await sbFetch('dfc_lancamentos','POST',rec);
+  if (!okD) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
+  const pertence = pertenceEmpresaAtiva(rec.empresa_id);
+  if (pertence) db.dfc_lans.push(rec);
   clearDfcLancamento(); renderDfcLancamentos(); populateDfcYearSelects();
+  if (!pertence) alert(`✅ Lançamento salvo em "${empresaNome(rec.empresa_id)}". Ele não aparece aqui porque essa não é a empresa ativa no momento.`);
 }
 function clearDfcLancamento() {
   document.getElementById('dfc-lan-data').value = today();
