@@ -3275,11 +3275,11 @@ async function supabaseAuthRefresh(refresh_token) {
 
 // Garante um access_token válido, renovando perto da expiração. Retorna
 // null se não houver sessão ou se a renovação falhar (exige novo login).
-async function obterAccessTokenValido() {
+async function obterAccessTokenValido(forcarRenovacao) {
   const sessao = lerSessaoAuth();
   if (!sessao) return null;
   const MARGEM = 60 * 1000;
-  if (sessao.expira_em - MARGEM > Date.now()) return sessao.access_token;
+  if (!forcarRenovacao && sessao.expira_em - MARGEM > Date.now()) return sessao.access_token;
   const nova = await supabaseAuthRefresh(sessao.refresh_token);
   if (!nova) { limparSessaoAuth(); return null; }
   salvarSessaoAuth({ ...nova, email: sessao.email });
@@ -3299,27 +3299,92 @@ async function supabaseAuthLogout() {
   limparSessaoAuth();
 }
 
+// Colunas do tipo DATE no Postgres. Elas não aceitam string vazia ("") —
+// o Postgrest devolve erro 22007 "invalid input syntax for type date".
+// O app usa '' internamente para representar "sem data", então convertemos
+// para null somente na hora de gravar no banco.
+const SB_CAMPOS_DATA = [
+  'dtpago', 'dtprev', 'dtrecebido', 'dtcompra', 'dtvenda',
+  'data', 'vencimento', 'dtemissao', 'dt_emissao',
+  'dt_reposicao', 'dt_cancelamento'
+];
+
+function sbNormalizarDatas(body) {
+  if (!body || typeof body !== 'object') return body;
+  if (Array.isArray(body)) return body.map(sbNormalizarDatas);
+  const out = {};
+  for (const k in body) {
+    const v = body[k];
+    out[k] = (SB_CAMPOS_DATA.indexOf(k) !== -1 && (v === '' || v === undefined)) ? null : v;
+  }
+  return out;
+}
+
+// Guarda o motivo real da última falha de gravação, para que os alertas
+// mostrem ao usuário o que aconteceu em vez de uma mensagem genérica.
+var _sbUltimoErro = null;
+
+function sbErroMsg() {
+  const e = _sbUltimoErro;
+  if (!e) return '\n\nVerifique sua conexão e tente novamente.';
+  if (e.tipo === 'sem-sessao') {
+    return '\n\n⚠️ Sua sessão expirou.\n\nClique em OK, saia do sistema, faça login novamente e repita a operação.';
+  }
+  if (e.tipo === 'rede') {
+    return '\n\n⚠️ Não foi possível falar com o servidor.\n\nVerifique sua internet. Se a internet estiver funcionando, o projeto no Supabase pode estar pausado por inatividade — entre no painel do Supabase e clique em "Restore project".';
+  }
+  if (e.status === 401 || e.status === 403) {
+    return '\n\n⚠️ Sessão expirada ou sem permissão (erro ' + e.status + ').\n\nSaia e faça login novamente. Se continuar, este usuário não tem permissão de alteração nesta tabela (política de RLS).';
+  }
+  return '\n\nErro ' + e.status + ': ' + String(e.detalhe || '').slice(0, 300);
+}
+
 async function sbFetch(table, method='GET', body=null, params='') {
   if ((method === 'POST' || method === 'PATCH' || method === 'DELETE') && table !== 'config' && typeof currentUser !== 'undefined' && currentUser) {
     trackUserActivity();
   }
   const url = `${SB_URL}/rest/v1/${table}${params}`;
-  const accessToken = await obterAccessTokenValido();
-  const headers = {
-    'apikey': SB_KEY,
-    'Authorization': 'Bearer ' + (accessToken || SB_KEY),
-    'Content-Type': 'application/json'
+  const gravacao = (method !== 'GET');
+  const bodyFinal = body ? sbNormalizarDatas(body) : body;
+  _sbUltimoErro = null;
+
+  const enviar = async (accessToken) => {
+    const headers = {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + (accessToken || SB_KEY),
+      'Content-Type': 'application/json'
+    };
+    if (method === 'POST')  headers['Prefer'] = 'return=representation';
+    if (method === 'PATCH') headers['Prefer'] = 'return=minimal';
+    const opts = { method, headers };
+    if (bodyFinal) opts.body = JSON.stringify(bodyFinal);
+    return await fetch(url, opts);
   };
-  if (method === 'POST')  headers['Prefer'] = 'return=representation';
-  if (method === 'PATCH') headers['Prefer'] = 'return=minimal';
-  const opts = { method, headers };
-  if (body) opts.body = JSON.stringify(body);
+
   // [OTIMIZADO] Qualquer gravação invalida os índices e o cache de parcelas.
-  if (method !== 'GET' && typeof bumpDbVer === 'function') bumpDbVer();
+  if (gravacao && typeof bumpDbVer === 'function') bumpDbVer();
+
   try {
-    const res = await fetch(url, opts);
+    let accessToken = await obterAccessTokenValido();
+    let res = await enviar(accessToken);
+
+    // O token pode ter sido invalidado no servidor antes de expirar aqui.
+    // Renova uma única vez e repete a requisição antes de dar erro.
+    if ((res.status === 401 || res.status === 403) && lerSessaoAuth()) {
+      const novoToken = await obterAccessTokenValido(true);
+      if (novoToken) {
+        accessToken = novoToken;
+        res = await enviar(accessToken);
+      }
+    }
+
     if (!res.ok) {
       const err = await res.text();
+      _sbUltimoErro = {
+        tipo: (gravacao && !accessToken) ? 'sem-sessao' : 'http',
+        status: res.status,
+        detalhe: err
+      };
       console.error(`[477] sbFetch ${method} ${table} erro ${res.status}:`, err);
       // Exibe no console de forma destacada para facilitar diagnóstico
       console.warn(`[477] Dado NÃO salvo no banco! Tabela: ${table} | Status: ${res.status} | Detalhe:`, err);
@@ -3329,6 +3394,7 @@ async function sbFetch(table, method='GET', body=null, params='') {
     const text = await res.text();
     return text ? JSON.parse(text) : [];
   } catch(e) {
+    _sbUltimoErro = { tipo: 'rede', detalhe: String((e && e.message) || e) };
     console.error(`sbFetch ${method} ${table} exceção:`, e);
     return null;
   }
@@ -4852,7 +4918,7 @@ async function updateLancamento() {
     cat_dre: l.cat_dre,
     parcela_datas: l.parcela_datas
   }, `?id=eq.${l.id}`);
-  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados. Verifique sua conexão e tente novamente.'); return; }
+  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados.' + sbErroMsg()); return; }
   // Se a empresa foi trocada para uma diferente da ativa no seletor, o
   // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
   if (!pertenceEmpresaAtiva(l.empresa_id)) db.lancamentos = db.lancamentos.filter(x => x.id !== l.id);
@@ -5619,7 +5685,7 @@ async function confirmarPago() {
   if (!ok) {
     // Gravação falhou: reverte o estado local para não mostrar "pago" sem ter salvo.
     Object.assign(l, anterior);
-    alert('❌ Não foi possível salvar o pagamento no banco de dados. Verifique sua conexão e tente novamente.');
+    alert('❌ Não foi possível salvar o pagamento no banco de dados.' + sbErroMsg());
     return;
   }
 
@@ -5966,7 +6032,7 @@ async function estornarPago(id, parcIdx) {
 
   if (!ok) {
     Object.assign(l, anterior);
-    alert('❌ Não foi possível desfazer o pagamento no banco de dados. Verifique sua conexão e tente novamente.');
+    alert('❌ Não foi possível desfazer o pagamento no banco de dados.' + sbErroMsg());
     return;
   }
 
@@ -8202,7 +8268,7 @@ async function updateLancReceber() {
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('elr-parcela-dates', l.parcelas) : null;
   l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('elr-parcela-dates', l.parcelas) : null;
   const okU = await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
-  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados. Verifique sua conexão e tente novamente.'); return; }
+  if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados.' + sbErroMsg()); return; }
   // Se a empresa foi trocada para uma diferente da ativa no seletor, o
   // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
   if (!pertenceEmpresaAtiva(l.empresa_id)) db.lancreceber = db.lancreceber.filter(x => x.id !== l.id);
@@ -8456,7 +8522,7 @@ async function confirmarRecebido() {
   if (!ok) {
     // Gravação falhou: reverte o estado local para não mostrar "recebido" sem ter salvo.
     Object.assign(l, anterior);
-    alert('❌ Não foi possível salvar o recebimento no banco de dados. Verifique sua conexão e tente novamente.');
+    alert('❌ Não foi possível salvar o recebimento no banco de dados.' + sbErroMsg());
     return;
   }
 
@@ -8481,7 +8547,7 @@ async function estornarRecebido(id, parcIdx) {
 
   if (!ok) {
     Object.assign(l, anterior);
-    alert('❌ Não foi possível desfazer o recebimento no banco de dados. Verifique sua conexão e tente novamente.');
+    alert('❌ Não foi possível desfazer o recebimento no banco de dados.' + sbErroMsg());
     return;
   }
 
