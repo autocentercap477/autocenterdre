@@ -633,6 +633,54 @@ th.ef-th { padding:8px 8px 8px 12px; }
 }
 .btn-pdf:hover { background:#faf9f7; color:#ea580c; border-color:#ea580c; }
 .btn-pdf svg { width:13px; height:13px; flex-shrink:0; }
+
+/* ── BOTÕES SUSPENSOS (ATALHOS DE LANÇAMENTO) ── */
+#fab-lancamentos {
+  position:fixed; right:22px; bottom:22px; z-index:900;
+  display:none; flex-direction:column; align-items:flex-end; gap:10px;
+}
+body.logado #fab-lancamentos { display:flex; }
+body.logado.fabs-ocultos #fab-lancamentos { display:none; }
+.fab {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:12px 18px; border:none; border-radius:30px; cursor:pointer;
+  font-family:inherit; font-size:13px; font-weight:700; color:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,.18); transition:.18s;
+  white-space:nowrap;
+}
+.fab:hover { transform:translateY(-2px); box-shadow:0 9px 24px rgba(0,0,0,.24); }
+.fab:active { transform:translateY(0); }
+.fab-pagar   { background:#ea580c; }
+.fab-pagar:hover   { background:#c2410c; }
+.fab-receber { background:#0f766e; }
+.fab-receber:hover { background:#0d5f59; }
+.fab-ico { font-size:15px; line-height:1; }
+.fab-toggle {
+  width:26px; height:26px; border-radius:50%; cursor:pointer;
+  border:1.5px solid #e7e5e4; background:#fff; color:#a8a29e;
+  font-size:13px; line-height:1; font-family:inherit;
+  box-shadow:0 3px 10px rgba(0,0,0,.12); transition:.15s;
+  align-self:flex-end;
+}
+.fab-toggle:hover { color:#ea580c; border-color:#ea580c; }
+.fab-restore {
+  position:fixed; right:22px; bottom:22px; z-index:900; display:none;
+  width:44px; height:44px; border-radius:50%; cursor:pointer;
+  border:none; background:#ea580c; color:#fff; font-size:20px; line-height:1;
+  font-family:inherit; box-shadow:0 6px 18px rgba(0,0,0,.18); transition:.18s;
+}
+.fab-restore:hover { background:#c2410c; transform:translateY(-2px); }
+body.logado.fabs-ocultos .fab-restore { display:block; }
+@media print { #fab-lancamentos, .fab-restore { display:none !important; } }
+
+/* ── PARCELAS: cabeçalho com ação de recalcular ── */
+.parc-acao {
+  display:inline-flex; align-items:center; gap:5px; cursor:pointer;
+  border:1.5px solid #ea580c; background:#fff; color:#ea580c;
+  border-radius:6px; padding:5px 10px; font-family:inherit;
+  font-size:11px; font-weight:700; transition:.15s; margin-left:auto;
+}
+.parc-acao:hover { background:#ea580c; color:#fff; }
 </style>
 </head>
 <body>
@@ -719,11 +767,11 @@ th.ef-th { padding:8px 8px 8px 12px; }
         </div>
         <div class="nav-sub-item" onclick="showPage('fornecedores')" id="nav-fornecedores">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Fornecedores
+          Despesas/Fornecedores
         </div>
         <div class="nav-sub-item" onclick="showPage('produtos')" id="nav-produtos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          Produtos (Compra)
+          Itens (Compra)
         </div>
         <div class="nav-sub-item" onclick="showPage('lancamentos')" id="nav-lancamentos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
@@ -785,7 +833,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Categorias
         </div>
-        <div class="nav-sub-item" onclick="showPage('dfc-lancamentos')" id="nav-dfc-lancamentos">
+        <div class="nav-sub-item nav-oculto" onclick="showPage('dfc-lancamentos')" id="nav-dfc-lancamentos" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
           Lançamentos
         </div>
@@ -832,14 +880,14 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <!-- ══ FORNECEDORES ══ -->
     <div class="page" id="page-fornecedores">
       <div class="page-header">
-        <div><div class="page-title">Fornecedores</div><div class="page-sub" style="margin-bottom:0">Cadastro e gestão de fornecedores</div></div>
+        <div><div class="page-title">Despesas/Fornecedores</div><div class="page-sub" style="margin-bottom:0">Cadastro e gestão de despesas e fornecedores</div></div>
         <button class="btn-novo" id="btn-novo-forn" onclick="toggleFormPanel('form-forn',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo
         </button>
       </div>
       <div class="form-panel" id="form-forn" style="margin-bottom:0">
       <div class="card">
-        <div class="card-title">Novo Fornecedor</div>
+        <div class="card-title">Nova Despesa/Fornecedor</div>
         <div class="grid3">
           <div class="form-group"><label>Razão Social / Nome *</label><input id="f-nome" type="text" placeholder="Nome do fornecedor" /></div>
           <div class="form-group"><label>CNPJ / CPF</label><input id="f-cnpj" type="text" placeholder="00.000.000/0001-00" /></div>
@@ -858,13 +906,13 @@ th.ef-th { padding:8px 8px 8px 12px; }
         </div>
         <div class="form-group"><label>Observações</label><textarea id="f-obs" rows="2" placeholder="Informações adicionais..."></textarea></div>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveFornecedor()">Salvar Fornecedor</button>
+          <button class="btn btn-primary" onclick="saveFornecedor()">Salvar Despesa/Fornecedor</button>
           <button class="btn btn-secondary" onclick="clearFornecedor()">Limpar</button>
         </div>
       </div>
       </div><!-- /form-panel forn -->
       <div class="card" style="margin-top:16px">
-        <div class="card-title">Fornecedores Cadastrados</div>
+        <div class="card-title">Despesas/Fornecedores Cadastrados</div>
         <div class="table-scroll"><table><thead><tr id="th-fornecedores-row">
           <th>Nome</th><th>CNPJ/CPF</th><th>Contato</th><th>Telefone</th><th>Categoria</th><th>Ações</th>
         </tr></thead><tbody id="tb-fornecedores"><tr><td colspan="6" class="empty-state">Nenhum fornecedor cadastrado.</td></tr></tbody></table></div>
@@ -875,7 +923,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <!-- ══ PRODUTOS ══ -->
     <div class="page" id="page-produtos">
       <div class="page-header">
-        <div><div class="page-title">Produtos</div><div class="page-sub" style="margin-bottom:0">Cadastro e gestão de produtos</div></div>
+        <div><div class="page-title">Itens (Compra)</div><div class="page-sub" style="margin-bottom:0">Cadastro e gestão de itens de compra</div></div>
         <button class="btn-novo" id="btn-novo-prod" onclick="abrirNovoProduto()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo
         </button>
@@ -883,9 +931,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <!-- MODAL: Novo Produto -->
       <div class="modal-overlay" id="modal-novo-prod">
         <div class="modal">
-          <div class="modal-title">Novo Produto</div>
+          <div class="modal-title">Novo Item</div>
           <div class="grid3">
-            <div class="form-group"><label>Nome do Produto *</label><input id="p-nome" type="text" placeholder="Descrição do produto" /></div>
+            <div class="form-group"><label>Nome do Item *</label><input id="p-nome" type="text" placeholder="Descrição do item" /></div>
             <div class="form-group"><label>Código / SKU</label><input id="p-sku" type="text" placeholder="SKU-001" /></div>
             <div class="form-group"><label>Unidade de Medida</label>
               <select id="p-unidade">
@@ -895,7 +943,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           </div>
           <div class="grid3">
             <div class="form-group"><label>Categoria DFC</label><select id="p-cat"><option value="">Nenhuma</option></select></div>
-            <div class="form-group"><label>Fornecedor Padrão</label>
+            <div class="form-group"><label>Despesas/Fornecedor Padrão</label>
               <select id="p-forn"><option value="">Selecione...</option></select>
             </div>
             <div class="form-group"><label>Preço Unitário (R$)</label><input id="p-preco" type="number" step="0.01" placeholder="0,00" /></div>
@@ -903,25 +951,25 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div class="form-group"><label>Descrição / Observações</label><textarea id="p-obs" rows="2" placeholder="Descrição detalhada..."></textarea></div>
           <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal('modal-novo-prod')">Cancelar</button>
-            <button class="btn btn-primary" onclick="saveProduto()">Salvar Produto</button>
+            <button class="btn btn-primary" onclick="saveProduto()">Salvar Item</button>
           </div>
         </div>
       </div><!-- /modal-novo-prod -->
       <div class="card" style="margin-top:16px">
-        <div class="card-title">Produtos Cadastrados</div>
+        <div class="card-title">Itens Cadastrados</div>
         <div class="form-group" style="max-width:340px;margin-bottom:14px">
           <input type="text" id="prod-busca" placeholder="🔍 Buscar por nome ou SKU..." oninput="renderProdutos()" />
         </div>
         <div class="table-scroll"><table><thead><tr id="th-produtos-row">
-          <th>Nome</th><th>SKU</th><th>Unidade</th><th>Categoria DFC</th><th>Fornecedor Padrão</th><th>Preço Unit.</th><th>Ações</th>
-        </tr></thead><tbody id="tb-produtos"><tr><td colspan="7" class="empty-state">Nenhum produto cadastrado.</td></tr></tbody></table></div>
+          <th>Nome</th><th>SKU</th><th>Unidade</th><th>Categoria DFC</th><th>Despesas/Fornecedor Padrão</th><th>Preço Unit.</th><th>Ações</th>
+        </tr></thead><tbody id="tb-produtos"><tr><td colspan="7" class="empty-state">Nenhum item cadastrado.</td></tr></tbody></table></div>
       </div>
     </div>
 
     <!-- ══ LANÇAMENTOS ══ -->
     <div class="page" id="page-lancamentos">
       <div class="page-header">
-        <div><div class="page-title">Lançamentos</div><div class="page-sub" style="margin-bottom:0">Registro de compras de produtos</div></div>
+        <div><div class="page-title">Lançamento de Contas a Pagar</div><div class="page-sub" style="margin-bottom:0">Registro de despesas e compras de itens</div></div>
         <button class="btn-pdf" onclick="imprimirPagina('lancamentos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button>
         <button class="btn btn-secondary" onclick="abrirModalCategoriaMassa('lancamentos')">🏷️ Categoria em Massa</button>
         <button class="btn btn-secondary" onclick="abrirModalImport('pagar')">📥 Importar Extrato</button>
@@ -944,7 +992,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div class="form-group"><label>Ano</label>
             <select id="lf-ano" onchange="renderLancamentos()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Fornecedor</label>
+          <div class="form-group"><label>Despesas/Fornecedor</label>
             <select id="lf-forn" onchange="renderLancamentos()"><option value="">Todos</option></select>
           </div>
           <div class="form-group"><label>Grupo</label>
@@ -953,7 +1001,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div class="form-group"><label>Categoria</label>
             <select id="lf-cat" onchange="renderLancamentos()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Produto</label>
+          <div class="form-group"><label>Item</label>
             <select id="lf-prod" onchange="renderLancamentos()"><option value="">Todos</option></select>
           </div>
           <div class="form-group"><label>Status Pagamento</label>
@@ -984,7 +1032,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearLancamentoFiltros()">Limpar Filtros</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-lancamentos-row">
-          <th>Data Compra</th><th>Fornecedor</th><th>Produto</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
+          <th>Data Compra</th><th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
           <th>Prev. Pgto</th><th>Lead Time</th><th>NF</th><th>Financeiro</th><th>Pago</th><th>Ações</th>
         </tr></thead><tbody id="tb-lancamentos"><tr><td colspan="12" class="empty-state">Nenhum lançamento registrado.</td></tr></tbody></table></div>
       </div>
@@ -1009,10 +1057,10 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div class="form-group"><label>Ano</label>
             <select id="af-ano" onchange="renderApagar()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Fornecedor</label>
+          <div class="form-group"><label>Despesas/Fornecedor</label>
             <select id="af-forn" onchange="renderApagar()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Produto</label>
+          <div class="form-group"><label>Item</label>
             <select id="af-prod" onchange="renderApagar()"><option value="">Todos</option></select>
           </div>
           <div class="form-group"><label>Grupo</label>
@@ -1054,7 +1102,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           </div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-apagar-row">
-          <th>Fornecedor</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Dt. Compra</th><th>Vencimento</th><th>Situação</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Dt. Compra</th><th>Vencimento</th><th>Situação</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-apagar"><tr><td colspan="11" class="empty-state">Nenhuma parcela em aberto.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -1078,10 +1126,10 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div class="form-group"><label>Ano</label>
             <select id="pgf-ano" onchange="renderPagas()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Fornecedor</label>
+          <div class="form-group"><label>Despesas/Fornecedor</label>
             <select id="pgf-forn" onchange="renderPagas()"><option value="">Todos</option></select>
           </div>
-          <div class="form-group"><label>Produto</label>
+          <div class="form-group"><label>Item</label>
             <select id="pgf-prod" onchange="renderPagas()"><option value="">Todos</option></select>
           </div>
           <div class="form-group"><label>Grupo</label>
@@ -1108,7 +1156,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearPagasFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-pagas-row">
-          <th>Fornecedor</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Compra</th><th>Data Pgto</th><th>Forma Pgto</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Compra</th><th>Data Pgto</th><th>Forma Pgto</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-pagas"><tr><td colspan="12" class="empty-state">Nenhuma parcela paga.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -2218,6 +2266,18 @@ th.ef-th { padding:8px 8px 8px 12px; }
   </div><!-- /main -->
 </div><!-- /app -->
 
+<!-- ══ BOTÕES SUSPENSOS: ATALHOS DE LANÇAMENTO ══ -->
+<div id="fab-lancamentos">
+  <button class="fab-toggle" onclick="alternarBotoesSuspensos()" title="Ocultar botões de atalho">&#10005;</button>
+  <button class="fab fab-pagar" onclick="abrirModalLanc()" title="Novo lançamento de conta a pagar">
+    <span class="fab-ico">&#128230;</span><span>Lançamento a Pagar</span>
+  </button>
+  <button class="fab fab-receber" onclick="abrirModalLancReceber()" title="Novo lançamento de conta a receber">
+    <span class="fab-ico">&#128176;</span><span>Lançamento a Receber</span>
+  </button>
+</div>
+<button id="fab-restore" class="fab-restore" onclick="alternarBotoesSuspensos()" title="Mostrar botões de atalho">&#43;</button>
+
 
 <!-- ══ MODAL DETALHE DIA CALENDÁRIO ══ -->
 <div class="cal-detail-overlay" id="cal-detail-overlay">
@@ -2225,7 +2285,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <div class="cal-detail-title" id="cal-detail-title">Lançamentos do dia</div>
     <table class="cal-detail-table">
       <thead><tr>
-        <th>Fornecedor</th><th>Valor</th><th>Situação</th>
+        <th>Despesas/Fornecedor</th><th>Valor</th><th>Situação</th>
       </tr></thead>
       <tbody id="cal-detail-tbody"></tbody>
     </table>
@@ -2252,8 +2312,8 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="l-nf" type="text" placeholder="000000" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Fornecedor *<button type="button" class="btn-add-inline" title="Cadastrar novo fornecedor" onclick="abrirCadastroRapido('fornecedor','l-forn')">+</button></label><select id="l-forn"><option value="">Selecione...</option></select></div>
-      <div class="form-group"><label class="label-add">Produto<button type="button" class="btn-add-inline" title="Cadastrar novo produto" onclick="abrirCadastroRapido('produto','l-prod')">+</button></label><select id="l-prod"><option value="">Nenhum (opcional)</option></select></div>
+      <div class="form-group"><label class="label-add">Despesas/Fornecedor<button type="button" class="btn-add-inline" title="Cadastrar nova despesa/fornecedor" onclick="abrirCadastroRapido('fornecedor','l-forn')">+</button></label><select id="l-forn"><option value="">Nenhum (opcional)</option></select></div>
+      <div class="form-group"><label class="label-add">Item<button type="button" class="btn-add-inline" title="Cadastrar novo item" onclick="abrirCadastroRapido('produto','l-prod')">+</button></label><select id="l-prod"><option value="">Nenhum (opcional)</option></select></div>
       <div class="form-group"><label>Valor Total (R$) *</label><input id="l-valor" type="number" step="0.01" placeholder="0,00" /></div>
     </div>
     <div class="grid3">
@@ -2286,7 +2346,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     </div>
     <div id="l-parcela-dates" style="display:none;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#ea580c;margin-bottom:10px;padding:8px 12px;background:#fff1e6;border-radius:6px;border-left:3px solid #ea580c;">
-        📅 Datas de vencimento de cada parcela (opcional — substitui a geração automática mensal)
+        📅 Datas e valores de cada parcela — preenchidos automaticamente, edite se precisar
       </div>
       <div id="l-parcela-dates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
     </div>
@@ -2359,7 +2419,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     </div>
     <div id="lr-parcela-dates" style="display:none;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#16a34a;margin-bottom:10px;padding:8px 12px;background:#dcfce7;border-radius:6px;border-left:3px solid #16a34a;">
-        📅 Datas de recebimento de cada parcela (opcional — substitui a geração automática mensal)
+        📅 Datas e valores de cada parcela — preenchidos automaticamente, edite se precisar
       </div>
       <div id="lr-parcela-dates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
     </div>
@@ -2517,7 +2577,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <!-- Datas manuais de parcelas no modal -->
     <div id="elr-parcela-dates" style="display:none;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#16a34a;margin-bottom:10px;padding:8px 12px;background:#dcfce7;border-radius:6px;border-left:3px solid #16a34a;">
-        📅 Datas de recebimento de cada parcela (opcional)
+        📅 Datas e valores de cada parcela — preenchidos automaticamente, edite se precisar
       </div>
       <div id="elr-parcela-dates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
     </div>
@@ -2789,8 +2849,8 @@ th.ef-th { padding:8px 8px 8px 12px; }
       <div class="form-group"><label>Nº Nota Fiscal</label><input id="edit-nf" type="text" /></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label class="label-add">Fornecedor<button type="button" class="btn-add-inline" title="Cadastrar novo fornecedor" onclick="abrirCadastroRapido('fornecedor','edit-forn')">+</button></label><select id="edit-forn"></select></div>
-      <div class="form-group"><label class="label-add">Produto<button type="button" class="btn-add-inline" title="Cadastrar novo produto" onclick="abrirCadastroRapido('produto','edit-prod')">+</button></label><select id="edit-prod"></select></div>
+      <div class="form-group"><label class="label-add">Despesas/Fornecedor<button type="button" class="btn-add-inline" title="Cadastrar nova despesa/fornecedor" onclick="abrirCadastroRapido('fornecedor','edit-forn')">+</button></label><select id="edit-forn"></select></div>
+      <div class="form-group"><label class="label-add">Item<button type="button" class="btn-add-inline" title="Cadastrar novo item" onclick="abrirCadastroRapido('produto','edit-prod')">+</button></label><select id="edit-prod"></select></div>
       <div class="form-group"><label>Valor Total</label><input id="edit-valor" type="number" step="0.01" /></div>
     </div>
     <div class="grid3">
@@ -2828,7 +2888,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <!-- Datas manuais de parcelas no modal -->
     <div id="edit-parcela-dates" style="display:none;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:600;color:#ea580c;margin-bottom:10px;padding:8px 12px;background:#fff1e6;border-radius:6px;border-left:3px solid #ea580c;">
-        📅 Datas de vencimento de cada parcela (opcional)
+        📅 Datas e valores de cada parcela — preenchidos automaticamente, edite se precisar
       </div>
       <div id="edit-parcela-dates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
     </div>
@@ -2843,7 +2903,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
 <!-- ══ MODAL EDITAR FORNECEDOR ══ -->
 <div class="modal-overlay" id="modal-forn">
   <div class="modal">
-    <div class="modal-title">Editar Fornecedor</div>
+    <div class="modal-title">Editar Despesa/Fornecedor</div>
     <input type="hidden" id="edit-forn-id" />
     <div class="grid3">
       <div class="form-group"><label>Razão Social / Nome</label><input id="ef-nome" type="text" /></div>
@@ -2883,7 +2943,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     </div>
     <div class="grid3">
       <div class="form-group"><label>Categoria DFC</label><select id="ep-cat"><option value="">Nenhuma</option></select></div>
-      <div class="form-group"><label>Fornecedor Padrão</label><select id="ep-forn"></select></div>
+      <div class="form-group"><label>Despesas/Fornecedor Padrão</label><select id="ep-forn"></select></div>
       <div class="form-group"><label>Preço Unit. (R$)</label><input id="ep-preco" type="number" step="0.01" /></div>
     </div>
     <div class="form-group"><label>Descrição</label><textarea id="ep-obs" rows="2"></textarea></div>
@@ -3103,7 +3163,7 @@ th.ef-th { padding:8px 8px 8px 12px; }
     <div style="max-height:50vh;overflow-y:auto">
       <table class="dfc-table" style="width:100%">
         <thead><tr>
-          <th style="text-align:left">Data</th><th style="text-align:left">Fornecedor / Cliente</th>
+          <th style="text-align:left">Data</th><th style="text-align:left">Despesas/Fornecedor / Cliente</th>
           <th style="text-align:left">Produto</th><th>Situação</th><th>Valor</th>
         </tr></thead>
         <tbody id="dre-detalhe-tbody"></tbody>
@@ -3149,13 +3209,23 @@ const BRAND_LOGO_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAArwAA
 // ══════════════════════════════════════════
 // SISTEMA DE USUÁRIOS COM PERMISSÕES
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// TELAS OCULTAS
+// Continuam existindo e funcionando (os dados não são tocados), mas somem
+// do menu e da tela de permissões. Para voltar a exibir uma delas, basta
+// tirar o id desta lista e remover o style="display:none" do item no menu.
+// ══════════════════════════════════════════════════════════
+const PAGINAS_OCULTAS = ['dfc-lancamentos'];
+
+function paginaOculta(p) { return PAGINAS_OCULTAS.includes(p); }
+
 const PAGES_CONFIG = [
   { id:'dashboard',         label:'Dashboard',           grupo:'geral'   },
   { id:'bancos',            label:'Bancos / Caixas',     grupo:'pagar'   },
   { id:'transferencias',    label:'Transferência entre Contas', grupo:'pagar' },
   { id:'fluxo-futuro',      label:'Fluxo de Caixa Futuro',grupo:'pagar'  },
-  { id:'fornecedores',      label:'Fornecedores',        grupo:'pagar'   },
-  { id:'produtos',          label:'Produtos (Compra)',   grupo:'pagar'   },
+  { id:'fornecedores',      label:'Despesas/Fornecedores', grupo:'pagar' },
+  { id:'produtos',          label:'Itens (Compra)',      grupo:'pagar'   },
   { id:'lancamentos',       label:'Lançamentos (Compra)',grupo:'pagar'   },
   { id:'apagar',            label:'Contas a Pagar',      grupo:'pagar'   },
   { id:'pagas',             label:'Contas Pagas',        grupo:'pagar'   },
@@ -3688,6 +3758,8 @@ function _finalizarLogin(found) {
   addLoginLog(found.user, found.nome);
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  document.body.classList.add('logado');
+  carregarBotoesSuspensos();
   document.getElementById('sidebar-user').textContent = found.nome;
   // Mostrar último login na sidebar
   const log = getLoginLog();
@@ -3727,6 +3799,7 @@ function doLogout() {
   currentUser = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  document.body.classList.remove('logado');
   document.getElementById('login-error').style.display = 'none';
   // Mantém e-mail preenchido no login se "Lembrar" estiver marcado
   if(!(document.getElementById('lembrar-senha') && document.getElementById('lembrar-senha').checked)) {
@@ -3753,6 +3826,8 @@ function paginaVisivel(p) {
 let _paginaAtual = 'dashboard';
 
 function showPage(p) {
+  // Telas ocultas não abrem nem por chamada direta
+  if (paginaOculta(p)) return;
   // Verificar permissão (exceto admin e páginas de administração)
   if (p !== 'usuarios' && p !== 'empresas' && currentUser && currentUser.role !== 'admin') {
     const allowed = currentUser.pages || [];
@@ -3833,6 +3908,30 @@ function renderPaginaAtual() {
 // ══════════════════════════════════════════════════════════
 const MENU_KEY = '477_menu_oculto';
 
+// ══════════════════════════════════════════════════════════
+// BOTÕES SUSPENSOS (atalhos flutuantes de lançamento)
+// Ficam no canto inferior direito, em qualquer tela do sistema.
+// O "✕" recolhe os dois; um botão redondo "+" traz de volta.
+// A preferência fica salva no navegador.
+// ══════════════════════════════════════════════════════════
+const FAB_KEY = '477_fabs_ocultos';
+
+function aplicarBotoesSuspensos(ocultos) {
+  document.body.classList.toggle('fabs-ocultos', !!ocultos);
+}
+
+function alternarBotoesSuspensos() {
+  const ocultos = !document.body.classList.contains('fabs-ocultos');
+  aplicarBotoesSuspensos(ocultos);
+  try { localStorage.setItem(FAB_KEY, ocultos ? '1' : '0'); } catch(e) {}
+}
+
+function carregarBotoesSuspensos() {
+  let ocultos = false;
+  try { ocultos = localStorage.getItem(FAB_KEY) === '1'; } catch(e) {}
+  aplicarBotoesSuspensos(ocultos);
+}
+
 function alternarMenu() {
   const oculto = !document.body.classList.contains('menu-oculto');
   aplicarModoMenu(oculto);
@@ -3857,8 +3956,30 @@ function carregarModoMenu() {
   aplicarModoMenu(oculto);
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// Modais de digitação que precisam sair sempre em branco: ao fechar
+// (botão X, Cancelar, clique fora ou Esc) o formulário é zerado, para o
+// próximo lançamento não herdar os dados do anterior.
+const MODAIS_LIMPAR_AO_FECHAR = {
+  'modal-novo-lanc': function () { try { clearLancamento(); } catch (e) {} },
+  'modal-novo-lr':   function () { try { clearLancReceber(); } catch (e) {} }
+};
+
+function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('open'); }
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+  const limpar = MODAIS_LIMPAR_AO_FECHAR[id];
+  if (limpar) limpar();
+}
+
+// Esc fecha o modal aberto (passando pela limpeza acima)
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape') return;
+  const abertos = document.querySelectorAll('.modal-overlay.open');
+  if (!abertos.length) return;
+  closeModal(abertos[abertos.length - 1].id);
+});
 
 function abrirModalLanc() {
   populateFornSelects();
@@ -3866,6 +3987,7 @@ function abrirModalLanc() {
   populateBancoSelects();
   populateFormasPagSelects();
   populateDreCatSelects();
+  clearLancamento();   // garante tela em branco também na abertura
   openModal('modal-novo-lanc');
 }
 function fecharModalLanc() { closeModal('modal-novo-lanc'); }
@@ -3876,6 +3998,7 @@ function abrirModalLancReceber() {
   populateBancoSelects();
   populateFormasRecebSelects();
   populateDreCatSelects();
+  clearLancReceber();  // garante tela em branco também na abertura
   openModal('modal-novo-lr');
 }
 function fecharModalLancReceber() { closeModal('modal-novo-lr'); }
@@ -3955,8 +4078,15 @@ function populateYearSelects() {
 }
 
 function populateFornSelects() {
-  const opts = '<option value="">Selecione...</option>' + db.fornecedores.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
-  ['l-forn','p-forn','edit-forn','ep-forn'].forEach(id => {
+  const itens = db.fornecedores.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
+  const opts = '<option value="">Selecione...</option>' + itens;
+  // Nos lançamentos a pagar a Despesa/Fornecedor é opcional
+  const optsOpcional = '<option value="">Nenhum (opcional)</option>' + itens;
+  ['l-forn','edit-forn'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = optsOpcional;
+  });
+  ['p-forn','ep-forn'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.innerHTML = opts;
   });
@@ -4000,6 +4130,7 @@ function _lookup(chave, arr) {
 }
 
 function getFornNome(id) {
+  if (!id) return '—';   // Despesas/Fornecedor é opcional
   const f = _lookup('forn', db.fornecedores).get(id);
   return f ? f.nome : id;
 }
@@ -4171,7 +4302,7 @@ function renderProdutos() {
     { key:'sku', label:'SKU', get:p=>p.sku||null },
     { key:'unidade', label:'Unidade', get:p=>p.unidade },
     { key:'cat', label:'Categoria DFC', get:p=>p.cat?getDfcCatNome(p.cat):null },
-    { key:'forn', label:'Fornecedor Padrão', get:p=>p.forn?getFornNome(p.forn):null },
+    { key:'forn', label:'Despesas/Fornecedor Padrão', get:p=>p.forn?getFornNome(p.forn):null },
     { key:'preco', label:'Preço Unit.', get:p=>p.preco||0, display:p=>p.preco?fmtBRL(p.preco):'—' },
     { key:'acoes', label:'Ações', get:()=>'', noFilter:true }
   ];
@@ -4377,8 +4508,8 @@ function agendarTrocaFraseDoDia() {
 // sem sair do lançamento que está sendo digitado.
 // ══════════════════════════════════════════
 const CAD_RAPIDO = {
-  fornecedor: { titulo:'Novo Fornecedor',        label:'Nome do fornecedor *', tabela:'fornecedores',   lista:'fornecedores' },
-  produto:    { titulo:'Novo Produto (Compra)',  label:'Nome do produto *',    tabela:'produtos',       lista:'produtos' },
+  fornecedor: { titulo:'Nova Despesa/Fornecedor', label:'Nome da despesa/fornecedor *', tabela:'fornecedores',   lista:'fornecedores' },
+  produto:    { titulo:'Novo Item (Compra)',     label:'Nome do item *',       tabela:'produtos',       lista:'produtos' },
   cliente:    { titulo:'Novo Cliente',           label:'Nome do cliente *',    tabela:'clientes',       lista:'clientes' },
   prodvenda:  { titulo:'Novo Produto de Venda',  label:'Nome do produto *',    tabela:'prodvenda',      lista:'prodvenda' },
   categoria:  { titulo:'Nova Categoria',         label:'Nome da categoria *',  tabela:'dfc_categorias', lista:'dfc_cats' }
@@ -4698,8 +4829,9 @@ async function saveLancamento() {
   const forn = document.getElementById('l-forn').value;
   const prod = document.getElementById('l-prod').value;
   const valor = parseFloat(document.getElementById('l-valor').value);
-  if(!dtcompra || !forn || !valor) { alert('Preencha data da compra, fornecedor e valor.'); return; }
-  // Produto é opcional: serviços e despesas avulsas não têm produto associado.
+  // Despesas/Fornecedor e Item são opcionais: despesas avulsas podem não ter
+  // nenhum dos dois. Só data da compra e valor são realmente obrigatórios.
+  if(!dtcompra || !valor) { alert('Preencha data da compra e valor.'); return; }
   const pago = document.getElementById('l-pago').value;
   const banco = document.getElementById('l-banco').value;
   if (!validarBancoObrigatorio(pago, banco)) return;
@@ -4734,18 +4866,19 @@ async function saveLancamento() {
 }
 
 function clearLancamento() {
-  ['l-dtcompra','l-dtprev','l-nf','l-obs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('l-forn').value='';
-  document.getElementById('l-prod').value='';
-  document.getElementById('l-valor').value='';
-  document.getElementById('l-parcelas').value='1';
-  document.getElementById('l-financeiro').value='nao';
-  document.getElementById('l-pago').value='nao';
-  // Reset parcela dates
-  const container = document.getElementById('l-parcela-dates');
-  const grid = document.getElementById('l-parcela-dates-grid');
-  if(container) container.style.display='none';
-  if(grid) grid.innerHTML='';
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  ['l-dtcompra','l-dtprev','l-nf','l-obs','l-valor'].forEach(id => set(id, ''));
+  set('l-forn','');
+  set('l-prod','');
+  set('l-catdre','');
+  set('l-tipo-pag','');
+  set('l-banco','');
+  set('l-parcelas','1');
+  set('l-financeiro','nao');
+  set('l-pago','nao');
+  // Empresa volta para a que está ativa no seletor global (ou em branco no consolidado)
+  try { set('l-empresa', empresaAtual() || ''); } catch(e) { set('l-empresa',''); }
+  limparGradeParcelas('l-parcela-dates');
 }
 
 function renderLancamentos() {
@@ -4794,8 +4927,8 @@ function renderLancamentos() {
   const _catDeLanc = l => l.cat_dre || (l.prod ? ((db.produtos.find(x=>x.id===l.prod)||{}).cat) : null);
   const colsLanc = [
     { key:'dtcompra', label:'Data Compra', get:l=>l.dtcompra, display:l=>fmtDate(l.dtcompra) },
-    { key:'forn', label:'Fornecedor', get:l=>getFornNome(l.forn) },
-    { key:'prod', label:'Produto', get:l=>l.prod?getProdNome(l.prod):null },
+    { key:'forn', label:'Despesas/Fornecedor', get:l=>l.forn?getFornNome(l.forn):null },
+    { key:'prod', label:'Item', get:l=>l.prod?getProdNome(l.prod):null },
     { key:'cat', label:'Categoria', get:l=>{ const c=_catDeLanc(l); return c?getDreCatNome(c):null; } },
     { key:'valor', label:'Valor', get:l=>l.valor||0, display:l=>fmtBRL(l.valor) },
     { key:'parcelas', label:'Parcelas', get:l=>l.parcelas||1, display:l=>`${l.parcelas}x` },
@@ -5566,8 +5699,8 @@ function renderApagar() {
 
   // Colunas para o filtro/ordenação estilo Excel no cabeçalho da tabela
   const colsApagar = [
-    { key:'forn', label:'Fornecedor', get:p=>getFornNome(p.forn) },
-    { key:'prod', label:'Produto', get:p=>p.prod?getProdNome(p.prod):null },
+    { key:'forn', label:'Despesas/Fornecedor', get:p=>p.forn?getFornNome(p.forn):null },
+    { key:'prod', label:'Item', get:p=>p.prod?getProdNome(p.prod):null },
     { key:'cat', label:'Categoria', get:p=>p.catId?getDreCatNome(p.catId):null },
     { key:'parcela', label:'Parcela', get:p=>p.parcIdx+(p.totalParc/1000), display:p=>`${p.parcIdx}/${p.totalParc}` },
     { key:'valor', label:'Valor Parcela', get:p=>p.valParc, display:p=>fmtBRL(p.valParc) },
@@ -6202,8 +6335,8 @@ function renderPagas() {
 
   // Colunas para o filtro/ordenação estilo Excel no cabeçalho da tabela
   const colsPagas = [
-    { key:'forn', label:'Fornecedor', get:p=>getFornNome(p.forn) },
-    { key:'prod', label:'Produto', get:p=>p.prod?getProdNome(p.prod):null },
+    { key:'forn', label:'Despesas/Fornecedor', get:p=>p.forn?getFornNome(p.forn):null },
+    { key:'prod', label:'Item', get:p=>p.prod?getProdNome(p.prod):null },
     { key:'cat', label:'Categoria', get:p=>p.catId?getDreCatNome(p.catId):null },
     { key:'parcela', label:'Parcela', get:p=>p.parcIdx+(p.totalParc/1000), display:p=>`${p.parcIdx}/${p.totalParc}` },
     { key:'valor', label:'Valor Parcela', get:p=>p.valParc, display:p=>fmtBRL(p.valParc) },
@@ -6535,7 +6668,7 @@ function abrirRelatorioKPI(key) {
 
   const nCols = rel.tipo === 'lanc' ? 6 : 7;
   const dtLabel = isPagar ? 'Data Compra' : 'Data Venda';
-  const nomeLabel = isPagar ? 'Fornecedor' : 'Cliente';
+  const nomeLabel = isPagar ? 'Despesas/Fornecedor' : 'Cliente';
   const cab = rel.tipo === 'lanc'
     ? `<th style="text-align:left">${dtLabel}</th><th style="text-align:left">${nomeLabel}</th><th style="text-align:left">Produto</th><th style="text-align:left">NF</th><th style="text-align:center">Parc.</th><th style="text-align:right">Valor</th>`
     : `<th style="text-align:left">${dtLabel}</th><th style="text-align:left">Vencimento</th><th style="text-align:left">${nomeLabel}</th><th style="text-align:left">Produto</th><th style="text-align:center">Parc.</th><th style="text-align:center">Status</th><th style="text-align:right">Valor</th>`;
@@ -7518,40 +7651,157 @@ document.addEventListener('DOMContentLoaded', () => {
 // ══════════════════════════════════════════
 // DATAS MANUAIS DE PARCELAS
 // ══════════════════════════════════════════
+// Prefixo dos campos do formulário a partir do id do container de parcelas.
+// 'l-parcela-dates' -> 'l' | 'edit-parcela-dates' -> 'edit' | etc.
+function _prefixoParcelas(containerid) { return containerid.replace(/-parcela-dates$/, ''); }
+
+// Data-base da 1ª parcela: previsão de pagamento/recebimento e, se estiver
+// vazia, a data da compra/venda. Em último caso, hoje.
+function _dataBaseParcelas(prefix) {
+  const cand = [prefix+'-dtprev', prefix+'-dtcompra', prefix+'-dtvenda'];
+  for (const id of cand) { const el = document.getElementById(id); if (el && el.value) return el.value; }
+  return today();
+}
+
+function _valorTotalParcelas(prefix) {
+  const el = document.getElementById(prefix+'-valor');
+  return el ? (parseFloat(el.value) || 0) : 0;
+}
+
+// Sugestão automática: vencimentos de mês em mês a partir da data-base e
+// valor total dividido igualmente (a diferença de centavos vai na última).
+// Vencimento mensal com "trava" no fim do mês: dia 31 vira 28/29/30 quando
+// o mês seguinte não tem aquele dia (em vez de pular para o mês seguinte).
+function _vencMensal(base, parcela) {
+  if (!base) return '';
+  const [y, m, d] = base.split('-').map(Number);
+  const alvo = new Date(y, m - 1 + (parcela - 1), 1);
+  const ultimoDia = new Date(alvo.getFullYear(), alvo.getMonth() + 1, 0).getDate();
+  const dia = Math.min(d, ultimoDia);
+  return `${alvo.getFullYear()}-${String(alvo.getMonth() + 1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+}
+
+function calcularParcelasAuto(containerid, n) {
+  const prefix = _prefixoParcelas(containerid);
+  const base   = _dataBaseParcelas(prefix);
+  const total  = _valorTotalParcelas(prefix);
+  const centavos = Math.round(total * 100);
+  const fatia    = Math.floor(centavos / n);
+  const datas = [], valores = [];
+  for (let i = 1; i <= n; i++) {
+    datas.push(_vencMensal(base, i));
+    const c = (i < n) ? fatia : (centavos - fatia * (n - 1));
+    valores.push(total > 0 ? (c / 100).toFixed(2) : '');
+  }
+  return { datas, valores };
+}
+
+// Marca um campo como "editado à mão" — a partir daí o recálculo automático
+// (ao mudar valor total ou data) deixa de sobrescrevê-lo.
+function marcarParcelaEditada(el) { if (el) el.dataset.auto = ''; }
+
+function limparGradeParcelas(containerid) {
+  const container = document.getElementById(containerid);
+  const grid = document.getElementById(containerid + '-grid');
+  if (container) container.style.display = 'none';
+  if (grid) grid.innerHTML = '';
+  const bar = document.getElementById(containerid + '-bar');
+  if (bar) bar.remove();
+  const sum = document.getElementById(containerid + '-sum');
+  if (sum) sum.remove();
+}
+
 function toggleParcelaDates(selectId, containerid) {
-  const n = parseInt(document.getElementById(selectId).value) || 1;
+  const selEl = document.getElementById(selectId);
+  const n = selEl ? (parseInt(selEl.value) || 1) : 1;
   const container = document.getElementById(containerid);
   const grid = document.getElementById(containerid + '-grid');
   if (!container || !grid) return;
-  if (n <= 1) {
-    container.style.display = 'none';
-    grid.innerHTML = '';
-    return;
-  }
-  // Try to get total value from sibling valor input
-  const formRoot = container.closest('.card, .modal');
-  let totalValor = 0;
-  if (formRoot) {
-    const valorInput = formRoot.querySelector('input[type="number"][id*="valor"], input[id$="-valor"]');
-    if (valorInput) totalValor = parseFloat(valorInput.value) || 0;
-  }
-  const valorSugerido = totalValor > 0 ? (totalValor / n).toFixed(2) : '';
+  if (n <= 1) { limparGradeParcelas(containerid); return; }
 
+  const auto = calcularParcelasAuto(containerid, n);
   container.style.display = '';
-  // Rebuild grid with date + valor inputs per parcela
   grid.innerHTML = Array.from({length: n}, (_, i) => `
     <div style="background:#faf9f8;border:1.5px solid #e7e5e4;border-radius:8px;padding:10px 12px;">
       <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:8px;">Parcela ${i+1}/${n}</div>
       <div style="margin-bottom:6px;">
         <label style="font-size:10px;font-weight:600;color:#57534e;margin-bottom:3px;display:block;">Vencimento</label>
-        <input type="date" id="${containerid}-p${i+1}" style="font-size:12px;padding:6px 9px;width:100%" />
+        <input type="date" id="${containerid}-p${i+1}" data-auto="1" value="${auto.datas[i] || ''}"
+               onchange="marcarParcelaEditada(this)"
+               style="font-size:12px;padding:6px 9px;width:100%" />
       </div>
       <div>
         <label style="font-size:10px;font-weight:600;color:#57534e;margin-bottom:3px;display:block;">Valor (R$)</label>
-        <input type="number" step="0.01" min="0" id="${containerid}-v${i+1}" placeholder="0,00" value="${valorSugerido}" style="font-size:12px;padding:6px 9px;width:100%" oninput="syncTotalParcelaValores('${containerid}',${n},'${selectId}')" />
+        <input type="number" step="0.01" min="0" id="${containerid}-v${i+1}" data-auto="1" placeholder="0,00"
+               value="${auto.valores[i] || ''}"
+               oninput="marcarParcelaEditada(this); syncTotalParcelaValores('${containerid}',${n},'${selectId}')"
+               style="font-size:12px;padding:6px 9px;width:100%" />
       </div>
     </div>`).join('');
+
+  // Barra inferior: soma das parcelas + botão de recalcular
+  let bar = document.getElementById(containerid + '-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = containerid + '-bar';
+    container.appendChild(bar);
+  }
+  bar.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;';
+  bar.innerHTML = `<span id="${containerid}-sum" style="font-size:12px;font-weight:600;color:#ea580c;padding:6px 12px;background:#fff1e6;border-radius:6px;"></span>` +
+    `<button type="button" class="parc-acao" onclick="recalcularParcelas('${containerid}','${selectId}')" title="Refazer datas e valores a partir do total e da data prevista">&#128260; Recalcular automático</button>`;
+  syncTotalParcelaValores(containerid, n, selectId);
 }
+
+// Refaz TUDO (inclusive o que foi editado à mão)
+function recalcularParcelas(containerid, selectId) {
+  const selEl = document.getElementById(selectId);
+  const n = selEl ? (parseInt(selEl.value) || 1) : 1;
+  if (n <= 1) return;
+  const auto = calcularParcelasAuto(containerid, n);
+  for (let i = 1; i <= n; i++) {
+    const d = document.getElementById(`${containerid}-p${i}`);
+    const v = document.getElementById(`${containerid}-v${i}`);
+    if (d) { d.value = auto.datas[i-1] || ''; d.dataset.auto = '1'; }
+    if (v) { v.value = auto.valores[i-1] || ''; v.dataset.auto = '1'; }
+  }
+  syncTotalParcelaValores(containerid, n, selectId);
+}
+
+// Atualiza só o que ainda não foi editado à mão — usado quando o usuário
+// muda o valor total ou a data prevista depois de escolher as parcelas.
+function recalcParcelasAuto(containerid, selectId) {
+  const selEl = document.getElementById(selectId);
+  const n = selEl ? (parseInt(selEl.value) || 1) : 1;
+  const grid = document.getElementById(containerid + '-grid');
+  if (n <= 1 || !grid || !grid.innerHTML) return;
+  const auto = calcularParcelasAuto(containerid, n);
+  for (let i = 1; i <= n; i++) {
+    const d = document.getElementById(`${containerid}-p${i}`);
+    const v = document.getElementById(`${containerid}-v${i}`);
+    if (d && d.dataset.auto === '1') d.value = auto.datas[i-1] || '';
+    if (v && v.dataset.auto === '1') v.value = auto.valores[i-1] || '';
+  }
+  syncTotalParcelaValores(containerid, n, selectId);
+}
+
+// Liga valor total e datas do cabeçalho ao recálculo das parcelas
+(function ligarRecalculoParcelas() {
+  const formularios = [
+    { prefix:'l',    cont:'l-parcela-dates',    sel:'l-parcelas'    },
+    { prefix:'lr',   cont:'lr-parcela-dates',   sel:'lr-parcelas'   },
+    { prefix:'edit', cont:'edit-parcela-dates', sel:'edit-parcelas' },
+    { prefix:'elr',  cont:'elr-parcela-dates',  sel:'elr-parcelas'  }
+  ];
+  formularios.forEach(f => {
+    [f.prefix+'-valor', f.prefix+'-dtprev', f.prefix+'-dtcompra', f.prefix+'-dtvenda'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const handler = () => recalcParcelasAuto(f.cont, f.sel);
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+  });
+})();
 
 function syncTotalParcelaValores(containerid, n, selectId) {
   // Show a small sum indicator if values are filled
@@ -7560,16 +7810,15 @@ function syncTotalParcelaValores(containerid, n, selectId) {
     return el ? parseFloat(el.value) || 0 : 0;
   }).reduce((a,b) => a+b, 0);
 
-  let indicator = document.getElementById(containerid + '-sum');
-  if (!indicator) {
-    const container = document.getElementById(containerid);
-    if (!container) return;
-    indicator = document.createElement('div');
-    indicator.id = containerid + '-sum';
-    indicator.style.cssText = 'font-size:12px;font-weight:600;color:#ea580c;margin-top:8px;padding:6px 12px;background:#fff1e6;border-radius:6px;display:inline-block;';
-    container.appendChild(indicator);
-  }
-  indicator.textContent = `∑ Soma das parcelas: R$ ${total.toFixed(2).replace('.',',')}`;
+  const indicator = document.getElementById(containerid + '-sum');
+  if (!indicator) return;
+  const prefix = _prefixoParcelas(containerid);
+  const totalCab = _valorTotalParcelas(prefix);
+  const bate = totalCab <= 0 || Math.abs(totalCab - total) < 0.005;
+  indicator.textContent = `∑ Soma das parcelas: R$ ${total.toFixed(2).replace('.',',')}` +
+    (bate ? '' : ` — difere do total (R$ ${totalCab.toFixed(2).replace('.',',')})`);
+  indicator.style.color      = bate ? '#ea580c' : '#b91c1c';
+  indicator.style.background = bate ? '#fff1e6' : '#fee2e2';
 }
 
 // ── Helpers: lê/grava datas+valores das parcelas no DOM ──
@@ -7632,7 +7881,7 @@ function setManualParcelaDates(containerid, raw) {
   setTimeout(() => {
     datas.forEach((d, i) => {
       const el = document.getElementById(`${containerid}-p${i+1}`);
-      if (el && d) el.value = d;
+      if (el && d) { el.value = d; el.dataset.auto = ''; }
     });
   }, 50);
 }
@@ -7643,7 +7892,7 @@ function setManualParcelaValores(containerid, raw) {
   setTimeout(() => {
     valores.forEach((v, i) => {
       const el = document.getElementById(`${containerid}-v${i+1}`);
-      if (el && v != null) el.value = v;
+      if (el && v != null) { el.value = v; el.dataset.auto = ''; }
     });
   }, 60);
 }
@@ -7655,11 +7904,11 @@ function restoreParcelaFields(containerid, raw) {
   setTimeout(() => {
     datas.forEach((d, i) => {
       const el = document.getElementById(`${containerid}-p${i+1}`);
-      if (el && d) el.value = d;
+      if (el && d) { el.value = d; el.dataset.auto = ''; }
     });
     valores.forEach((v, i) => {
       const el = document.getElementById(`${containerid}-v${i+1}`);
-      if (el && v != null) el.value = v;
+      if (el && v != null) { el.value = v; el.dataset.auto = ''; }
     });
   }, 60);
 }
@@ -7679,6 +7928,7 @@ function applyNavPermissions() {
     const match = onclick.match(/showPage\('([\w-]+)'\)/);
     if (!match) return;
     const pg = match[1];
+    if (paginaOculta(pg)) { item.style.display = 'none'; return; }
     if (pg === 'usuarios' || pg === 'empresas') return;
     if (isAdmin) { item.style.display = ''; return; }
     item.style.display = allowed.includes(pg) ? '' : 'none';
@@ -7707,11 +7957,12 @@ async function renderUsuariosAdmin() {
   container.innerHTML = USERS.map((u) => {
     const isAdmin = u.role === 'admin';
     const initial = u.nome.charAt(0).toUpperCase();
-    const pagGeral   = PAGES_CONFIG.filter(pg=>pg.grupo==='geral');
-    const pagPagar   = PAGES_CONFIG.filter(pg=>pg.grupo==='pagar');
-    const pagReceber = PAGES_CONFIG.filter(pg=>pg.grupo==='receber');
-    const pagDfc     = PAGES_CONFIG.filter(pg=>pg.grupo==='dfc');
-    const pagDre     = PAGES_CONFIG.filter(pg=>pg.grupo==='dre');
+    const pagsVisiveis = PAGES_CONFIG.filter(pg=>!paginaOculta(pg.id));
+    const pagGeral   = pagsVisiveis.filter(pg=>pg.grupo==='geral');
+    const pagPagar   = pagsVisiveis.filter(pg=>pg.grupo==='pagar');
+    const pagReceber = pagsVisiveis.filter(pg=>pg.grupo==='receber');
+    const pagDfc     = pagsVisiveis.filter(pg=>pg.grupo==='dfc');
+    const pagDre     = pagsVisiveis.filter(pg=>pg.grupo==='dre');
     const buildPerms = (pgs) => pgs.map(pg => {
       const checked = (u.pages || []).includes(pg.id);
       const disabled = isAdmin ? ' disabled-perm' : '';
@@ -8109,21 +8360,18 @@ async function saveLancReceber() {
   if (!pertence) alert(`✅ Lançamento salvo em "${empresaNome(lanc.empresa_id)}". Ele não aparece aqui porque essa não é a empresa ativa no momento.`);
 }
 function clearLancReceber() {
-  ['lr-dtvenda','lr-dtprev','lr-nf','lr-obs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('lr-cliente').value='';
-  document.getElementById('lr-prod').value='';
-  document.getElementById('lr-valor').value='';
-  document.getElementById('lr-parcelas').value='1';
-  document.getElementById('lr-financeiro').value='nao';
-  document.getElementById('lr-recebido').value='nao';
-  document.getElementById('lr-tipo-pag').value='';
-  document.getElementById('lr-banco').value='';
-  document.getElementById('lr-juros').value='';
-  // Reset parcela dates
-  const container = document.getElementById('lr-parcela-dates');
-  const grid = document.getElementById('lr-parcela-dates-grid');
-  if(container) container.style.display='none';
-  if(grid) grid.innerHTML='';
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  ['lr-dtvenda','lr-dtprev','lr-nf','lr-obs','lr-valor','lr-juros'].forEach(id => set(id, ''));
+  set('lr-cliente','');
+  set('lr-prod','');
+  set('lr-catdre','');
+  set('lr-parcelas','1');
+  set('lr-financeiro','nao');
+  set('lr-recebido','nao');
+  set('lr-tipo-pag','');
+  set('lr-banco','');
+  try { set('lr-empresa', empresaAtual() || ''); } catch(e) { set('lr-empresa',''); }
+  limparGradeParcelas('lr-parcela-dates');
 }
 function renderLancReceber() {
   if (!paginaVisivel('lancreceber')) return;
@@ -12271,7 +12519,7 @@ function _pdfDiaColsDef(pagina) {
   const jurosDe = p => calcJuros(p.valParc, p.venc, p.juros != null ? p.juros : getJurosGlobal());
   const defs = {
     apagar: [
-      { key:'forn',      label:'Fornecedor',     get:p=>getFornNome(p.forn) },
+      { key:'forn',      label:'Despesas/Fornecedor',     get:p=>p.forn?getFornNome(p.forn):null },
       { key:'prod',      label:'Produto',        get:p=>p.prod?getProdNome(p.prod):'—' },
       { key:'cat',       label:'Categoria',      get:p=>p.catId?getDreCatNome(p.catId):'—' },
       { key:'parcela',   label:'Parcela',        get:p=>`${p.parcIdx}/${p.totalParc}` },
@@ -12283,7 +12531,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'financeiro',label:'Financeiro',     get:p=>p.financeiro==='sim'?'Sim':'Não' }
     ],
     pagas: [
-      { key:'forn',      label:'Fornecedor',     get:p=>getFornNome(p.forn) },
+      { key:'forn',      label:'Despesas/Fornecedor',     get:p=>p.forn?getFornNome(p.forn):null },
       { key:'prod',      label:'Produto',        get:p=>p.prod?getProdNome(p.prod):'—' },
       { key:'cat',       label:'Categoria',      get:p=>p.catId?getDreCatNome(p.catId):'—' },
       { key:'parcela',   label:'Parcela',        get:p=>`${p.parcIdx}/${p.totalParc}` },
@@ -13036,7 +13284,7 @@ window.APP_BUILD = '2026-08-10 · dre-categorias-expansiveis';
 
 // Fechar modais clicando fora
 document.querySelectorAll('.modal-overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); });
+  ov.addEventListener('click', e => { if(e.target === ov) { if (ov.id) closeModal(ov.id); else ov.classList.remove('open'); } });
 });
 </script>
 </body>
