@@ -785,6 +785,10 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           Contas Pagas
         </div>
+        <div class="nav-sub-item" onclick="showPage('custos-fixos')" id="nav-custos-fixos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Custos Fixos
+        </div>
       </div>
 
       <!-- GRUPO: Contas a Receber -->
@@ -1032,7 +1036,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearLancamentoFiltros()">Limpar Filtros</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-lancamentos-row">
-          <th>Data Compra</th><th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
+          <th>Data Competência</th><th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
           <th>Prev. Pgto</th><th>Lead Time</th><th>NF</th><th>Financeiro</th><th>Pago</th><th>Ações</th>
         </tr></thead><tbody id="tb-lancamentos"><tr><td colspan="12" class="empty-state">Nenhum lançamento registrado.</td></tr></tbody></table></div>
       </div>
@@ -1102,7 +1106,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           </div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-apagar-row">
-          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Dt. Compra</th><th>Vencimento</th><th>Situação</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Dt. Competência</th><th>Vencimento</th><th>Situação</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-apagar"><tr><td colspan="11" class="empty-state">Nenhuma parcela em aberto.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -1144,7 +1148,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div class="form-group"><label>Data Pagamento</label>
             <input type="date" id="pgf-data-pago" onchange="renderPagas()" style="padding:7px 10px;font-size:13px" />
           </div>
-          <div class="form-group"><label>Data Compra</label>
+          <div class="form-group"><label>Data Competência</label>
             <input type="date" id="pgf-data-compra" onchange="renderPagas()" style="padding:7px 10px;font-size:13px" />
           </div>
           <div class="form-group"><label>Forma de Pagamento</label>
@@ -1156,11 +1160,59 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearPagasFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-pagas-row">
-          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Compra</th><th>Data Pgto</th><th>Forma Pgto</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Competência</th><th>Data Pgto</th><th>Forma Pgto</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-pagas"><tr><td colspan="12" class="empty-state">Nenhuma parcela paga.</td></tr></tbody></table></div>
       </div>
     </div>
 
+
+    <!-- ══ CUSTOS FIXOS ══ -->
+    <div class="page" id="page-custos-fixos">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Custos Fixos</div>
+          <div class="page-sub" style="margin-bottom:0">Todos os lançamentos marcados como custo fixo, com as vigências cadastradas em cada um.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-pdf" onclick="imprimirPagina('custos-fixos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button>
+        </div>
+      </div>
+      <div id="cf-kpis" class="grid4" style="margin-bottom:20px;"></div>
+      <div class="card">
+        <div class="card-title">Filtros</div>
+        <div class="filter-row">
+          <div class="form-group"><label>Situação da vigência</label>
+            <select id="cf-f-status" onchange="renderCustosFixos()">
+              <option value="">Todas</option>
+              <option value="Vigente">Vigente hoje</option>
+              <option value="Futuro">Vigência futura</option>
+              <option value="Encerrado">Encerrado</option>
+              <option value="Sem vigência">Sem vigência</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Despesas/Fornecedor</label>
+            <select id="cf-f-forn" onchange="renderCustosFixos()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Categoria</label>
+            <select id="cf-f-cat" onchange="renderCustosFixos()"><option value="">Todas</option></select>
+          </div>
+          <div class="form-group"><label>Vigência na data</label>
+            <input type="date" id="cf-f-data" onchange="renderCustosFixos()" style="padding:7px 10px;font-size:13px" />
+          </div>
+          <div class="form-group"><label>Busca</label>
+            <input type="text" id="cf-f-texto" oninput="renderCustosFixos()" placeholder="fornecedor, item, obs..." style="width:170px" />
+          </div>
+          <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearCustosFixosFiltros()">Limpar</button></div>
+        </div>
+        <div class="table-scroll"><table><thead><tr id="th-custos-fixos-row">
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Vigência atual</th><th>Valor vigente</th><th>Situação</th><th>Vigências</th><th>Ações</th>
+        </tr></thead><tbody id="tb-custos-fixos"><tr><td colspan="8" class="empty-state">Nenhum lançamento marcado como custo fixo.</td></tr></tbody></table></div>
+      </div>
+      <div class="card" id="cf-detalhe-card" style="display:none">
+        <div class="card-title" id="cf-detalhe-titulo">Vigências</div>
+        <div id="cf-detalhe-corpo"></div>
+      </div>
+    </div>
 
     <!-- ══ EMPRESAS ══ -->
     <div class="page" id="page-empresas">
@@ -1364,8 +1416,8 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
             <select id="lrf-categoria" onchange="renderLancReceber()"><option value="">Todas</option></select>
           </div>
           <div class="form-group"><label>Filtrar Data Por</label>
-            <select id="lrf-tipo-data" onchange="renderLancReceber()" title="Escolha se os campos de data abaixo (Data Específica / De / Até) filtram pela data da venda ou pela data de vencimento (Prev. Receb.)">
-              <option value="venda">Data da Venda</option>
+            <select id="lrf-tipo-data" onchange="renderLancReceber()" title="Escolha se os campos de data abaixo (Data Específica / De / Até) filtram pela data da competência ou pela data de vencimento (Prev. Receb.)">
+              <option value="venda">Data da Competência</option>
               <option value="vencimento">Vencimento (Prev. Receb.)</option>
             </select>
           </div>
@@ -1390,7 +1442,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearLancReceberFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-lancreceber-row">
-          <th>Data da Venda</th><th>Cliente</th><th>Produto</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
+          <th>Data da Competência</th><th>Cliente</th><th>Produto</th><th>Categoria</th><th>Valor</th><th>Parcelas</th>
           <th>Prev. Receb.</th><th>NF</th><th>Financeiro</th><th>Recebido</th><th>Ações</th>
         </tr></thead><tbody id="tb-lancreceber"><tr><td colspan="11" class="empty-state">Nenhum lançamento registrado.</td></tr></tbody></table></div>
       </div>
@@ -1473,7 +1525,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           </div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-areceber-row">
-          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Juros</th><th>Total c/ Juros</th><th>Dt. Venda</th><th>Vencimento</th><th>Situação</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Juros</th><th>Total c/ Juros</th><th>Dt. Competência</th><th>Vencimento</th><th>Situação</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-areceber"><tr><td colspan="14" class="empty-state">Nenhuma parcela em aberto.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -1509,7 +1561,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div class="form-group"><label>Data Recebimento</label>
             <input type="date" id="recf-data-rec" onchange="renderRecebido()" style="padding:7px 10px;font-size:13px" />
           </div>
-          <div class="form-group"><label>Data Venda</label>
+          <div class="form-group"><label>Data Competência</label>
             <input type="date" id="recf-data-venda" onchange="renderRecebido()" style="padding:7px 10px;font-size:13px" />
           </div>
           <div class="form-group"><label>Forma de Recebimento</label>
@@ -1521,7 +1573,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearRecebidoFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-recebido-row">
-          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Dt. Venda</th><th>Dt. Recebimento</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Dt. Competência</th><th>Dt. Recebimento</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-recebido"><tr><td colspan="12" class="empty-state">Nenhum recebimento registrado.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -1574,7 +1626,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="card">
         <div class="card-title">Pedidos Cancelados</div>
         <div class="table-scroll"><table><thead><tr id="th-pedidoscancelados-row">
-          <th>Dt. Cancelamento</th><th>Cliente</th><th>Produto</th><th>Valor</th><th>Parcelas</th><th>Dt. Venda</th><th>Prev. Receb.</th><th>NF</th><th>Motivo</th><th>Ações</th>
+          <th>Dt. Cancelamento</th><th>Cliente</th><th>Produto</th><th>Valor</th><th>Parcelas</th><th>Dt. Competência</th><th>Prev. Receb.</th><th>NF</th><th>Motivo</th><th>Ações</th>
         </tr></thead><tbody id="tb-pedidoscancelados"><tr><td colspan="10" class="empty-state">Nenhum pedido cancelado.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -1627,7 +1679,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="card">
         <div class="card-title">Reposições</div>
         <div class="table-scroll"><table><thead><tr id="th-reposicao-row">
-          <th>Dt. Reposição</th><th>Cliente</th><th>Produto</th><th>Valor</th><th>Parcelas</th><th>Dt. Venda</th><th>Prev. Receb.</th><th>NF</th><th>Motivo</th><th>Ações</th>
+          <th>Dt. Reposição</th><th>Cliente</th><th>Produto</th><th>Valor</th><th>Parcelas</th><th>Dt. Competência</th><th>Prev. Receb.</th><th>NF</th><th>Motivo</th><th>Ações</th>
         </tr></thead><tbody id="tb-reposicao"><tr><td colspan="10" class="empty-state">Nenhuma reposição registrada.</td></tr></tbody></table></div>
       </div>
     </div>
@@ -2307,7 +2359,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="form-group"><label>Empresa *</label><select id="l-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Data da Compra *</label><input id="l-dtcompra" type="date" /></div>
+      <div class="form-group"><label>Data da Competência *</label><input id="l-dtcompra" type="date" /></div>
       <div class="form-group"><label>Previsão de Pagamento</label><input id="l-dtprev" type="date" /></div>
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="l-nf" type="text" placeholder="000000" /></div>
     </div>
@@ -2341,7 +2393,14 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
         <select id="l-financeiro"><option value="nao">Não</option><option value="sim">Sim</option></select>
       </div>
       <div class="form-group"><label>Pago?</label>
-        <select id="l-pago"><option value="nao">Não</option><option value="sim">Sim</option></select>
+        <select id="l-pago" onchange="toggleDtPago('l')"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+    </div>
+    <div class="grid3" id="l-dtpago-wrap" style="display:none;">
+      <div class="form-group">
+        <label style="color:#b45309">Data do Pagamento *</label>
+        <input id="l-dtpago" type="date" />
+        <div style="font-size:11px;color:#a8a29e;margin-top:4px;">Obrigatória quando o lançamento é salvo como <b>Pago</b>.</div>
       </div>
     </div>
     <div id="l-parcela-dates" style="display:none;margin-bottom:16px;">
@@ -2358,6 +2417,33 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       </div>
       <div class="form-group"><label>Banco / Conta</label>
         <select id="l-banco"><option value="">Não informado</option></select>
+      </div>
+    </div>
+    <!-- ══ CUSTO FIXO + VIGÊNCIAS ══ -->
+    <div style="border:1px solid #e7e5e4;border-radius:8px;padding:12px 14px;margin-bottom:16px;background:#fcfcfb;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#44403c;margin:0;">
+        <input type="checkbox" id="l-custofixo" onchange="toggleCustoFixoBox('l')" style="width:16px;height:16px;accent-color:#ea580c;cursor:pointer;" />
+        🔁 Marcar como Custo Fixo (despesa recorrente)
+      </label>
+      <div id="l-custofixo-box" style="display:none;margin-top:12px;border-top:1px dashed #e7e5e4;padding-top:12px;">
+        <div style="font-size:12px;color:#78716c;margin-bottom:10px;">
+          Informe o período em que esse custo vale. Deixe o <b>Fim</b> em branco (ou marque “Indeterminado”) para uma vigência sem data final.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end;">
+          <div class="form-group" style="margin:0"><label>Início da vigência *</label><input type="date" id="l-vig-inicio" /></div>
+          <div class="form-group" style="margin:0"><label>Fim da vigência</label><input type="date" id="l-vig-fim" /></div>
+          <div class="form-group" style="margin:0"><label>Valor no período (R$)</label><input type="number" step="0.01" id="l-vig-valor" placeholder="usa o valor total" /></div>
+          <div class="form-group" style="margin:0"><label>Observação</label><input type="text" id="l-vig-obs" placeholder="Ex.: reajuste IGPM" /></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#57534e;cursor:pointer;margin:0;">
+            <input type="checkbox" id="l-vig-indeterminado" onchange="toggleVigIndeterminado('l')" style="accent-color:#ea580c;cursor:pointer;" /> Indeterminado (sem data final)
+          </label>
+          <button type="button" class="btn btn-primary btn-sm" id="l-vig-btn" onclick="incluirVigencia('l')">+ Incluir vigência</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="l-vig-cancel" onclick="cancelarEdicaoVigencia('l')" style="display:none">Cancelar edição</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#a8a29e;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;">Vigências incluídas</div>
+        <div id="l-vig-lista"></div>
       </div>
     </div>
     <div class="form-group"><label>Observações</label><textarea id="l-obs" rows="2" placeholder="Informações adicionais..."></textarea></div>
@@ -2380,7 +2466,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="form-group"><label>Empresa *</label><select id="lr-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Data da Venda *</label><input id="lr-dtvenda" type="date" /></div>
+      <div class="form-group"><label>Data da Competência *</label><input id="lr-dtvenda" type="date" /></div>
       <div class="form-group"><label>Previsão de Recebimento</label><input id="lr-dtprev" type="date" /></div>
       <div class="form-group"><label>Nº da Nota Fiscal</label><input id="lr-nf" type="text" placeholder="000000" /></div>
     </div>
@@ -2533,7 +2619,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="form-group"><label>Empresa *</label><select id="elr-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Data da Venda</label><input id="elr-dtvenda" type="date" /></div>
+      <div class="form-group"><label>Data da Competência</label><input id="elr-dtvenda" type="date" /></div>
       <div class="form-group"><label>Prev. Recebimento</label><input id="elr-dtprev" type="date" /></div>
       <div class="form-group"><label>Nº Nota Fiscal</label><input id="elr-nf" type="text" /></div>
     </div>
@@ -2844,7 +2930,7 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       <div class="form-group"><label>Empresa *</label><select id="edit-empresa" class="sel-empresa"><option value="">Selecione...</option></select></div>
     </div>
     <div class="grid3">
-      <div class="form-group"><label>Data da Compra</label><input id="edit-dtcompra" type="date" /></div>
+      <div class="form-group"><label>Data da Competência</label><input id="edit-dtcompra" type="date" /></div>
       <div class="form-group"><label>Previsão de Pagamento</label><input id="edit-dtprev" type="date" /></div>
       <div class="form-group"><label>Nº Nota Fiscal</label><input id="edit-nf" type="text" /></div>
     </div>
@@ -2877,12 +2963,19 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
         <select id="edit-financeiro"><option value="nao">Não</option><option value="sim">Sim</option></select>
       </div>
       <div class="form-group"><label>Pago?</label>
-        <select id="edit-pago"><option value="nao">Não</option><option value="sim">Sim</option></select>
+        <select id="edit-pago" onchange="toggleDtPago('edit')"><option value="nao">Não</option><option value="sim">Sim</option></select>
       </div>
     </div>
     <div class="grid3">
       <div class="form-group"><label>Banco / Conta *</label>
         <select id="edit-banco"><option value="">Não informado</option></select>
+      </div>
+    </div>
+    <div class="grid3" id="edit-dtpago-wrap" style="display:none;">
+      <div class="form-group">
+        <label style="color:#b45309">Data do Pagamento *</label>
+        <input id="edit-dtpago" type="date" />
+        <div style="font-size:11px;color:#a8a29e;margin-top:4px;">Obrigatória quando o lançamento é salvo como <b>Pago</b>.</div>
       </div>
     </div>
     <!-- Datas manuais de parcelas no modal -->
@@ -2891,6 +2984,33 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
         📅 Datas e valores de cada parcela — preenchidos automaticamente, edite se precisar
       </div>
       <div id="edit-parcela-dates-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
+    </div>
+    <!-- ══ CUSTO FIXO + VIGÊNCIAS ══ -->
+    <div style="border:1px solid #e7e5e4;border-radius:8px;padding:12px 14px;margin-bottom:16px;background:#fcfcfb;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#44403c;margin:0;">
+        <input type="checkbox" id="edit-custofixo" onchange="toggleCustoFixoBox('edit')" style="width:16px;height:16px;accent-color:#ea580c;cursor:pointer;" />
+        🔁 Marcar como Custo Fixo (despesa recorrente)
+      </label>
+      <div id="edit-custofixo-box" style="display:none;margin-top:12px;border-top:1px dashed #e7e5e4;padding-top:12px;">
+        <div style="font-size:12px;color:#78716c;margin-bottom:10px;">
+          Informe o período em que esse custo vale. Deixe o <b>Fim</b> em branco (ou marque “Indeterminado”) para uma vigência sem data final.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end;">
+          <div class="form-group" style="margin:0"><label>Início da vigência *</label><input type="date" id="edit-vig-inicio" /></div>
+          <div class="form-group" style="margin:0"><label>Fim da vigência</label><input type="date" id="edit-vig-fim" /></div>
+          <div class="form-group" style="margin:0"><label>Valor no período (R$)</label><input type="number" step="0.01" id="edit-vig-valor" placeholder="usa o valor total" /></div>
+          <div class="form-group" style="margin:0"><label>Observação</label><input type="text" id="edit-vig-obs" placeholder="Ex.: reajuste IGPM" /></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#57534e;cursor:pointer;margin:0;">
+            <input type="checkbox" id="edit-vig-indeterminado" onchange="toggleVigIndeterminado('edit')" style="accent-color:#ea580c;cursor:pointer;" /> Indeterminado (sem data final)
+          </label>
+          <button type="button" class="btn btn-primary btn-sm" id="edit-vig-btn" onclick="incluirVigencia('edit')">+ Incluir vigência</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="edit-vig-cancel" onclick="cancelarEdicaoVigencia('edit')" style="display:none">Cancelar edição</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#a8a29e;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;">Vigências incluídas</div>
+        <div id="edit-vig-lista"></div>
+      </div>
     </div>
     <div class="form-group"><label>Observações</label><textarea id="edit-obs" rows="2"></textarea></div>
     <div class="modal-footer">
@@ -3229,6 +3349,7 @@ const PAGES_CONFIG = [
   { id:'lancamentos',       label:'Lançamentos (Compra)',grupo:'pagar'   },
   { id:'apagar',            label:'Contas a Pagar',      grupo:'pagar'   },
   { id:'pagas',             label:'Contas Pagas',        grupo:'pagar'   },
+  { id:'custos-fixos',      label:'Custos Fixos',        grupo:'pagar'   },
   { id:'clientes',          label:'Clientes',            grupo:'receber' },
   { id:'prodvenda',         label:'Produtos de Venda',   grupo:'receber' },
   { id:'lancreceber',       label:'Lançamentos (Venda)', grupo:'receber' },
@@ -3491,7 +3612,11 @@ let db = {
   transferencias: [],
   pedidos_cancelados: [],
   reposicoes: [],
-  empresas: []
+  empresas: [],
+  // Custos fixos: mapa "id do lançamento" -> { ativo:true, vigencias:[...] }.
+  // Fica guardado na tabela `config` que já existe (key = "custofixo_<id>"),
+  // então não é preciso criar tabela nem coluna nova no Supabase.
+  custosfixos: {}
 };
 
 // ══════════════════════════════════════════
@@ -3607,7 +3732,9 @@ async function loadAllData() {
       sbFetch('config', 'GET', null, '?key=in.(formas_pagamento,formas_recebimento,motivos_cancelamento,motivos_reposicao)'), // 14
       fetchAll('pedidos_cancelados', 'dt_cancelamento'), // 15
       fetchAll('reposicoes', 'dt_reposicao'), // 16
-      fetchAll('empresas', 'nome') // 17 — nunca filtrado por empresa
+      fetchAll('empresas', 'nome'), // 17 — nunca filtrado por empresa
+      // 18 — Custos fixos e suas vigências (guardados na tabela `config`)
+      sbFetch('config', 'GET', null, '?key=like.custofixo_*&limit=5000')
     ]);
 
     const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
@@ -3631,6 +3758,14 @@ async function loadAllData() {
       if (c.key === 'formas_recebimento')    formasRecebExtra  = lista;
       if (c.key === 'motivos_cancelamento')  motivosCancelExtra = lista;
       if (c.key === 'motivos_reposicao')     motivosRepoExtra   = lista;
+    });
+    db.custosfixos = {};
+    (val(18) || []).forEach(c => {
+      const lancId = String(c.key || '').slice('custofixo_'.length);
+      if (!lancId) return;
+      let obj = null;
+      try { obj = JSON.parse(c.value); } catch(e) { obj = null; }
+      if (obj && obj.ativo) db.custosfixos[lancId] = { ativo: true, vigencias: obj.vigencias || [] };
     });
     db.pedidos_cancelados = val(15) || [];
     db.reposicoes = val(16) || [];
@@ -3843,6 +3978,7 @@ function showPage(p) {
   if (p === 'lancamentos')    renderLancamentos();
   if (p === 'apagar')         renderApagar();
   if (p === 'pagas')          renderPagas();
+  if (p === 'custos-fixos')   renderCustosFixos();
   if (p === 'bancos')         { renderBancos(); renderFluxoBancoDiario(); }
   if (p === 'transferencias') { populateTransfSelects(); renderTransferencias(); }
   if (p === 'fluxo-futuro')   renderFluxoFuturo();
@@ -3878,6 +4014,7 @@ function renderPaginaAtual() {
   if (p === 'lancamentos')    renderLancamentos();
   if (p === 'apagar')         renderApagar();
   if (p === 'pagas')          renderPagas();
+  if (p === 'custos-fixos')   renderCustosFixos();
   if (p === 'bancos')         { renderBancos(); renderFluxoBancoDiario(); }
   if (p === 'transferencias') { populateTransfSelects(); renderTransferencias(); }
   if (p === 'fluxo-futuro')   renderFluxoFuturo();
@@ -4831,10 +4968,20 @@ async function saveLancamento() {
   const valor = parseFloat(document.getElementById('l-valor').value);
   // Despesas/Fornecedor e Item são opcionais: despesas avulsas podem não ter
   // nenhum dos dois. Só data da compra e valor são realmente obrigatórios.
-  if(!dtcompra || !valor) { alert('Preencha data da compra e valor.'); return; }
+  if(!dtcompra || !valor) { alert('Preencha a data da competência e o valor.'); return; }
   const pago = document.getElementById('l-pago').value;
   const banco = document.getElementById('l-banco').value;
   if (!validarBancoObrigatorio(pago, banco)) return;
+  // Data do pagamento é obrigatória quando o lançamento já nasce pago — sem ela
+  // a parcela cai em "Contas Pagas" sem data e some do fluxo de caixa por dia.
+  const dtpagoNovo = campoValor('l-dtpago');
+  if (!validarDataPagamentoObrigatoria(pago, dtpagoNovo, 'l-dtpago')) return;
+  // Custo fixo: se estiver marcado, precisa de pelo menos uma vigência.
+  const ehCustoFixo = !!(document.getElementById('l-custofixo') && document.getElementById('l-custofixo').checked);
+  if (ehCustoFixo && !(_vigTemp.l || []).length) {
+    alert('Você marcou este lançamento como Custo Fixo, mas nenhuma vigência foi incluída.\n\nPreencha o início da vigência e clique em "+ Incluir vigência".');
+    return;
+  }
   const empresa_id = empresaDoForm('l-empresa');
   if (empresa_id === null) return;
   const parcelas = parseInt(document.getElementById('l-parcelas').value)||1;
@@ -4852,16 +4999,26 @@ async function saveLancamento() {
     banco,
     cat_dre: document.getElementById('l-catdre') ? document.getElementById('l-catdre').value : '',
     obs: document.getElementById('l-obs').value,
+    dtpago: pago === 'sim' ? dtpagoNovo : '',
     parcela_datas: parcelas > 1 ? buildParcelaDatasPayload('l-parcela-dates', parcelas) : null
   };
+  // Parcelado que já nasce pago: todas as parcelas recebem a data informada,
+  // senão elas continuariam aparecendo em aberto em "Contas a Pagar".
+  if (parcelas > 1 && pago === 'sim') {
+    lanc.parcela_datas = _marcarTodasParcelasPagas(lanc.parcela_datas, parcelas, dtpagoNovo);
+  }
   const rL = await sbFetch('lancamentos', 'POST', lanc);
   if(!rL) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
+  if (ehCustoFixo) {
+    const okCf = await cfSalvarNoBanco(lanc.id, true, _vigTemp.l);
+    if (!okCf) alert('⚠ O lançamento foi salvo, mas as vigências do custo fixo não puderam ser gravadas.' + sbErroMsg());
+  }
   // Só mantém no array em memória (e portanto visível na tela) se pertencer
   // à empresa ativa no seletor — senão ele foi salvo corretamente no banco,
   // mas só deve aparecer quando essa outra empresa (ou o Consolidado) for selecionada.
   const pertence = pertenceEmpresaAtiva(lanc.empresa_id);
   if (pertence) db.lancamentos.push(lanc);
-  clearLancamento(); closeModal('modal-novo-lanc'); renderLancamentos(); renderApagar(); renderPagas(); populateYearSelects();
+  clearLancamento(); closeModal('modal-novo-lanc'); renderLancamentos(); renderApagar(); renderPagas(); renderCustosFixos(); populateYearSelects();
   if (!pertence) alert(`✅ Lançamento salvo em "${empresaNome(lanc.empresa_id)}". Ele não aparece aqui porque essa não é a empresa ativa no momento.`);
 }
 
@@ -4878,7 +5035,14 @@ function clearLancamento() {
   set('l-pago','nao');
   // Empresa volta para a que está ativa no seletor global (ou em branco no consolidado)
   try { set('l-empresa', empresaAtual() || ''); } catch(e) { set('l-empresa',''); }
+  set('l-dtpago','');
   limparGradeParcelas('l-parcela-dates');
+  const cfChk = document.getElementById('l-custofixo');
+  if (cfChk) cfChk.checked = false;
+  _vigTemp.l = [];
+  limparCamposVigencia('l');
+  toggleCustoFixoBox('l');
+  toggleDtPago('l', false);
 }
 
 function renderLancamentos() {
@@ -4926,7 +5090,7 @@ function renderLancamentos() {
 
   const _catDeLanc = l => l.cat_dre || (l.prod ? ((db.produtos.find(x=>x.id===l.prod)||{}).cat) : null);
   const colsLanc = [
-    { key:'dtcompra', label:'Data Compra', get:l=>l.dtcompra, display:l=>fmtDate(l.dtcompra) },
+    { key:'dtcompra', label:'Data Competência', get:l=>l.dtcompra, display:l=>fmtDate(l.dtcompra) },
     { key:'forn', label:'Despesas/Fornecedor', get:l=>l.forn?getFornNome(l.forn):null },
     { key:'prod', label:'Item', get:l=>l.prod?getProdNome(l.prod):null },
     { key:'cat', label:'Categoria', get:l=>{ const c=_catDeLanc(l); return c?getDreCatNome(c):null; } },
@@ -5004,6 +5168,17 @@ function editLancamento(id) {
   populateDreCatSelects();
   const ecd = document.getElementById('edit-catdre');
   if (ecd) ecd.value = l.cat_dre || '';
+  // Data do pagamento (só aparece quando o lançamento está como Pago)
+  const edtp = document.getElementById('edit-dtpago');
+  if (edtp) edtp.value = l.dtpago || '';
+  toggleDtPago('edit', false);
+  // Custo fixo e vigências já cadastradas
+  const cfDados = cfDadosDoLanc(id);
+  _vigTemp.edit = cfDados ? (cfDados.vigencias || []).map(v => Object.assign({}, v)) : [];
+  const cfChkE = document.getElementById('edit-custofixo');
+  if (cfChkE) cfChkE.checked = !!cfDados;
+  limparCamposVigencia('edit');
+  toggleCustoFixoBox('edit');
   // Populate manual parcela dates if present
   if (l.parcelas > 1) {
     toggleParcelaDates('edit-parcelas', 'edit-parcela-dates');
@@ -5024,6 +5199,13 @@ async function updateLancamento() {
   const pago = document.getElementById('edit-pago').value;
   const banco = document.getElementById('edit-banco') ? document.getElementById('edit-banco').value : (l.banco||'');
   if (!validarBancoObrigatorio(pago, banco)) return;
+  const dtpagoEdit = campoValor('edit-dtpago');
+  if (!validarDataPagamentoObrigatoria(pago, dtpagoEdit, 'edit-dtpago')) return;
+  const ehCustoFixoEdit = !!(document.getElementById('edit-custofixo') && document.getElementById('edit-custofixo').checked);
+  if (ehCustoFixoEdit && !(_vigTemp.edit || []).length) {
+    alert('Você marcou este lançamento como Custo Fixo, mas nenhuma vigência foi incluída.\n\nPreencha o início da vigência e clique em "+ Incluir vigência".');
+    return;
+  }
   const _empEdit = empresaDoForm('edit-empresa');
   if (_empEdit === null) return;
   l.empresa_id = _empEdit;
@@ -5041,28 +5223,40 @@ async function updateLancamento() {
   l.banco    = banco;
   l.cat_dre  = document.getElementById('edit-catdre')   ? document.getElementById('edit-catdre').value   : (l.cat_dre||'');
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('edit-parcela-dates', l.parcelas) : null;
-  l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('edit-parcela-dates', l.parcelas) : null;
+  // [CORREÇÃO] Reconstruir parcela_datas apagava o status de pago de cada
+  // parcela (arrays "pagos"/"dtpagos"), fazendo parcelas já quitadas voltarem
+  // para Contas a Pagar depois de uma simples edição. Agora ele é preservado.
+  const _rawParcAntigo = l.parcela_datas;
+  l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPreservando('edit-parcela-dates', l.parcelas, _rawParcAntigo) : null;
+  l.dtpago = pago === 'sim' ? dtpagoEdit : '';
+  if (l.parcelas > 1 && pago === 'sim') {
+    l.parcela_datas = _marcarTodasParcelasPagas(l.parcela_datas, l.parcelas, dtpagoEdit);
+  }
   const okU = await sbFetch('lancamentos', 'PATCH', {
     empresa_id: l.empresa_id,
     dtcompra: l.dtcompra, dtprev: l.dtprev, nf: l.nf,
     forn: l.forn, prod: l.prod, valor: l.valor,
     parcelas: l.parcelas, financeiro: l.financeiro,
     pago: l.pago, tipo_pag: l.tipo_pag, banco: l.banco, obs: l.obs,
-    cat_dre: l.cat_dre,
+    cat_dre: l.cat_dre, dtpago: l.dtpago,
     parcela_datas: l.parcela_datas
   }, `?id=eq.${l.id}`);
   if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados.' + sbErroMsg()); return; }
+  const okCfE = await cfSalvarNoBanco(l.id, ehCustoFixoEdit, _vigTemp.edit);
+  if (!okCfE) alert('⚠ O lançamento foi salvo, mas o custo fixo/vigências não puderam ser gravados.' + sbErroMsg());
   // Se a empresa foi trocada para uma diferente da ativa no seletor, o
   // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
   if (!pertenceEmpresaAtiva(l.empresa_id)) db.lancamentos = db.lancamentos.filter(x => x.id !== l.id);
-  closeModal('modal-lanc'); renderLancamentos();
+  bumpDbVer();
+  closeModal('modal-lanc'); renderLancamentos(); renderApagar(); renderPagas(); renderCustosFixos();
 }
 
 async function deleteLancamento(id) {
   if(!confirm('Excluir este lançamento?')) return;
   await sbFetch('lancamentos', 'DELETE', null, `?id=eq.${id}`);
+  if (cfEhCustoFixo(id)) await cfSalvarNoBanco(id, false, []);
   db.lancamentos = db.lancamentos.filter(x=>x.id!==id);
-  renderLancamentos();
+  renderLancamentos(); renderCustosFixos();
 }
 
 // ══════════════════════════════════════════
@@ -5704,7 +5898,7 @@ function renderApagar() {
     { key:'cat', label:'Categoria', get:p=>p.catId?getDreCatNome(p.catId):null },
     { key:'parcela', label:'Parcela', get:p=>p.parcIdx+(p.totalParc/1000), display:p=>`${p.parcIdx}/${p.totalParc}` },
     { key:'valor', label:'Valor Parcela', get:p=>p.valParc, display:p=>fmtBRL(p.valParc) },
-    { key:'dtcompra', label:'Dt. Compra', get:p=>p.dtcompra, display:p=>fmtDate(p.dtcompra) },
+    { key:'dtcompra', label:'Dt. Competência', get:p=>p.dtcompra, display:p=>fmtDate(p.dtcompra) },
     { key:'venc', label:'Vencimento', get:p=>p.venc, display:p=>fmtDate(p.venc) },
     { key:'situacao', label:'Situação', get:p=>situacaoParcela(p.venc).label },
     { key:'nf', label:'NF', get:p=>p.nf||null },
@@ -6341,7 +6535,7 @@ function renderPagas() {
     { key:'parcela', label:'Parcela', get:p=>p.parcIdx+(p.totalParc/1000), display:p=>`${p.parcIdx}/${p.totalParc}` },
     { key:'valor', label:'Valor Parcela', get:p=>p.valParc, display:p=>fmtBRL(p.valParc) },
     { key:'venc', label:'Vencimento', get:p=>p.venc, display:p=>fmtDate(p.venc) },
-    { key:'dtcompra', label:'Data Compra', get:p=>p.dtcompra, display:p=>fmtDate(p.dtcompra) },
+    { key:'dtcompra', label:'Data Competência', get:p=>p.dtcompra, display:p=>fmtDate(p.dtcompra) },
     { key:'dtpago', label:'Data Pgto', get:p=>p.dtpago, display:p=>fmtDate(p.dtpago) },
     { key:'tipopag', label:'Forma Pgto', get:p=>p.tipoPag||null },
     { key:'nf', label:'NF', get:p=>p.nf||null },
@@ -6370,7 +6564,7 @@ function renderPagas() {
     const finBadge = p.financeiro==='sim' ? '<span class="badge badge-green">Sim</span>' : '<span class="badge badge-red">Não</span>';
     const dtpagoCell = p.dtpago
       ? `<span style="font-family:DM Mono,monospace;font-size:12px;color:#16a34a;font-weight:600">${fmtDate(p.dtpago)}</span>`
-      : '<span style="color:#a8a29e;font-size:12px">—</span>';
+      : `<button class="btn btn-secondary btn-sm" style="color:#b91c1c;border-color:#fecaca" onclick="marcarPago('${p.lancId}', ${p.parcIdx})" title="Esta parcela está como paga mas sem data de pagamento. Clique para informar.">⚠ Informar data</button>`;
     const catNome = p.catId ? getDreCatNome(p.catId) : '';
     const catCell = catNome
       ? `<span class="badge badge-blue" style="cursor:pointer" onclick="abrirEditarCategoriaPago('${p.lancId}','${p.catId}')" title="Clique para editar a categoria">${catNome} ✎</span>`
@@ -6667,7 +6861,7 @@ function abrirRelatorioKPI(key) {
   }
 
   const nCols = rel.tipo === 'lanc' ? 6 : 7;
-  const dtLabel = isPagar ? 'Data Compra' : 'Data Venda';
+  const dtLabel = 'Data Competência';
   const nomeLabel = isPagar ? 'Despesas/Fornecedor' : 'Cliente';
   const cab = rel.tipo === 'lanc'
     ? `<th style="text-align:left">${dtLabel}</th><th style="text-align:left">${nomeLabel}</th><th style="text-align:left">Produto</th><th style="text-align:left">NF</th><th style="text-align:center">Parc.</th><th style="text-align:right">Valor</th>`
@@ -8411,7 +8605,7 @@ function renderLancReceber() {
   });
   const _catDeVenda = l => l.cat_dre || (l.prod ? ((db.prodvenda.find(x=>x.id===l.prod)||{}).cat) : null);
   const colsLR = [
-    { key:'dtvenda', label:'Data da Venda', get:l=>l.dtvenda||l.dtcompra, display:l=>fmtDate(l.dtvenda||l.dtcompra) },
+    { key:'dtvenda', label:'Data da Competência', get:l=>l.dtvenda||l.dtcompra, display:l=>fmtDate(l.dtvenda||l.dtcompra) },
     { key:'cliente', label:'Cliente', get:l=>getClienteNome(l.cliente) },
     { key:'prod', label:'Produto', get:l=>l.prod?getProdVendaNome(l.prod):null },
     { key:'cat', label:'Categoria', get:l=>{ const c=_catDeVenda(l); return c?getDreCatNome(c):null; } },
@@ -8662,7 +8856,7 @@ function renderAReceber() {
       display:p=>{ const v=calcJuros(p.valParc,p.venc,p.juros!=null?p.juros:getJurosGlobal()); return v>0?fmtBRL(v):'—'; } },
     { key:'totaljuros', label:'Total c/ Juros', get:p=>p.valParc+calcJuros(p.valParc,p.venc,p.juros!=null?p.juros:getJurosGlobal()),
       display:p=>fmtBRL(p.valParc+calcJuros(p.valParc,p.venc,p.juros!=null?p.juros:getJurosGlobal())) },
-    { key:'dtvenda', label:'Dt. Venda', get:p=>p.dtvenda, display:p=>fmtDate(p.dtvenda) },
+    { key:'dtvenda', label:'Dt. Competência', get:p=>p.dtvenda, display:p=>fmtDate(p.dtvenda) },
     { key:'venc', label:'Vencimento', get:p=>p.venc, display:p=>fmtDate(p.venc) },
     { key:'situacao', label:'Situação', get:p=>situacaoParcela(p.venc).label },
     { key:'tipopag', label:'Forma Receb.', get:p=>p.tipoPag||null },
@@ -8854,7 +9048,7 @@ function renderRecebido() {
     { key:'parcela', label:'Parcela', get:p=>p.parcIdx+(p.totalParc/1000), display:p=>`${p.parcIdx}/${p.totalParc}` },
     { key:'valor', label:'Valor Parcela', get:p=>p.valParc, display:p=>fmtBRL(p.valParc) },
     { key:'venc', label:'Vencimento', get:p=>p.venc, display:p=>fmtDate(p.venc) },
-    { key:'dtvenda', label:'Dt. Venda', get:p=>p.dtvenda, display:p=>fmtDate(p.dtvenda) },
+    { key:'dtvenda', label:'Dt. Competência', get:p=>p.dtvenda, display:p=>fmtDate(p.dtvenda) },
     { key:'dtrecebido', label:'Dt. Recebimento', get:p=>p.dtrecebido, display:p=>fmtDate(p.dtrecebido) },
     { key:'tipopag', label:'Forma Receb.', get:p=>p.tipoPag||null },
     { key:'nf', label:'NF', get:p=>p.nf||null },
@@ -11721,6 +11915,7 @@ function imprimirPagina(pagina) {
     lancamentos: 'Lançamentos de Compras',
     apagar:      'Contas a Pagar',
     pagas:       'Contas Pagas',
+    'custos-fixos': 'Custos Fixos',
     areceber:    'Contas a Receber',
     recebido:    'Contas Recebidas',
     pedidoscancelados: 'Pedidos Cancelados',
@@ -11730,6 +11925,7 @@ function imprimirPagina(pagina) {
     lancamentos: 'tb-lancamentos',
     apagar:      'tb-apagar',
     pagas:       'tb-pagas',
+    'custos-fixos': 'tb-custos-fixos',
     areceber:    'tb-areceber',
     recebido:    'tb-recebido',
     pedidoscancelados: 'tb-pedidoscancelados',
@@ -11738,6 +11934,7 @@ function imprimirPagina(pagina) {
   const kpiIds = {
     apagar:   'apagar-kpis',
     pagas:    'pagas-kpis',
+    'custos-fixos': 'cf-kpis',
     areceber: 'areceber-kpis',
     recebido: 'recebido-kpis',
     pedidoscancelados: 'pc-kpis',
@@ -12524,7 +12721,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'cat',       label:'Categoria',      get:p=>p.catId?getDreCatNome(p.catId):'—' },
       { key:'parcela',   label:'Parcela',        get:p=>`${p.parcIdx}/${p.totalParc}` },
       { key:'valor',     label:'Valor Parcela',  get:p=>fmtBRL(p.valParc), num:true },
-      { key:'dtcompra',  label:'Dt. Compra',     get:p=>fmtDate(p.dtcompra) },
+      { key:'dtcompra',  label:'Dt. Competência', get:p=>fmtDate(p.dtcompra) },
       { key:'venc',      label:'Vencimento',     get:p=>fmtDate(p.venc) },
       { key:'situacao',  label:'Situação',       get:p=>situacaoParcela(p.venc).label },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
@@ -12537,7 +12734,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'parcela',   label:'Parcela',        get:p=>`${p.parcIdx}/${p.totalParc}` },
       { key:'valor',     label:'Valor Parcela',  get:p=>fmtBRL(p.valParc), num:true },
       { key:'venc',      label:'Vencimento',     get:p=>fmtDate(p.venc) },
-      { key:'dtcompra',  label:'Dt. Compra',     get:p=>fmtDate(p.dtcompra) },
+      { key:'dtcompra',  label:'Dt. Competência', get:p=>fmtDate(p.dtcompra) },
       { key:'dtpago',    label:'Dt. Pgto',       get:p=>fmtDate(p.dtpago) },
       { key:'forma',     label:'Forma Pgto',     get:p=>p.tipoPag||'—' },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
@@ -12550,7 +12747,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'valor',     label:'Valor Parcela',  get:p=>fmtBRL(p.valParc), num:true },
       { key:'juros',     label:'Juros',          get:p=>{ const v=jurosDe(p); return v>0?fmtBRL(v):'—'; } },
       { key:'totaljuros',label:'Total c/ Juros', get:p=>fmtBRL(p.valParc+jurosDe(p)) },
-      { key:'dtvenda',   label:'Dt. Venda',      get:p=>fmtDate(p.dtvenda) },
+      { key:'dtvenda',   label:'Dt. Competência', get:p=>fmtDate(p.dtvenda) },
       { key:'venc',      label:'Vencimento',     get:p=>fmtDate(p.venc) },
       { key:'situacao',  label:'Situação',       get:p=>situacaoParcela(p.venc).label },
       { key:'forma',     label:'Forma Receb.',   get:p=>p.tipoPag||'—' },
@@ -12563,7 +12760,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'parcela',   label:'Parcela',        get:p=>`${p.parcIdx}/${p.totalParc}` },
       { key:'valor',     label:'Valor Parcela',  get:p=>fmtBRL(p.valParc), num:true },
       { key:'venc',      label:'Vencimento',     get:p=>fmtDate(p.venc) },
-      { key:'dtvenda',   label:'Dt. Venda',      get:p=>fmtDate(p.dtvenda) },
+      { key:'dtvenda',   label:'Dt. Competência', get:p=>fmtDate(p.dtvenda) },
       { key:'dtrecebido',label:'Dt. Recebimento',get:p=>fmtDate(p.dtrecebido) },
       { key:'forma',     label:'Forma Receb.',   get:p=>p.tipoPag||'—' },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
@@ -12575,7 +12772,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'cat',       label:'Categoria',      get:p=>{ const c=p.cat_dre||(p.prod?((db.prodvenda.find(x=>x.id===p.prod)||{}).cat):null); return c?getDreCatNome(c):'—'; } },
       { key:'valor',     label:'Valor',          get:p=>fmtBRL(p.valor), num:true },
       { key:'parcelas',  label:'Parcelas',       get:p=>`${p.parcelas||1}x` },
-      { key:'dtvenda',   label:'Dt. Venda',      get:p=>fmtDate(p.dtvenda||p.dtcompra) },
+      { key:'dtvenda',   label:'Dt. Competência', get:p=>fmtDate(p.dtvenda||p.dtcompra) },
       { key:'dtprev',    label:'Vencimento',     get:p=>fmtDate(p.dtprev) },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
       { key:'financeiro',label:'Financeiro',     get:p=>p.financeiro==='sim'?'Sim':'Não' },
@@ -12744,7 +12941,7 @@ function abrirCancelarPedido(id) {
     `<b>Cliente:</b> ${getClienteNome(l.cliente)}<br>` +
     `<b>Produto:</b> ${l.prod ? getProdVendaNome(l.prod) : '—'}<br>` +
     `<b>Valor:</b> ${fmtBRL(l.valor)} &nbsp;·&nbsp; <b>Parcelas:</b> ${l.parcelas || 1}x<br>` +
-    `<b>Data da venda:</b> ${fmtDate(l.dtvenda || l.dtcompra)}`;
+    `<b>Data da competência:</b> ${fmtDate(l.dtvenda || l.dtcompra)}`;
   populateMotivoSelects();
   document.getElementById('cancel-pedido-motivo').value = '';
   document.getElementById('cancel-pedido-data').value = today();
@@ -13027,7 +13224,7 @@ function abrirReposicaoPedido(id) {
     `<b>Cliente:</b> ${getClienteNome(l.cliente)}<br>` +
     `<b>Produto:</b> ${l.prod ? getProdVendaNome(l.prod) : '—'}<br>` +
     `<b>Valor:</b> ${fmtBRL(l.valor)} &nbsp;·&nbsp; <b>Parcelas:</b> ${l.parcelas || 1}x<br>` +
-    `<b>Data da venda:</b> ${fmtDate(l.dtvenda || l.dtcompra)}`;
+    `<b>Data da competência:</b> ${fmtDate(l.dtvenda || l.dtcompra)}`;
   populateMotivoRepoSelects();
   document.getElementById('repo-pedido-motivo').value = '';
   document.getElementById('repo-pedido-data').value = today();
@@ -13278,8 +13475,450 @@ async function excluirReposicao(id) {
 
 function imprimirReposicoes() { imprimirPagina('reposicao'); }
 
+
+// ══════════════════════════════════════════════════════════════════════
+// CUSTOS FIXOS E VIGÊNCIAS
+// ----------------------------------------------------------------------
+// Um lançamento pode ser marcado como "custo fixo" (aluguel, contador,
+// internet...). Cada custo fixo tem uma ou mais VIGÊNCIAS: o período em
+// que aquele valor vale. Quando o contrato reajusta, encerra-se a vigência
+// antiga e cria-se uma nova — o histórico fica preservado.
+//
+// Onde isso é guardado: na tabela `config`, que já existe no Supabase,
+// com a chave "custofixo_<id do lançamento>". Assim NÃO é preciso criar
+// tabela nem coluna nova no banco.
+//
+// Formato do valor gravado:
+//   { "ativo": true,
+//     "vigencias": [ { id, inicio, fim, valor, obs }, ... ] }
+//   fim vazio ("") = vigência por prazo indeterminado.
+// ══════════════════════════════════════════════════════════════════════
+const CF_CONFIG_PREFIX = 'custofixo_';
+
+// Vigências que estão sendo editadas no formulário, por prefixo de tela
+// ('l' = Novo Lançamento, 'edit' = Editar Lançamento).
+var _vigTemp    = { l: [], edit: [] };
+var _vigEditIdx = { l: -1, edit: -1 };   // -1 = incluindo nova; >=0 = editando a existente
+
+function campoValor(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function cfDadosDoLanc(lancId) { return (db.custosfixos && db.custosfixos[lancId]) || null; }
+function cfEhCustoFixo(lancId) { const d = cfDadosDoLanc(lancId); return !!(d && d.ativo); }
+
+function vigOrdenar(lista) {
+  return (lista || []).slice().sort((a,b) => (a.inicio||'').localeCompare(b.inicio||''));
+}
+
+// Duas vigências não podem se sobrepor: senão não dá para saber qual valor
+// vale em um determinado mês. Vigência sem fim vale "até sempre".
+function vigSobrepoe(a, b) {
+  const aIni = a.inicio || '0000-01-01', aFim = a.fim || '9999-12-31';
+  const bIni = b.inicio || '0000-01-01', bFim = b.fim || '9999-12-31';
+  return aIni <= bFim && bIni <= aFim;
+}
+
+// Vigência que cobre a data de referência (por padrão, hoje).
+function vigVigente(lista, ref) {
+  const d = ref || today();
+  return vigOrdenar(lista).find(v => (!v.inicio || v.inicio <= d) && (!v.fim || v.fim >= d)) || null;
+}
+
+function vigStatus(lista, ref) {
+  const lst = vigOrdenar(lista);
+  if (!lst.length) return { label:'Sem vigência', cls:'badge-gray' };
+  if (vigVigente(lst, ref)) return { label:'Vigente', cls:'badge-green' };
+  const d = ref || today();
+  if (lst.some(v => v.inicio && v.inicio > d)) return { label:'Futuro', cls:'badge-blue' };
+  return { label:'Encerrado', cls:'badge-red' };
+}
+
+function vigTextoPeriodo(v) {
+  if (!v) return '—';
+  return (v.inicio ? fmtDate(v.inicio) : '—') + ' → ' + (v.fim ? fmtDate(v.fim) : 'Indeterminado');
+}
+
+// ── Gravação (tabela `config`) ─────────────────────────────────────────
+async function cfSalvarNoBanco(lancId, ativo, vigencias) {
+  const key = CF_CONFIG_PREFIX + lancId;
+  const del = await sbFetch('config', 'DELETE', null, `?key=eq.${encodeURIComponent(key)}`);
+  if (del === null) return false;
+  if (!ativo) { delete db.custosfixos[lancId]; bumpDbVer(); return true; }
+  const payload = { ativo: true, vigencias: vigOrdenar(vigencias || []) };
+  const ok = await sbFetch('config', 'POST', { id: uid(), key, value: JSON.stringify(payload) });
+  if (!ok) return false;
+  db.custosfixos[lancId] = payload;
+  bumpDbVer();
+  return true;
+}
+
+// ── Interface do formulário ────────────────────────────────────────────
+function toggleCustoFixoBox(prefix) {
+  const chk = document.getElementById(prefix + '-custofixo');
+  const box = document.getElementById(prefix + '-custofixo-box');
+  if (!chk || !box) return;
+  box.style.display = chk.checked ? '' : 'none';
+  if (chk.checked && !(_vigTemp[prefix] || []).length) {
+    // Sugere início e valor a partir do que já foi digitado no lançamento.
+    const ini = document.getElementById(prefix + '-vig-inicio');
+    if (ini && !ini.value) ini.value = campoValor(prefix + '-dtprev') || campoValor(prefix + '-dtcompra') || today();
+    const val = document.getElementById(prefix + '-vig-valor');
+    const tot = campoValor(prefix + '-valor');
+    if (val && !val.value && tot) val.value = tot;
+  }
+  renderVigencias(prefix);
+}
+
+function toggleVigIndeterminado(prefix) {
+  const ind = document.getElementById(prefix + '-vig-indeterminado');
+  const fim = document.getElementById(prefix + '-vig-fim');
+  if (!ind || !fim) return;
+  fim.disabled = ind.checked;
+  if (ind.checked) fim.value = '';
+}
+
+function limparCamposVigencia(prefix) {
+  ['-vig-inicio','-vig-fim','-vig-valor','-vig-obs'].forEach(s => {
+    const el = document.getElementById(prefix + s); if (el) el.value = '';
+  });
+  const ind = document.getElementById(prefix + '-vig-indeterminado');
+  if (ind) ind.checked = false;
+  const fim = document.getElementById(prefix + '-vig-fim');
+  if (fim) fim.disabled = false;
+  _vigEditIdx[prefix] = -1;
+  const btn = document.getElementById(prefix + '-vig-btn');
+  if (btn) btn.textContent = '+ Incluir vigência';
+  const cancel = document.getElementById(prefix + '-vig-cancel');
+  if (cancel) cancel.style.display = 'none';
+}
+
+function incluirVigencia(prefix) {
+  const inicio = campoValor(prefix + '-vig-inicio');
+  const indEl  = document.getElementById(prefix + '-vig-indeterminado');
+  const fim    = (indEl && indEl.checked) ? '' : campoValor(prefix + '-vig-fim');
+  const valorS = campoValor(prefix + '-vig-valor');
+  const obs    = campoValor(prefix + '-vig-obs');
+
+  if (!inicio) { alert('Informe a data de início da vigência.'); return; }
+  if (fim && fim < inicio) { alert('A data final da vigência não pode ser anterior à data de início.'); return; }
+
+  const lista   = _vigTemp[prefix] || (_vigTemp[prefix] = []);
+  const idxEdit = _vigEditIdx[prefix];
+  const nova    = { inicio, fim, valor: (valorS === '' ? null : (parseFloat(valorS) || 0)), obs };
+
+  if (lista.some((v, i) => i !== idxEdit && vigSobrepoe(v, nova))) {
+    alert('Já existe uma vigência cobrindo esse período.\n\nEncerre a vigência anterior (preenchendo o Fim) antes de criar a nova, ou edite a existente.');
+    return;
+  }
+
+  if (idxEdit >= 0) lista[idxEdit] = Object.assign({}, lista[idxEdit], nova);
+  else lista.push(Object.assign({ id: uid() }, nova));
+
+  _vigTemp[prefix] = vigOrdenar(lista);
+  limparCamposVigencia(prefix);
+  renderVigencias(prefix);
+}
+
+function editarVigencia(prefix, idx) {
+  const v = (_vigTemp[prefix] || [])[idx];
+  if (!v) return;
+  const set = (s, val) => { const el = document.getElementById(prefix + s); if (el) el.value = val; };
+  set('-vig-inicio', v.inicio || '');
+  set('-vig-fim',    v.fim || '');
+  set('-vig-valor',  v.valor == null ? '' : v.valor);
+  set('-vig-obs',    v.obs || '');
+  const ind = document.getElementById(prefix + '-vig-indeterminado');
+  if (ind) ind.checked = !v.fim;
+  toggleVigIndeterminado(prefix);
+  _vigEditIdx[prefix] = idx;
+  const btn = document.getElementById(prefix + '-vig-btn');
+  if (btn) btn.textContent = '💾 Salvar alteração';
+  const cancel = document.getElementById(prefix + '-vig-cancel');
+  if (cancel) cancel.style.display = '';
+  renderVigencias(prefix);
+}
+
+function cancelarEdicaoVigencia(prefix) { limparCamposVigencia(prefix); renderVigencias(prefix); }
+
+function excluirVigencia(prefix, idx) {
+  const v = (_vigTemp[prefix] || [])[idx];
+  if (!v) return;
+  if (!confirm('Excluir a vigência ' + vigTextoPeriodo(v) + '?')) return;
+  _vigTemp[prefix].splice(idx, 1);
+  if (_vigEditIdx[prefix] === idx) limparCamposVigencia(prefix);
+  else if (_vigEditIdx[prefix] > idx) _vigEditIdx[prefix]--;
+  renderVigencias(prefix);
+}
+
+function renderVigencias(prefix) {
+  const cont = document.getElementById(prefix + '-vig-lista');
+  if (!cont) return;
+  const lista = vigOrdenar(_vigTemp[prefix] || []);
+  _vigTemp[prefix] = lista;
+
+  if (!lista.length) {
+    cont.innerHTML = '<div style="font-size:12px;color:#a8a29e;padding:6px 0">Nenhuma vigência incluída. Preencha o período acima e clique em “+ Incluir vigência”.</div>';
+    return;
+  }
+
+  const hoje = today();
+  cont.innerHTML = lista.map((v, i) => {
+    const ativa    = (!v.inicio || v.inicio <= hoje) && (!v.fim || v.fim >= hoje);
+    const editando = _vigEditIdx[prefix] === i;
+    const badge    = ativa
+      ? '<span class="badge badge-green">Vigente</span>'
+      : ((v.inicio && v.inicio > hoje) ? '<span class="badge badge-blue">Futura</span>' : '<span class="badge badge-gray">Encerrada</span>');
+    const valorTxt = (v.valor == null || v.valor === '')
+      ? '<span style="color:#a8a29e">valor do lançamento</span>'
+      : fmtBRL(v.valor);
+    return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;border:1px solid ${editando ? '#ea580c' : '#e7e5e4'};background:${editando ? '#fff8f3' : '#fff'};border-radius:6px;margin-bottom:6px;">
+      <span style="font-family:DM Mono,monospace;font-size:12px;color:#44403c;min-width:190px">${vigTextoPeriodo(v)}</span>
+      <span style="font-family:DM Mono,monospace;font-size:12px;font-weight:600;min-width:110px">${valorTxt}</span>
+      ${badge}
+      ${v.obs ? `<span style="font-size:11px;color:#78716c;flex:1">${v.obs}</span>` : '<span style="flex:1"></span>'}
+      <button type="button" class="btn btn-secondary btn-sm" onclick="editarVigencia('${prefix}',${i})">Editar</button>
+      <button type="button" class="btn btn-secondary btn-sm" style="color:#b91c1c" onclick="excluirVigencia('${prefix}',${i})">Excluir</button>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DATA DE PAGAMENTO OBRIGATÓRIA
+// Um lançamento nunca pode ficar marcado como Pago sem a data em que o
+// dinheiro saiu: o saldo por banco, o DFC e o fluxo diário dependem dela.
+// ══════════════════════════════════════════════════════════════════════
+function toggleDtPago(prefix, autoPreencher) {
+  const sel  = document.getElementById(prefix + '-pago');
+  const wrap = document.getElementById(prefix + '-dtpago-wrap');
+  const inp  = document.getElementById(prefix + '-dtpago');
+  if (!sel || !wrap) return;
+  const sim = sel.value === 'sim';
+  wrap.style.display = sim ? '' : 'none';
+  if (!sim && inp) inp.value = '';
+  if (sim && inp && !inp.value && autoPreencher !== false) {
+    inp.value = campoValor(prefix + '-dtprev') || today();
+  }
+}
+
+function validarDataPagamentoObrigatoria(pago, dtpago, campoId) {
+  if (pago === 'sim' && !dtpago) {
+    alert('Informe a Data do Pagamento.\n\nTodo lançamento marcado como PAGO precisa da data em que o valor saiu — sem ela a conta não entra no fluxo de caixa nem no saldo do banco.');
+    const el = document.getElementById(campoId);
+    if (el) { el.focus(); }
+    return false;
+  }
+  return true;
+}
+
+// Marca todas as parcelas de um lançamento como pagas na mesma data.
+// Usado quando o lançamento já é criado/editado como "Pago".
+function _marcarTodasParcelasPagas(raw, n, dtpago) {
+  const { datas, valores } = _parseParcelas(raw);
+  return JSON.stringify({
+    datas:   datas.slice(0, n),
+    valores: valores.slice(0, n),
+    pagos:   new Array(n).fill(true),
+    dtpagos: new Array(n).fill(dtpago)
+  });
+}
+
+// Reconstrói parcela_datas a partir do formulário SEM perder o status de
+// pagamento de cada parcela, que fica no mesmo campo.
+function buildParcelaDatasPreservando(containerid, n, rawAntigo) {
+  const novo = buildParcelaDatasPayload(containerid, n);
+  const { pagos, dtpagos } = _parseParcelas(rawAntigo);
+  if (!pagos.length && !dtpagos.length) return novo;
+  let base;
+  try { base = novo ? JSON.parse(novo) : { datas: [], valores: [] }; }
+  catch(e) { base = { datas: [], valores: [] }; }
+  base.pagos   = pagos.slice(0, n);
+  base.dtpagos = dtpagos.slice(0, n);
+  return JSON.stringify(base);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TELA: CUSTOS FIXOS
+// ══════════════════════════════════════════════════════════════════════
+function _cfPopularFiltros(itens) {
+  const selF = document.getElementById('cf-f-forn');
+  if (selF) {
+    const atual = selF.value;
+    const ids = [...new Set(itens.map(i => i.forn).filter(Boolean))];
+    selF.innerHTML = '<option value="">Todos</option>' +
+      ids.map(id => `<option value="${id}">${getFornNome(id)}</option>`)
+         .sort((a,b) => a.localeCompare(b)).join('');
+    selF.value = atual;
+  }
+  const selC = document.getElementById('cf-f-cat');
+  if (selC) {
+    const atual = selC.value;
+    const ids = [...new Set(itens.map(i => i.catId).filter(Boolean))];
+    selC.innerHTML = '<option value="">Todas</option>' +
+      ids.map(id => `<option value="${id}">${getDreCatNome(id)}</option>`)
+         .sort((a,b) => a.localeCompare(b)).join('');
+    selC.value = atual;
+  }
+}
+
+function renderCustosFixos() {
+  if (!paginaVisivel('custos-fixos')) return;
+  const tb = document.getElementById('tb-custos-fixos');
+  if (!tb) return;
+
+  const fStatus = campoValor('cf-f-status');
+  const fForn   = campoValor('cf-f-forn');
+  const fCat    = campoValor('cf-f-cat');
+  const fData   = campoValor('cf-f-data');
+  const fTexto  = (campoValor('cf-f-texto') || '').trim().toLowerCase();
+  const ref     = fData || today();
+
+  let itens = db.lancamentos.filter(l => cfEhCustoFixo(l.id)).map(l => {
+    const vigs   = vigOrdenar((cfDadosDoLanc(l.id) || {}).vigencias || []);
+    const atual  = vigVigente(vigs, ref);
+    const st     = vigStatus(vigs, ref);
+    const alvo   = atual || vigs[vigs.length - 1] || null;
+    const prodObj = l.prod ? db.produtos.find(x => x.id === l.prod) : null;
+    const catId  = l.cat_dre || (prodObj ? prodObj.cat : '') || '';
+    const nParc  = l.parcelas || 1;
+    // Valor de referência: o da vigência, se informado; senão o valor da
+    // parcela do lançamento (que é o desembolso recorrente do período).
+    const valorRef = (alvo && alvo.valor != null && alvo.valor !== '')
+      ? alvo.valor
+      : ((l.valor || 0) / nParc);
+    return {
+      lancId: l.id, empresa_id: l.empresa_id,
+      forn: l.forn, prod: l.prod, catId,
+      valorLanc: l.valor || 0,
+      valorRef, vigenciaAtual: alvo,
+      periodo: alvo ? vigTextoPeriodo(alvo) : '—',
+      inicio: alvo ? (alvo.inicio || '') : '',
+      qtd: vigs.length,
+      status: st.label, statusCls: st.cls,
+      obs: (alvo && alvo.obs) || ''
+    };
+  });
+
+  _cfPopularFiltros(itens);
+
+  itens = itens.filter(i => {
+    if (fStatus && i.status !== fStatus) return false;
+    if (fForn && i.forn !== fForn) return false;
+    if (fCat && i.catId !== fCat) return false;
+    if (fTexto) {
+      const alvo = [getFornNome(i.forn), i.prod ? getProdNome(i.prod) : '', i.catId ? getDreCatNome(i.catId) : '', i.obs]
+        .join(' ').toLowerCase();
+      if (alvo.indexOf(fTexto) === -1) return false;
+    }
+    return true;
+  });
+
+  const cols = [
+    { key:'forn',    label:'Despesas/Fornecedor', get:i => i.forn ? getFornNome(i.forn) : null },
+    { key:'prod',    label:'Item',                get:i => i.prod ? getProdNome(i.prod) : null },
+    { key:'cat',     label:'Categoria',           get:i => i.catId ? getDreCatNome(i.catId) : null },
+    { key:'periodo', label:'Vigência atual',      get:i => i.inicio || '', display:i => i.periodo },
+    { key:'valor',   label:'Valor vigente',       get:i => i.valorRef, display:i => fmtBRL(i.valorRef) },
+    { key:'status',  label:'Situação',            get:i => i.status },
+    { key:'qtd',     label:'Vigências',           get:i => i.qtd },
+    { key:'acoes',   label:'Ações',               get:() => '', noFilter:true }
+  ];
+  itens = efMount('custosfixos', 'th-custos-fixos-row', cols, itens, renderCustosFixos);
+
+  // KPIs
+  const vigentes    = itens.filter(i => i.status === 'Vigente');
+  const totalMensal = vigentes.reduce((s,i) => s + (i.valorRef || 0), 0);
+  const encerrando  = vigentes.filter(i => {
+    const f = i.vigenciaAtual && i.vigenciaAtual.fim;
+    return f && diffDias(today(), f) <= 60;
+  }).length;
+  const kpi = document.getElementById('cf-kpis');
+  if (kpi) kpi.innerHTML = `
+    <div class="card kpi"><div class="kpi-val">${itens.length}</div><div class="kpi-lbl">Custos fixos cadastrados</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#16a34a">${vigentes.length}</div><div class="kpi-lbl">Vigentes ${fData ? 'em ' + fmtDate(fData) : 'hoje'}</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#ea580c">${fmtBRL(totalMensal)}</div><div class="kpi-lbl">Total do período vigente</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#d97706">${encerrando}</div><div class="kpi-lbl">Vigências encerrando em 60 dias</div></div>`;
+
+  if (!itens.length) {
+    tb.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum custo fixo encontrado. Marque um lançamento como “Custo Fixo” na tela Novo Lançamento — Pagamento.</td></tr>';
+    const card = document.getElementById('cf-detalhe-card');
+    if (card) card.style.display = 'none';
+    return;
+  }
+  if (!_efState('custosfixos').sortKey) itens.sort((a,b) => (getFornNome(a.forn)||'').localeCompare(getFornNome(b.forn)||''));
+
+  window._pdfLists = window._pdfLists || {}; window._pdfLists['custos-fixos'] = itens.slice();
+  const _c = _cortarLista(itens, 8);
+  tb.innerHTML = _c.aviso + _c.itens.map(i => `<tr>
+      <td><b>${getFornNome(i.forn)}</b></td>
+      <td>${i.prod ? getProdNome(i.prod) : '—'}</td>
+      <td>${i.catId ? `<span class="badge badge-blue">${getDreCatNome(i.catId)}</span>` : '<span class="badge badge-gray">Sem categoria</span>'}</td>
+      <td style="font-family:DM Mono,monospace;font-size:12px;color:#57534e">${i.periodo}</td>
+      <td style="font-family:DM Mono,monospace;font-weight:600">${fmtBRL(i.valorRef)}</td>
+      <td><span class="badge ${i.statusCls}">${i.status}</span></td>
+      <td style="text-align:center">
+        <button class="btn btn-secondary btn-sm" onclick="verVigenciasCustoFixo('${i.lancId}')" title="Ver o histórico de vigências">${i.qtd} ▾</button>
+      </td>
+      <td class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editLancamento('${i.lancId}')">Editar / Vigências</button>
+        <button class="btn btn-secondary btn-sm" style="color:#b91c1c" onclick="removerCustoFixo('${i.lancId}')" title="Deixa de ser custo fixo (o lançamento continua existindo)">Remover</button>
+      </td>
+    </tr>`).join('');
+}
+
+// Painel abaixo da tabela com o histórico completo de vigências do item.
+function verVigenciasCustoFixo(lancId) {
+  const l = db.lancamentos.find(x => x.id === lancId);
+  const dados = cfDadosDoLanc(lancId);
+  const card = document.getElementById('cf-detalhe-card');
+  const tit  = document.getElementById('cf-detalhe-titulo');
+  const body = document.getElementById('cf-detalhe-corpo');
+  if (!l || !dados || !card) return;
+
+  const vigs = vigOrdenar(dados.vigencias || []);
+  const hoje = today();
+  if (tit) tit.textContent = 'Vigências — ' + getFornNome(l.forn) + (l.prod ? ' · ' + getProdNome(l.prod) : '');
+  if (body) body.innerHTML = (vigs.length ? `<div class="table-scroll"><table>
+      <thead><tr><th>Início</th><th>Fim</th><th>Valor</th><th>Situação</th><th>Observação</th></tr></thead>
+      <tbody>${vigs.map(v => {
+        const ativa = (!v.inicio || v.inicio <= hoje) && (!v.fim || v.fim >= hoje);
+        const badge = ativa ? '<span class="badge badge-green">Vigente</span>'
+                    : ((v.inicio && v.inicio > hoje) ? '<span class="badge badge-blue">Futura</span>' : '<span class="badge badge-gray">Encerrada</span>');
+        return `<tr>
+          <td style="font-family:DM Mono,monospace;font-size:12px">${v.inicio ? fmtDate(v.inicio) : '—'}</td>
+          <td style="font-family:DM Mono,monospace;font-size:12px">${v.fim ? fmtDate(v.fim) : 'Indeterminado'}</td>
+          <td style="font-family:DM Mono,monospace">${(v.valor == null || v.valor === '') ? fmtBRL((l.valor||0)/(l.parcelas||1)) + ' <span style="color:#a8a29e;font-size:11px">(do lançamento)</span>' : fmtBRL(v.valor)}</td>
+          <td>${badge}</td>
+          <td style="font-size:12px;color:#57534e">${v.obs || '—'}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>` : '<div class="empty-state">Nenhuma vigência cadastrada.</div>') +
+    `<div style="margin-top:12px;display:flex;gap:8px">
+       <button class="btn btn-primary btn-sm" onclick="editLancamento('${lancId}')">Editar vigências</button>
+       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('cf-detalhe-card').style.display='none'">Fechar</button>
+     </div>`;
+  card.style.display = '';
+  card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+async function removerCustoFixo(lancId) {
+  const l = db.lancamentos.find(x => x.id === lancId);
+  if (!l) return;
+  if (!confirm('Tirar a marcação de Custo Fixo de "' + getFornNome(l.forn) + '"?\n\nAs vigências cadastradas serão apagadas. O lançamento em si NÃO será excluído.')) return;
+  const ok = await cfSalvarNoBanco(lancId, false, []);
+  if (!ok) { alert('❌ Não foi possível remover o custo fixo.' + sbErroMsg()); return; }
+  const card = document.getElementById('cf-detalhe-card');
+  if (card) card.style.display = 'none';
+  renderCustosFixos();
+}
+
+function clearCustosFixosFiltros() {
+  ['cf-f-status','cf-f-forn','cf-f-cat','cf-f-data','cf-f-texto'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  renderCustosFixos();
+}
+
+
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-08-10 · dre-categorias-expansiveis';
+window.APP_BUILD = '2026-09-05 · custos-fixos-vigencias-dtpago';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
