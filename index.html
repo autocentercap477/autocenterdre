@@ -397,6 +397,16 @@ th.ef-th { padding:8px 8px 8px 12px; }
 .nav-sub-item:hover { background:#f5f4f2; color:#1f2937; }
 .nav-sub-item.active { background:#fff1e6; color:#ea580c; }
 .nav-sub-item svg { width:15px; height:15px; flex-shrink:0; }
+/* Item em destaque no menu (Cobrança) — verde, para chamar atenção */
+.nav-sub-item.nav-destaque { color:#15803d; font-weight:700; }
+.nav-sub-item.nav-destaque svg { stroke:#16a34a; }
+.nav-sub-item.nav-destaque:hover { background:#dcfce7; color:#14532d; }
+.nav-sub-item.nav-destaque.active { background:#dcfce7; color:#14532d; }
+.nav-sub-item.nav-destaque.active svg { stroke:#15803d; }
+.nav-destaque-pino {
+  width:7px; height:7px; border-radius:50%; background:#16a34a;
+  margin-left:auto; flex-shrink:0; box-shadow:0 0 0 3px rgba(22,163,74,.18);
+}
 /* badge receber */
 .badge-receber { background:#dcfce7; color:#166534; }
 .badge-apagar  { background:#fee2e2; color:#991b1b; }
@@ -681,6 +691,102 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
   font-size:11px; font-weight:700; transition:.15s; margin-left:auto;
 }
 .parc-acao:hover { background:#ea580c; color:#fff; }
+/* ══════════════════════════════════════════════════════════
+   COBRANÇA (clientes em atraso)
+   ══════════════════════════════════════════════════════════ */
+.cob-semana-bar {
+  display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap;
+  background:#fff7ed; border:1.5px solid #fed7aa; border-radius:12px;
+  padding:14px 16px; margin-bottom:18px;
+}
+.cob-semana-bar .form-group { margin-bottom:0; min-width:120px; }
+.cob-periodo {
+  font-family:'DM Mono',monospace; font-size:13px; font-weight:600;
+  color:#9a3412; background:#ffedd5; border:1px solid #fed7aa;
+  border-radius:8px; padding:7px 12px;
+}
+.cob-nav-btn {
+  background:#fff; border:1.5px solid #fed7aa; color:#c2410c; cursor:pointer;
+  border-radius:8px; padding:7px 12px; font-size:13px; font-weight:700; font-family:inherit;
+}
+.cob-nav-btn:hover { background:#ffedd5; }
+tr.cob-dia > td {
+  background:#f1f5f9 !important; border-top:2px solid #cbd5e1;
+  border-bottom:1px solid #cbd5e1; padding:9px 12px !important;
+}
+.cob-dia-nome {
+  font-size:12px; font-weight:800; color:#0f172a;
+  text-transform:uppercase; letter-spacing:.7px;
+}
+.cob-dia-meta { font-size:11px; color:#64748b; font-weight:600; }
+tr.cob-dia-vazio > td {
+  background:#fcfcfb !important; color:#cbd5e1; font-size:11px;
+  font-style:italic; padding:7px 12px !important;
+}
+.cob-tag-atraso {
+  display:inline-block; background:#fee2e2; color:#991b1b; border-radius:6px;
+  padding:2px 7px; font-size:11px; font-weight:700; font-family:'DM Mono',monospace;
+}
+.cob-tag-parcial {
+  display:inline-block; background:#fef3c7; color:#92400e; border-radius:6px;
+  padding:2px 7px; font-size:11px; font-weight:700;
+}
+.cob-fup-btn { position:relative; }
+.cob-fup-count {
+  display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center;
+  background:#1e40af; color:#fff; border-radius:9px; font-size:10px; font-weight:800;
+  padding:0 4px; margin-left:4px;
+}
+.cob-fup-item {
+  border:1px solid #e7e5e4; border-left:3px solid #2563eb; border-radius:9px;
+  padding:11px 13px; margin-bottom:10px; background:#fbfcfe;
+}
+.cob-fup-top {
+  display:flex; justify-content:space-between; align-items:center;
+  gap:10px; margin-bottom:6px; flex-wrap:wrap;
+}
+.cob-fup-data { font-size:12px; font-weight:700; color:#1e3a8a; font-family:'DM Mono',monospace; }
+.cob-fup-txt { font-size:13px; color:#374151; white-space:pre-wrap; line-height:1.5; }
+.cob-fup-rodape { font-size:11px; color:#a8a29e; margin-top:6px; }
+.cob-bx-linha {
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  border:1px solid #e7e5e4; border-left:3px solid #16a34a; border-radius:9px;
+  padding:9px 12px; margin-bottom:8px; background:#f8fdfa;
+}
+.cob-bx-resumo {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px;
+}
+.cob-bx-box {
+  background:#faf9f7; border:1px solid #e7e5e4; border-radius:10px;
+  padding:12px; text-align:center;
+}
+.cob-bx-box .v { font-size:19px; font-weight:800; font-family:'DM Mono',monospace; }
+.cob-bx-box .l {
+  font-size:10px; color:#a8a29e; text-transform:uppercase;
+  letter-spacing:.5px; margin-top:3px; font-weight:700;
+}
+.cob-bx-barra { height:9px; background:#e7e5e4; border-radius:6px; overflow:hidden; margin-bottom:18px; }
+.cob-bx-barra > div { height:100%; background:linear-gradient(90deg,#16a34a,#4ade80); }
+.aviso-atraso-modal { border-top:6px solid #dc2626; }
+.aviso-atraso-cli {
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:9px 12px; border-bottom:1px solid #f5f4f2; font-size:13px;
+}
+.aviso-atraso-cli:last-child { border-bottom:none; }
+
+/* Botão e modais do WhatsApp na Cobrança */
+.btn-whats { background:#25d366 !important; color:#fff !important; border:none !important; }
+.btn-whats:hover { background:#1ebe5b !important; }
+.cob-var-chip {
+  display:inline-block; background:#f5f4f2; border:1px solid #e7e5e4; border-radius:6px;
+  padding:2px 7px; margin:0 4px 4px 0; font-size:11px; font-family:'DM Mono',monospace;
+  color:#57534e; cursor:pointer;
+}
+.cob-var-chip:hover { background:#fff1e6; border-color:#fed7aa; color:#c2410c; }
+.cob-msg-preview {
+  width:100%; min-height:260px; font-family:inherit; font-size:13px; line-height:1.55;
+  padding:13px; border:1.5px solid #e7e5e4; border-radius:10px; resize:vertical; background:#fbfdfb;
+}
 </style>
 </head>
 <body>
@@ -812,6 +918,11 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
         <div class="nav-sub-item" onclick="showPage('areceber')" id="nav-areceber">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Contas a Receber
+        </div>
+        <div class="nav-sub-item nav-destaque" onclick="showPage('cobranca')" id="nav-cobranca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .95.68l1.5 4.5a1 1 0 0 1-.5 1.2l-2.26 1.1a12 12 0 0 0 5.55 5.55l1.1-2.26a1 1 0 0 1 1.2-.5l4.5 1.5a1 1 0 0 1 .68.95V19a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg>
+          Cobrança
+          <span class="nav-destaque-pino"></span>
         </div>
         <div class="nav-sub-item" onclick="showPage('recebido')" id="nav-recebido">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -1530,6 +1641,77 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
       </div>
     </div>
 
+    <!-- ══ COBRANÇA (clientes em atraso) ══ -->
+    <div class="page" id="page-cobranca">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Cobrança</div>
+          <div class="page-sub" style="margin-bottom:0">Agenda semanal de clientes em atraso · follow-up de conversas · recebimento parcelado</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-pdf" style="background:#b91c1c" onclick="abrirAvisoAtraso(true)">🔔 Avisos de Atraso</button>
+          <button class="btn-pdf" style="background:#15803d" onclick="abrirModelosCobranca()">✉️ Mensagens</button>
+          <button class="btn-pdf" onclick="imprimirPagina('cobranca')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button>
+        </div>
+      </div>
+
+      <div id="cobranca-kpis" class="grid4" style="margin-bottom:20px;"></div>
+
+      <div class="card">
+        <div class="card-title">Semana de cobrança</div>
+        <div class="cob-semana-bar">
+          <div class="form-group"><label>Ano</label>
+            <select id="cob-ano" onchange="popularSemanasCobranca(true); renderCobranca();" style="width:110px"></select>
+          </div>
+          <div class="form-group"><label>Semana</label>
+            <select id="cob-semana" onchange="renderCobranca()" style="min-width:230px"></select>
+          </div>
+          <button class="cob-nav-btn" onclick="navSemanaCobranca(-1)" title="Semana anterior">◀</button>
+          <button class="cob-nav-btn" onclick="semanaAtualCobranca()">Semana atual</button>
+          <button class="cob-nav-btn" onclick="navSemanaCobranca(1)" title="Próxima semana">▶</button>
+          <span class="cob-periodo" id="cob-periodo">—</span>
+          <div class="form-group" style="margin-left:auto"><label>Exibir</label>
+            <select id="cob-escopo" onchange="renderCobranca()" style="min-width:190px">
+              <option value="semana">Somente a semana escolhida</option>
+              <option value="todas">Todas as pendências</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="form-group"><label>Cliente</label>
+            <select id="cob-cliente" onchange="renderCobranca()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Situação</label>
+            <select id="cob-situacao" onchange="renderCobranca()">
+              <option value="atraso">Somente em atraso</option>
+              <option value="hoje">Vencem hoje</option>
+              <option value="aberto">Todas em aberto</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Buscar (cliente / NF / produto)</label>
+            <input type="text" id="cob-busca" oninput="renderCobranca()" placeholder="Digite para filtrar..." style="width:220px" />
+          </div>
+          <div class="form-group"><label>Atraso mínimo (dias)</label>
+            <input type="number" min="0" step="1" id="cob-atraso-min" oninput="renderCobranca()" placeholder="0" style="width:120px" />
+          </div>
+          <div style="align-self:flex-end;display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="clearCobrancaFiltros()">Limpar</button>
+          </div>
+        </div>
+
+        <div class="table-scroll" style="max-height:none">
+          <table><thead><tr>
+            <th>Cliente</th><th>Produto</th><th>Parcela</th><th>Valor</th>
+            <th>Recebido</th><th>Saldo</th><th>Juros</th>
+            <th>Previsão / Venc.</th><th>Atraso</th><th>Follow-up</th><th>Situação</th><th>Ações</th>
+          </tr></thead><tbody id="tb-cobranca">
+            <tr><td colspan="12" class="empty-state">Nenhuma cobrança nesta semana.</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ RECEBIDO ══ -->
     <div class="page" id="page-recebido">
       <div class="page-header"><div><div class="page-title">Contas Recebidas</div><div class="page-sub" style="margin-bottom:0">Histórico de recebimentos realizados</div></div><div style="display:flex;gap:8px"><button class="btn-pdf" onclick="abrirPdfDia('recebido')" style="background:#0f766e">📅 PDF por Dia</button><button class="btn-pdf" onclick="imprimirPagina('recebido')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button></div></div>
@@ -1921,6 +2103,23 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
             <input type="checkbox" id="dre-somente-classificados" onchange="renderDre()" />
             Considerar apenas lançamentos com Categoria definida
           </label>
+          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Base de apuração:</span>
+          <select id="dre-base" onchange="salvarPrefsDre(); renderDre();" style="width:290px;padding:6px 10px;font-size:13px;">
+            <option value="competencia">Competência (data da venda / compra)</option>
+            <option value="vencimento">Vencimento das parcelas (30/60/90...)</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
+          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Ocultar:</span>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="dre-ocultar-acumulada" onchange="salvarPrefsDre(); renderDre();" />
+            Coluna &quot;DRE Acumulada&quot;
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="dre-ocultar-varestoque" onchange="salvarPrefsDre(); renderDre();" />
+            Linha &quot;Variação do Estoque&quot;
+          </label>
+          <span style="font-size:11px;color:#a8a29e;">Ocultar a variação só esconde a linha; o valor já digitado continua somando no CPV.</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
           <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Meses visíveis:</span>
@@ -2710,6 +2909,233 @@ body.logado.fabs-ocultos .fab-restore { display:block; }
   </div>
 </div>
 
+<!-- ══ MODAL: EDITAR PREVISÃO DE RECEBIMENTO (COBRANÇA) ══ -->
+<div class="modal-overlay" id="modal-cob-previsao">
+  <div class="modal" style="width:420px;">
+    <div class="modal-title">📅 Editar previsão de recebimento</div>
+    <div id="cob-prev-info" style="font-size:13px;color:#57534e;margin-bottom:18px;"></div>
+    <div class="form-group">
+      <label>Nova data prevista de recebimento *</label>
+      <input id="cob-prev-data" type="date" />
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:6px;">
+      <button class="btn btn-secondary" style="flex:1;font-size:12px" onclick="document.getElementById('cob-prev-data').value=today()">Hoje</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:12px" onclick="cobPrevSomarDias(7)">+7 dias</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:12px" onclick="cobPrevSomarDias(15)">+15 dias</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:12px" onclick="cobPrevSomarDias(30)">+30 dias</button>
+    </div>
+    <p style="font-size:11px;color:#a8a29e;margin-top:10px;">A data altera apenas esta parcela e a move para o dia da semana correspondente na agenda de cobrança.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cob-previsao')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarPrevisaoCobranca()">✓ Salvar previsão</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: FOLLOW-UP DE COBRANÇA ══ -->
+<div class="modal-overlay" id="modal-cob-followup">
+  <div class="modal" style="width:680px;">
+    <div class="modal-title">💬 Follow-up de cobrança</div>
+    <div id="cob-fup-info" style="font-size:13px;color:#57534e;margin-bottom:6px;"></div>
+    <div id="cob-fup-contato" style="font-size:12px;color:#a8a29e;margin-bottom:18px;"></div>
+
+    <div class="card" style="margin-bottom:18px;padding:16px;background:#fbfcfe;">
+      <div class="card-title" style="margin-bottom:12px">Registrar nova conversa</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Data *</label><input id="cob-fup-data" type="date" /></div>
+        <div class="form-group"><label>Hora</label><input id="cob-fup-hora" type="time" /></div>
+        <div class="form-group"><label>Canal</label>
+          <select id="cob-fup-canal">
+            <option value="Telefone">Telefone</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="E-mail">E-mail</option>
+            <option value="Presencial">Presencial</option>
+            <option value="Mensagem">Mensagem / SMS</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Falou com</label><input id="cob-fup-pessoa" type="text" placeholder="Nome de quem atendeu" /></div>
+        <div class="form-group"><label>Resultado</label>
+          <select id="cob-fup-resultado">
+            <option value="Promessa de pagamento">Promessa de pagamento</option>
+            <option value="Negociação em andamento">Negociação em andamento</option>
+            <option value="Sem contato / não atendeu">Sem contato / não atendeu</option>
+            <option value="Pagamento confirmado">Pagamento confirmado</option>
+            <option value="Contesta o débito">Contesta o débito</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Resumo da conversa *</label>
+        <textarea id="cob-fup-obs" rows="3" placeholder="O que foi tratado com o cliente..." style="width:100%"></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0"><label>Próximo contato / promessa para</label>
+        <input id="cob-fup-proximo" type="date" style="width:200px" />
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="addFollowupCobranca()">+ Registrar conversa</button></div>
+    </div>
+
+    <div class="card-title">Histórico de conversas</div>
+    <div id="cob-fup-lista"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cob-followup')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: RECEBIMENTO PARCELADO / BAIXA PARCIAL ══ -->
+<div class="modal-overlay" id="modal-cob-baixa">
+  <div class="modal" style="width:720px;">
+    <div class="modal-title">💵 Recebimento parcelado da parcela</div>
+    <div id="cob-bx-info" style="font-size:13px;color:#57534e;margin-bottom:16px;"></div>
+
+    <div class="cob-bx-resumo">
+      <div class="cob-bx-box"><div class="v" id="cob-bx-total" style="color:#1f2937">R$ 0,00</div><div class="l">Valor da parcela</div></div>
+      <div class="cob-bx-box"><div class="v" id="cob-bx-pago" style="color:#16a34a">R$ 0,00</div><div class="l">Já recebido</div></div>
+      <div class="cob-bx-box"><div class="v" id="cob-bx-saldo" style="color:#dc2626">R$ 0,00</div><div class="l">Saldo a receber</div></div>
+    </div>
+    <div class="cob-bx-barra"><div id="cob-bx-progresso" style="width:0%"></div></div>
+
+    <div class="card" style="margin-bottom:18px;padding:16px;background:#f8fdfa;">
+      <div class="card-title" style="margin-bottom:12px">Lançar um recebimento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Data *</label><input id="cob-bx-data" type="date" /></div>
+        <div class="form-group"><label>Valor (R$) *</label><input id="cob-bx-valor" type="number" step="0.01" min="0.01" placeholder="0,00" /></div>
+        <div class="form-group"><label>Forma de recebimento *</label>
+          <select id="cob-bx-forma" onchange="onTipoRecebChange(this)"><option value="">Selecione...</option></select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Banco / Conta *</label>
+          <select id="cob-bx-banco"><option value="">Não informado</option></select>
+        </div>
+        <div class="form-group"><label>Observação</label><input id="cob-bx-obs" type="text" placeholder="Nº do cheque, comprovante..." /></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" style="font-size:12px" onclick="cobBaixaUsarSaldo()">Usar saldo total</button>
+        <button class="btn btn-primary" onclick="addBaixaCobranca()">+ Lançar recebimento</button>
+      </div>
+    </div>
+
+    <div class="card-title">Recebimentos lançados nesta parcela</div>
+    <div id="cob-bx-lista"></div>
+    <p style="font-size:11px;color:#a8a29e;margin-top:12px;">Ao somar o valor integral da parcela, ela é quitada automaticamente e passa para <strong>Contas Recebidas</strong>.</p>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cob-baixa')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ENVIAR MENSAGEM NO WHATSAPP ══ -->
+<div class="modal-overlay" id="modal-cob-whats">
+  <div class="modal" style="width:700px;">
+    <div class="modal-title">📱 Enviar mensagem no WhatsApp</div>
+    <div id="cob-wa-info" style="font-size:13px;color:#57534e;margin-bottom:18px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group"><label>Modelo de mensagem</label>
+        <select id="cob-wa-modelo" onchange="aplicarModeloWhats()"></select>
+      </div>
+      <div class="form-group"><label>WhatsApp do cliente *</label>
+        <input id="cob-wa-fone" type="text" placeholder="Ex.: 47 99999-0000" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Mensagem (pode editar antes de enviar)</label>
+      <textarea id="cob-wa-texto" class="cob-msg-preview"></textarea>
+    </div>
+
+    <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;margin-bottom:6px;">
+      <input type="checkbox" id="cob-wa-registrar" checked />
+      Registrar este envio no follow-up da cobrança
+    </label>
+    <p style="font-size:11px;color:#a8a29e;">O WhatsApp abre em uma nova aba com a mensagem já escrita — você confere e aperta enviar por lá.</p>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cob-whats')">Cancelar</button>
+      <button class="btn btn-secondary" onclick="copiarMensagemWhats()">📋 Copiar texto</button>
+      <button class="btn btn-primary btn-whats" onclick="enviarWhatsCobranca()">📱 Abrir WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: MODELOS DE MENSAGEM DE COBRANÇA ══ -->
+<div class="modal-overlay" id="modal-cob-msgs">
+  <div class="modal" style="width:760px;">
+    <div class="modal-title">✉️ Modelos de mensagem de cobrança</div>
+
+    <div class="card" style="padding:16px;margin-bottom:18px;background:#fbfcfe;">
+      <div class="card-title" style="margin-bottom:12px">Como você assina as mensagens</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="margin-bottom:0"><label>Seu nome</label>
+          <input id="cob-msg-remetente" type="text" placeholder="Ex.: Maria" />
+        </div>
+        <div class="form-group" style="margin-bottom:0"><label>Nome da empresa</label>
+          <input id="cob-msg-empresa" type="text" placeholder="Ex.: 477 Hidráulica" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Modelo</label>
+      <select id="cob-msg-lista" onchange="carregarModeloCobranca()"></select>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+      <div class="form-group"><label>Título do modelo *</label>
+        <input id="cob-msg-titulo" type="text" placeholder="Ex.: 3 dias de atraso" />
+      </div>
+      <div class="form-group"><label>Sugerir a partir de (dias de atraso)</label>
+        <input id="cob-msg-gatilho" type="number" step="1" placeholder="Ex.: 3 · use −7 para avisar antes" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Texto da mensagem *</label>
+      <textarea id="cob-msg-texto" class="cob-msg-preview"></textarea>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;color:#a8a29e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">
+        Campos automáticos — clique para inserir no texto
+      </div>
+      <div id="cob-msg-vars"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="novoModeloCobranca()">+ Novo modelo</button>
+      <button class="btn btn-primary" onclick="salvarModeloCobranca()">✓ Salvar modelo</button>
+      <button class="btn btn-danger" onclick="excluirModeloCobranca()">Excluir modelo</button>
+      <button class="btn btn-secondary" onclick="restaurarModelosPadrao()">Restaurar modelos padrão</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cob-msgs')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: AVISO DE CLIENTE EM DÉBITO (bloqueante) ══ -->
+<div class="modal-overlay" id="modal-aviso-atraso" data-nao-fechar="1">
+  <div class="modal aviso-atraso-modal" style="width:560px;">
+    <div class="modal-title" style="color:#b91c1c;display:flex;align-items:center;gap:9px;">
+      <span style="font-size:22px">⚠️</span> Atenção: cliente(s) em débito
+    </div>
+    <p style="font-size:13px;color:#57534e;margin-bottom:16px;">
+      Os clientes abaixo atingiram a data de vencimento e continuam em aberto. Confira a lista e feche este aviso para continuar.
+    </p>
+    <div id="aviso-atraso-lista" style="border:1px solid #e7e5e4;border-radius:10px;max-height:320px;overflow-y:auto;margin-bottom:8px;"></div>
+    <div id="aviso-atraso-resumo" style="font-size:12px;color:#991b1b;font-weight:700;text-align:right;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharAvisoAtraso(); showPage('cobranca');">Ir para Cobrança</button>
+      <button class="btn btn-primary" style="background:#b91c1c" onclick="fecharAvisoAtraso()">✓ Ciente, fechar aviso</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL CADASTRAR FORMA DE RECEBIMENTO ══ -->
 <div class="modal-overlay" id="modal-nova-forma-receb">
   <div class="modal" style="width:380px;">
@@ -3354,6 +3780,7 @@ const PAGES_CONFIG = [
   { id:'prodvenda',         label:'Produtos de Venda',   grupo:'receber' },
   { id:'lancreceber',       label:'Lançamentos (Venda)', grupo:'receber' },
   { id:'areceber',          label:'Contas a Receber',    grupo:'receber' },
+  { id:'cobranca',          label:'Cobrança',            grupo:'receber' },
   { id:'recebido',          label:'Contas Recebidas',    grupo:'receber' },
   { id:'pedidoscancelados', label:'Pedidos Cancelados',  grupo:'receber' },
   { id:'reposicao',         label:'Reposição',           grupo:'receber' },
@@ -3734,7 +4161,11 @@ async function loadAllData() {
       fetchAll('reposicoes', 'dt_reposicao'), // 16
       fetchAll('empresas', 'nome'), // 17 — nunca filtrado por empresa
       // 18 — Custos fixos e suas vigências (guardados na tabela `config`)
-      sbFetch('config', 'GET', null, '?key=like.custofixo_*&limit=5000')
+      sbFetch('config', 'GET', null, '?key=like.custofixo_*&limit=5000'),
+      // 19 — Cobrança: follow-ups e recebimentos parciais (tabela `config`)
+      sbFetch('config', 'GET', null, '?key=like.cobranca:*&limit=5000'),
+      // 20 — Modelos de mensagem de cobrança (WhatsApp)
+      sbFetch('config', 'GET', null, '?key=eq.cobranca_mensagens&limit=1')
     ]);
 
     const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
@@ -3767,6 +4198,17 @@ async function loadAllData() {
       try { obj = JSON.parse(c.value); } catch(e) { obj = null; }
       if (obj && obj.ativo) db.custosfixos[lancId] = { ativo: true, vigencias: obj.vigencias || [] };
     });
+    // Cobrança: follow-ups e baixas parciais (key = "cobranca:<lancId>:<parcela>")
+    cobrancaDados = {};
+    (val(19) || []).forEach(c => {
+      const chave = String(c.key || '').slice(COB_PREFIX.length);
+      if (!chave) return;
+      let obj = null;
+      try { obj = JSON.parse(c.value); } catch(e) { obj = null; }
+      if (obj) cobrancaDados[chave] = { followups: obj.followups || [], baixas: obj.baixas || [] };
+    });
+    // Modelos de mensagem do WhatsApp usados na Cobrança
+    _carregarModelosCobranca(val(20));
     db.pedidos_cancelados = val(15) || [];
     db.reposicoes = val(16) || [];
     db.empresas = val(17) || [];
@@ -3987,7 +4429,8 @@ function showPage(p) {
   if (p === 'clientes')       renderClientes();
   if (p === 'prodvenda')      renderProdVenda();
   if (p === 'lancreceber')    renderLancReceber();
-  if (p === 'areceber')       renderAReceber();
+  if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
+  if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -4023,7 +4466,8 @@ function renderPaginaAtual() {
   if (p === 'clientes')       renderClientes();
   if (p === 'prodvenda')      renderProdVenda();
   if (p === 'lancreceber')    renderLancReceber();
-  if (p === 'areceber')       renderAReceber();
+  if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
+  if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -4115,7 +4559,10 @@ document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   const abertos = document.querySelectorAll('.modal-overlay.open');
   if (!abertos.length) return;
-  closeModal(abertos[abertos.length - 1].id);
+  const ultimo = abertos[abertos.length - 1];
+  // Avisos bloqueantes (ex.: cliente em débito) só saem pelo botão do modal
+  if (ultimo.dataset && ultimo.dataset.naoFechar) return;
+  closeModal(ultimo.id);
 });
 
 function abrirModalLanc() {
@@ -5822,7 +6269,7 @@ function ativarSelectsPesquisaveis() {
   // Cliente — com cadastro rápido nas telas de lançamento de receitas
   enhanceSearchableSelect(document.getElementById('lr-cliente'), { criarNovo: criarClienteRapido });
   enhanceSearchableSelect(document.getElementById('elr-cliente'), { criarNovo: criarClienteRapido });
-  ['lrf-cliente','arf-cliente','recf-cliente'].forEach(id => enhanceSearchableSelect(document.getElementById(id)));
+  ['lrf-cliente','arf-cliente','recf-cliente','cob-cliente'].forEach(id => enhanceSearchableSelect(document.getElementById(id)));
 
   // Produto (só busca, sem cadastro rápido — produto tem mais campos obrigatórios)
   ['l-prod','edit-prod','lf-prod','af-prod','pgf-prod','dash-prod',
@@ -8297,7 +8744,7 @@ function populateClienteSelects() {
   const opts = '<option value="">Selecione...</option>' + db.clientes.map(cl=>`<option value="${cl.id}">${cl.nome}</option>`).join('');
   ['lr-cliente','elr-cliente'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=opts; });
   const filterOpts = '<option value="">Todos</option>' + db.clientes.map(cl=>`<option value="${cl.id}">${cl.nome}</option>`).join('');
-  ['lrf-cliente','arf-cliente','recf-cliente'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=filterOpts; });
+  ['lrf-cliente','arf-cliente','recf-cliente','cob-cliente'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=filterOpts; });
 }
 function populateProdVendaSelects() {
   const opts = '<option value="">Selecione...</option>' + db.prodvenda.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
@@ -8896,7 +9343,7 @@ function renderAReceber() {
       <td>${p.prod?getProdVendaNome(p.prod):'—'}</td>
       <td>${p.catId?'<span class="badge badge-blue">'+getDfcCatNome(p.catId)+'</span>':'<span style="color:#a8a29e">—</span>'}</td>
       <td style="font-family:DM Mono,monospace">${p.parcIdx}/${p.totalParc}</td>
-      <td style="font-family:DM Mono,monospace">${fmtBRL(p.valParc)}</td>
+      <td style="font-family:DM Mono,monospace">${fmtBRL(p.valParc)}${_parcialAReceber(p)}</td>
       <td>${jurosCell}</td>
       <td>${totalCell}</td>
       <td style="font-size:12px;color:#57534e">${fmtDate(p.dtvenda)}</td>
@@ -8911,6 +9358,14 @@ function renderAReceber() {
       </td>
     </tr>`;
   }).join('');
+}
+// Mostra, em Contas a Receber, quando a parcela já teve recebimento parcial
+// lançado na tela de Cobrança — assim o valor cheio não engana o usuário.
+function _parcialAReceber(p) {
+  const pago = (typeof cobTotalBaixas === 'function') ? cobTotalBaixas(p.lancId, p.parcIdx) : 0;
+  if (!(pago > 0)) return '';
+  const saldo = Math.max(0, p.valParc - pago);
+  return `<br><small style="color:#16a34a;font-size:11px">recebido ${fmtBRL(pago)} · saldo ${fmtBRL(saldo)}</small>`;
 }
 function clearAReceberFiltros() {
   ['arf-mes','arf-ano','arf-cliente','arf-categoria','arf-data','arf-data-de','arf-data-ate','arf-valor-min','arf-valor-max','arf-situacao','arf-tipo-pag','arf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
@@ -8968,7 +9423,7 @@ async function confirmarRecebido() {
     return;
   }
 
-  closeModal('modal-recebido'); renderAReceber(); renderRecebido(); renderDashboard();
+  closeModal('modal-recebido'); renderAReceber(); renderCobranca(); renderRecebido(); renderDashboard();
 }
 async function estornarRecebido(id, parcIdx) {
   if(!confirm('Desfazer o recebimento desta parcela?')) return;
@@ -8993,7 +9448,7 @@ async function estornarRecebido(id, parcIdx) {
     return;
   }
 
-  renderRecebido(); renderAReceber(); renderDashboard();
+  renderRecebido(); renderAReceber(); renderCobranca(); renderDashboard();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -10161,8 +10616,14 @@ async function setVarEstoque(mes, rawValor) {
 }
 
 function renderDre() {
+  if (!window._drePrefsOk) { window._drePrefsOk = true; restaurarPrefsDre(); }
   const ano = parseInt(document.getElementById('dre-ano').value);
   const somenteClassificados = document.getElementById('dre-somente-classificados').checked;
+  // Base de apuração: competência (data da venda/compra) ou vencimento das parcelas
+  const baseDre = (document.getElementById('dre-base') || {}).value || 'competencia';
+  // Ocultar a coluna do acumulado e/ou a linha de Variação do Estoque
+  const mostrarAcum   = !((document.getElementById('dre-ocultar-acumulada') || {}).checked);
+  const ocultarVarEst = !!((document.getElementById('dre-ocultar-varestoque') || {}).checked);
   const wrap = document.getElementById('dre-tabela-wrap');
   if (!wrap) return;
 
@@ -10206,59 +10667,61 @@ function renderDre() {
 
   // 1. Lançamentos a Receber (competência = data da venda)
   db.lancreceber.forEach(l => {
-    const dtRef = l.dtvenda || l.dtcompra;
-    if (!dtRef) return;
-    const parts = dtRef.split('-');
-    if (parseInt(parts[0]) !== ano) return;
-    const m = parseInt(parts[1]);
+    const ocorrencias = _dreOcorrencias(l, baseDre, ano, 'receber');
+    if (!ocorrencias.length) return;
     const prodObj = db.prodvenda.find(x => x.id === l.prod);
     const catId = l.cat_dre || (prodObj ? prodObj.cat : null);
     if (!catId) { if (somenteClassificados) return; }
     let grupoId = catId ? getDreCatGrupo(catId) : null;
     // Venda sem grupo de DRE => conta como Receita Bruta (grupo-base)
     if (!grupoId && !somenteClassificados) grupoId = grupoBaseId;
-    if (grupoId && valoresMes[m][grupoId] !== undefined) {
+    if (!grupoId) return;
+    ocorrencias.forEach(o => {
+      const m = o.mes;
+      if (valoresMes[m][grupoId] === undefined) return;
       const item = {
-        tipo: 'receber', data: dtRef, nome: getClienteNome(l.cliente),
-        prod: l.prod ? getProdVendaNome(l.prod) : '', valor: l.valor || 0,
-        status: l.recebido === 'sim' ? 'Recebido' : 'A Receber'
+        tipo: 'receber', data: o.data, nome: getClienteNome(l.cliente),
+        prod: (l.prod ? getProdVendaNome(l.prod) : '') + (o.parcela ? ` (parc. ${o.parcela})` : ''),
+        valor: o.valor,
+        status: o.quitado ? 'Recebido' : 'A Receber'
       };
-      valoresMes[m][grupoId] += (l.valor || 0);
+      valoresMes[m][grupoId] += o.valor;
       itensMes[m][grupoId].push(item);
       // Categoria da venda; sem categoria definida, entra como "Sem categoria"
       // (só faz sentido dentro do grupo-base, onde a venda caiu por fallback)
       const catKey = catId || (grupoId === grupoBaseId ? SEM_CAT : null);
       if (catKey) {
-        valoresMesCat[m][catKey] = (valoresMesCat[m][catKey] || 0) + (l.valor || 0);
+        valoresMesCat[m][catKey] = (valoresMesCat[m][catKey] || 0) + o.valor;
         (itensMesCat[m][catKey] = itensMesCat[m][catKey] || []).push(item);
       }
-    }
+    });
   });
 
   // 2. Lançamentos a Pagar (competência = data da compra)
   db.lancamentos.forEach(l => {
-    const dtRef = l.dtcompra;
-    if (!dtRef) return;
-    const parts = dtRef.split('-');
-    if (parseInt(parts[0]) !== ano) return;
-    const m = parseInt(parts[1]);
+    const ocorrencias = _dreOcorrencias(l, baseDre, ano, 'pagar');
+    if (!ocorrencias.length) return;
     const prodObj = db.produtos.find(x => x.id === l.prod);
     const catId = l.cat_dre || (prodObj ? prodObj.cat : null);
     if (!catId) { if (somenteClassificados) return; }
     const grupoId = catId ? getDreCatGrupo(catId) : null;
-    if (grupoId && valoresMes[m][grupoId] !== undefined) {
+    if (!grupoId) return;
+    ocorrencias.forEach(o => {
+      const m = o.mes;
+      if (valoresMes[m][grupoId] === undefined) return;
       const item = {
-        tipo: 'pagar', data: dtRef, nome: getFornNome(l.forn),
-        prod: l.prod ? getProdNome(l.prod) : '', valor: l.valor || 0,
-        status: l.pago === 'sim' ? 'Pago' : 'A Pagar'
+        tipo: 'pagar', data: o.data, nome: getFornNome(l.forn),
+        prod: (l.prod ? getProdNome(l.prod) : '') + (o.parcela ? ` (parc. ${o.parcela})` : ''),
+        valor: o.valor,
+        status: o.quitado ? 'Pago' : 'A Pagar'
       };
-      valoresMes[m][grupoId] += (l.valor || 0);
+      valoresMes[m][grupoId] += o.valor;
       itensMes[m][grupoId].push(item);
       if (catId) {
-        valoresMesCat[m][catId] = (valoresMesCat[m][catId] || 0) + (l.valor || 0);
+        valoresMesCat[m][catId] = (valoresMesCat[m][catId] || 0) + o.valor;
         (itensMesCat[m][catId] = itensMesCat[m][catId] || []).push(item);
       }
-    }
+    });
   });
 
   // Injeta a Variação de Estoque digitada manualmente (não vem de lançamentos).
@@ -10343,7 +10806,8 @@ function renderDre() {
     });
   });
 
-  const mesesHeader = mesesVisiveis.map(m => `<th>${MESES_ABR[m]}</th>`).join('') + '<th class="dfc-col-total">DRE Acumulada</th>';
+  const mesesHeader = mesesVisiveis.map(m => `<th>${MESES_ABR[m]}</th>`).join('')
+    + (mostrarAcum ? '<th class="dfc-col-total">DRE Acumulada</th>' : '');
 
   // Linha de uma categoria, exibida dentro do grupo expandido (herda o sinal
   // do grupo-pai, para que a soma das categorias bata com a linha do grupo).
@@ -10360,7 +10824,7 @@ function renderDre() {
     const totalCell = Math.abs(totalVal) >= 0.005
       ? `<td class="dfc-col-total dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}','total')" title="Ver lançamentos desta categoria">${fmtDreVal(totalVal)}</td>`
       : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`;
-    return `<tr class="dre-cat-row"><td>${nomeCat}</td>${cells}${totalCell}</tr>`;
+    return `<tr class="dre-cat-row"><td>${nomeCat}</td>${cells}${mostrarAcum ? totalCell : ''}</tr>`;
   };
 
   const linhaValor = (g, cls, clicavel) => {
@@ -10392,7 +10856,7 @@ function renderDre() {
       ? `<button type="button" class="dre-toggle-cat" onclick="toggleDreGrupoCat('${g.id}')" title="${expandido ? 'Recolher' : 'Expandir'} categorias">${expandido ? '▾' : '▸'}</button>`
       : (clicavel ? '<span class="dre-toggle-spacer"></span>' : '');
 
-    let html = `<tr class="${cls}"><td>${toggleHtml}${g.nome}</td>${cells}${totalCell}</tr>`;
+    let html = `<tr class="${cls}"><td>${toggleHtml}${g.nome}</td>${cells}${mostrarAcum ? totalCell : ''}</tr>`;
     if (temFilhos && expandido) {
       catsDoGrupo.forEach(c => { html += linhaCategoria(c.id, c.nome, g.tipo); });
       if (temSemCategoria) html += linhaCategoria(SEM_CAT, 'Sem categoria', g.tipo);
@@ -10401,7 +10865,7 @@ function renderDre() {
   };
   const linhaPercentual = (g) => {
     const cells = mesesVisiveis.map(mes => `<td>${fmtDrePercent(linhaCalc[g.id][mes])}</td>`).join('');
-    return `<tr class="dre-row-percent"><td>${g.nome}</td>${cells}<td class="dfc-col-total">${fmtDrePercent(linhaCalc[g.id]['total'])}</td></tr>`;
+    return `<tr class="dre-row-percent"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDrePercent(linhaCalc[g.id]['total'])}</td>` : ''}</tr>`;
   };
 
   // Última linha do tipo "subtotal" cadastrada = resultado final (Lucro/Prejuízo)
@@ -10411,7 +10875,7 @@ function renderDre() {
   const linhaFinal = (g, cls) => {
     const cells = mesesVisiveis.map(mes => `<td>${fmtDreVal(linhaCalc[g.id][mes])}</td>`).join('');
     const totalVal = linhaCalc[g.id]['total'];
-    return `<tr class="${cls}"><td>${g.nome}</td>${cells}<td class="dfc-col-total">${fmtDreVal(totalVal)}</td></tr>`;
+    return `<tr class="${cls}"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>` : ''}</tr>`;
   };
 
   // Linha da Variação de Estoque: células editáveis em formato contábil (digite
@@ -10426,11 +10890,11 @@ function renderDre() {
     }).join('');
     let soma = 0; mesesVisiveis.forEach(mes => { soma += parseFloat(mapaAno[mes]) || 0; });
     const totalCell = `<td class="dfc-col-total">${Math.abs(soma) < 0.005 ? '<span class="dfc-val-zero">—</span>' : (soma > 0 ? '+ ' : '− ') + fmtBRL(Math.abs(soma))}</td>`;
-    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}${totalCell}</tr>`;
+    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}${mostrarAcum ? totalCell : ''}</tr>`;
   };
 
   const linhasHtml = grupos.map(g => {
-    if (g.id === varEstGrupoId && (g.tipo === 'entrada' || g.tipo === 'saida')) return linhaVarEstoque(g);
+    if (g.id === varEstGrupoId && (g.tipo === 'entrada' || g.tipo === 'saida')) return ocultarVarEst ? '' : linhaVarEstoque(g);
     if (g.tipo === 'percentual') return linhaPercentual(g);
     if (g.tipo === 'subtotal') {
       if (g.id === ultimoSubtotalId) return linhaFinal(g, 'dre-row-final');
@@ -10471,15 +10935,82 @@ function renderDre() {
     return `<td>${v==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(v)}</td>`;
   }).join('');
   const peTot = peCol('total');
-  const peRow = `<tr class="dre-row-pe"><td>Ponto de Equilíbrio (R$)</td>${peCells}<td class="dfc-col-total">${peTot==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(peTot)}</td></tr>`;
+  const peRow = `<tr class="dre-row-pe"><td>Ponto de Equilíbrio (R$)</td>${peCells}${mostrarAcum ? `<td class="dfc-col-total">${peTot==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(peTot)}</td>` : ''}</tr>`;
 
-  const html = `<table class="dfc-table">
+  const avisoBase = baseDre === 'vencimento'
+    ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12px;">
+         📅 Apuração pelo <strong>vencimento das parcelas</strong>: cada parcela (30/60/90...) entra no mês em que vence, e não no mês da venda/compra.
+       </div>`
+    : '';
+  const html = avisoBase + `<table class="dfc-table">
     <thead><tr><th>DRE</th>${mesesHeader}</tr></thead>
     <tbody>${linhasHtml}${peRow}</tbody>
   </table>`;
 
   wrap.innerHTML = html;
   renderDreChart(grupos, gruposValor, linhaCalc, ultimoSubtotalId);
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Ocorrências de um lançamento no DRE.
+//  • Competência: um único valor cheio no mês da venda/compra (padrão).
+//  • Vencimento: uma ocorrência por parcela, no mês em que ela vence —
+//    é assim que se enxerga a amortização de empréstimos ou as compras
+//    parceladas em 30/60/90 dias caindo mês a mês.
+// ──────────────────────────────────────────────────────────────────
+function _dreOcorrencias(l, base, ano, tipo) {
+  const res = [];
+  const quitadoTudo = tipo === 'receber' ? (l.recebido === 'sim') : (l.pago === 'sim');
+
+  if (base !== 'vencimento') {
+    const dtRef = tipo === 'receber' ? (l.dtvenda || l.dtcompra) : l.dtcompra;
+    if (!dtRef) return res;
+    const p = dtRef.split('-');
+    if (parseInt(p[0]) !== ano) return res;
+    res.push({ mes: parseInt(p[1]), valor: l.valor || 0, data: dtRef, parcela: '', quitado: quitadoTudo });
+    return res;
+  }
+
+  const n = l.parcelas || 1;
+  const { datas, valores, pagos } = _parseParcelas(l.parcela_datas);
+  for (let i = 1; i <= n; i++) {
+    const venc = datas[i-1]
+      ? datas[i-1]
+      : (tipo === 'receber' ? parcelaVencimentoReceber(l.dtprev, i) : parcelaVencimento(l.dtprev, i, n));
+    if (!venc) continue;
+    const pv = venc.split('-');
+    if (parseInt(pv[0]) !== ano) continue;
+    const val = (valores[i-1] != null) ? valores[i-1] : ((l.valor || 0) / n);
+    res.push({
+      mes: parseInt(pv[1]), valor: val, data: venc, parcela: i + '/' + n,
+      quitado: n > 1 ? (pagos[i-1] === true) : quitadoTudo
+    });
+  }
+  return res;
+}
+
+// Preferências da tela de DRE (base de apuração e o que está oculto).
+// Ficam no navegador — é uma escolha de visualização, não um dado da empresa.
+const DRE_PREFS_KEY = '477_dre_prefs';
+function salvarPrefsDre() {
+  try {
+    localStorage.setItem(DRE_PREFS_KEY, JSON.stringify({
+      base:   (document.getElementById('dre-base') || {}).value || 'competencia',
+      acum:   !!((document.getElementById('dre-ocultar-acumulada') || {}).checked),
+      varest: !!((document.getElementById('dre-ocultar-varestoque') || {}).checked)
+    }));
+  } catch(e) {}
+}
+function restaurarPrefsDre() {
+  let p = null;
+  try { p = JSON.parse(localStorage.getItem(DRE_PREFS_KEY) || 'null'); } catch(e) { p = null; }
+  if (!p) return;
+  const b = document.getElementById('dre-base');
+  if (b && p.base) b.value = p.base;
+  const a = document.getElementById('dre-ocultar-acumulada');
+  if (a) a.checked = !!p.acum;
+  const v = document.getElementById('dre-ocultar-varestoque');
+  if (v) v.checked = !!p.varest;
 }
 
 function dreMesesTodos(mostrar) {
@@ -10975,7 +11506,7 @@ function getBancoNome(id) {
 function populateBancoSelects() {
   const opts = '<option value="">Não informado</option>' +
     db.bancos.map(b => `<option value="${b.id}">${b.nome}</option>`).join('');
-  ['l-banco','lr-banco','edit-banco','elr-banco','modal-recebido-banco','modal-pago-banco','mp-banco','mr-banco'].forEach(id => {
+  ['l-banco','lr-banco','edit-banco','elr-banco','modal-recebido-banco','modal-pago-banco','mp-banco','mr-banco','cob-bx-banco'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { const val=el.value; el.innerHTML=opts; if(val) el.value=val; }
   });
@@ -11025,7 +11556,7 @@ function populateFormasPagSelects() {
 }
 
 function populateFormasRecebSelects() {
-  ['lr-tipo-pag','elr-tipo-pag','modal-recebido-tipo-pag'].forEach(id => {
+  ['lr-tipo-pag','elr-tipo-pag','modal-recebido-tipo-pag','cob-bx-forma'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     const val = (el.value === FORMA_NOVA) ? '' : el.value;
@@ -11917,6 +12448,7 @@ function imprimirPagina(pagina) {
     pagas:       'Contas Pagas',
     'custos-fixos': 'Custos Fixos',
     areceber:    'Contas a Receber',
+    cobranca:    'Cobrança — Clientes em Atraso',
     recebido:    'Contas Recebidas',
     pedidoscancelados: 'Pedidos Cancelados',
     reposicao:   'Reposições'
@@ -11927,6 +12459,7 @@ function imprimirPagina(pagina) {
     pagas:       'tb-pagas',
     'custos-fixos': 'tb-custos-fixos',
     areceber:    'tb-areceber',
+    cobranca:    'tb-cobranca',
     recebido:    'tb-recebido',
     pedidoscancelados: 'tb-pedidoscancelados',
     reposicao:   'tb-reposicao'
@@ -11936,6 +12469,7 @@ function imprimirPagina(pagina) {
     pagas:    'pagas-kpis',
     'custos-fixos': 'cf-kpis',
     areceber: 'areceber-kpis',
+    cobranca: 'cobranca-kpis',
     recebido: 'recebido-kpis',
     pedidoscancelados: 'pc-kpis',
     reposicao:   'rp-kpis'
@@ -13922,7 +14456,923 @@ window.APP_BUILD = '2026-09-05 · custos-fixos-vigencias-dtpago';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
+
+// ══════════════════════════════════════════════════════════════════════
+// COBRANÇA — clientes em atraso
+// ----------------------------------------------------------------------
+// Tela dedicada à cobrança, montada em cima das MESMAS parcelas de
+// "Contas a Receber" (db.lancreceber). Nada é duplicado: o que existe a
+// mais aqui são os follow-ups (histórico de conversas) e os recebimentos
+// parciais, que ficam na tabela `config` já existente no Supabase, com a
+// chave "cobranca:<id do lançamento>:<nº da parcela>" — assim NÃO é
+// preciso criar tabela nem coluna nova no banco.
+//
+//   { followups: [ {id,data,hora,canal,pessoa,resultado,obs,proximo,usuario} ],
+//     baixas:    [ {id,data,valor,forma,banco,obs,usuario} ] }
+//
+// Quando a soma das baixas alcança o valor da parcela, ela é quitada
+// pelo mesmo caminho do botão "Marcar Recebido" e sai para Contas
+// Recebidas automaticamente.
+// ══════════════════════════════════════════════════════════════════════
+const COB_PREFIX = 'cobranca:';
+const AVISO_ATRASO_KEY = 'cap_aviso_atraso_visto';
+const COB_DIAS = ['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo'];
+var cobrancaDados = {};   // "lancId:parcIdx" -> { followups:[], baixas:[] }
+
+// ── Datas / semanas ISO ───────────────────────────────────────────────
+function _dataLocal(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function _isoStr(dt) {
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+}
+function _addDias(iso, n) { const d = _dataLocal(iso); d.setDate(d.getDate()+n); return _isoStr(d); }
+
+// Semana ISO 8601 (a que o pessoal chama de "semana 33"): começa na segunda
+function semanaISO(iso) {
+  const d = _dataLocal(iso);
+  const alvo = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diaSem = (alvo.getDay() + 6) % 7;           // 0 = segunda
+  alvo.setDate(alvo.getDate() - diaSem + 3);        // quinta-feira da semana
+  const anoISO = alvo.getFullYear();
+  const jan4 = new Date(anoISO, 0, 4);
+  const seg1 = new Date(anoISO, 0, 4 - ((jan4.getDay() + 6) % 7));
+  const semana = Math.round((alvo - seg1) / 604800000) + 1;
+  return { ano: anoISO, semana };
+}
+function segundaDaSemana(ano, semana) {
+  const jan4 = new Date(ano, 0, 4);
+  const seg1 = new Date(ano, 0, 4 - ((jan4.getDay() + 6) % 7));
+  const seg = new Date(seg1);
+  seg.setDate(seg1.getDate() + (semana - 1) * 7);
+  return seg;
+}
+function totalSemanasISO(ano) { return semanaISO(_isoStr(new Date(ano, 11, 28))).semana; }
+
+// ── Persistência (tabela `config`) ────────────────────────────────────
+function _cobKey(lancId, parcIdx) { return lancId + ':' + parcIdx; }
+function cobGet(lancId, parcIdx) {
+  const k = _cobKey(lancId, parcIdx);
+  if (!cobrancaDados[k]) cobrancaDados[k] = { followups: [], baixas: [] };
+  return cobrancaDados[k];
+}
+function cobTotalBaixas(lancId, parcIdx) {
+  return (cobGet(lancId, parcIdx).baixas || []).reduce((s,b) => s + (parseFloat(b.valor)||0), 0);
+}
+async function cobSalvar(lancId, parcIdx) {
+  const reg = cobGet(lancId, parcIdx);
+  const key = COB_PREFIX + _cobKey(lancId, parcIdx);
+  await sbFetch('config', 'DELETE', null, `?key=eq.${encodeURIComponent(key)}`);
+  const vazio = !(reg.followups||[]).length && !(reg.baixas||[]).length;
+  if (vazio) return true;
+  const ok = await sbFetch('config', 'POST', { id: uid(), key, value: JSON.stringify(reg) });
+  return !!ok;
+}
+
+// ── Seletor de semana ─────────────────────────────────────────────────
+function popularSemanasCobranca(forcar) {
+  const selAno = document.getElementById('cob-ano');
+  const selSem = document.getElementById('cob-semana');
+  if (!selAno || !selSem) return;
+
+  if (!selAno.options.length) {
+    const atual = new Date().getFullYear();
+    const anos = new Set();
+    for (let y = atual - 2; y <= atual + 1; y++) anos.add(y);
+    db.lancreceber.forEach(l => { if (l.dtprev) anos.add(parseInt(l.dtprev.split('-')[0])); });
+    selAno.innerHTML = [...anos].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('');
+    selAno.value = semanaISO(today()).ano;
+  }
+  if (!selSem.options.length || forcar) {
+    const ano = parseInt(selAno.value) || new Date().getFullYear();
+    const total = totalSemanasISO(ano);
+    let html = '';
+    for (let w = 1; w <= total; w++) {
+      const seg = segundaDaSemana(ano, w);
+      const dom = new Date(seg); dom.setDate(seg.getDate()+6);
+      const r = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+      html += `<option value="${w}">Semana ${w} · ${r(seg)} a ${r(dom)}</option>`;
+    }
+    selSem.innerHTML = html;
+    const hj = semanaISO(today());
+    selSem.value = (hj.ano === ano) ? Math.min(hj.semana, total) : 1;
+  }
+}
+function semanaAtualCobranca() {
+  const hj = semanaISO(today());
+  const selAno = document.getElementById('cob-ano');
+  if (![...selAno.options].some(o => o.value == hj.ano)) {
+    selAno.insertAdjacentHTML('afterbegin', `<option value="${hj.ano}">${hj.ano}</option>`);
+  }
+  selAno.value = hj.ano;
+  popularSemanasCobranca(true);
+  document.getElementById('cob-semana').value = hj.semana;
+  document.getElementById('cob-escopo').value = 'semana';
+  renderCobranca();
+}
+function navSemanaCobranca(passo) {
+  const selAno = document.getElementById('cob-ano');
+  const selSem = document.getElementById('cob-semana');
+  let ano = parseInt(selAno.value), sem = parseInt(selSem.value) + passo;
+  if (sem < 1) { ano -= 1; if (![...selAno.options].some(o=>o.value==ano)) selAno.insertAdjacentHTML('beforeend', `<option value="${ano}">${ano}</option>`); selAno.value = ano; popularSemanasCobranca(true); sem = totalSemanasISO(ano); }
+  else if (sem > totalSemanasISO(ano)) { ano += 1; if (![...selAno.options].some(o=>o.value==ano)) selAno.insertAdjacentHTML('afterbegin', `<option value="${ano}">${ano}</option>`); selAno.value = ano; popularSemanasCobranca(true); sem = 1; }
+  selSem.value = sem;
+  document.getElementById('cob-escopo').value = 'semana';
+  renderCobranca();
+}
+function clearCobrancaFiltros() {
+  ['cob-cliente','cob-busca','cob-atraso-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('cob-situacao').value = 'atraso';
+  document.getElementById('cob-escopo').value = 'semana';
+  renderCobranca();
+}
+
+// ── Render da agenda semanal ──────────────────────────────────────────
+function renderCobranca() {
+  if (!paginaVisivel('cobranca')) return;
+  popularSemanasCobranca();
+
+  const ano      = parseInt(document.getElementById('cob-ano').value) || new Date().getFullYear();
+  const sem      = parseInt(document.getElementById('cob-semana').value) || 1;
+  const escopo   = document.getElementById('cob-escopo').value || 'semana';
+  const cliente  = document.getElementById('cob-cliente').value;
+  const situacao = document.getElementById('cob-situacao').value || 'atraso';
+  const busca    = (document.getElementById('cob-busca').value || '').trim().toLowerCase();
+  const atrasoMin = parseInt(document.getElementById('cob-atraso-min').value);
+
+  const seg = segundaDaSemana(ano, sem);
+  const dom = new Date(seg); dom.setDate(seg.getDate()+6);
+  const ini = _isoStr(seg), fim = _isoStr(dom);
+  document.getElementById('cob-periodo').textContent =
+    (escopo === 'semana') ? `${fmtDate(ini)} a ${fmtDate(fim)}` : 'Todas as pendências';
+
+  const hoje = today();
+  const list = getParcelasReceber(false).filter(p => {
+    if (cliente && p.cliente !== cliente) return false;
+    if (situacao === 'atraso' && !(p.venc && p.venc < hoje)) return false;
+    if (situacao === 'hoje'   && p.venc !== hoje) return false;
+    if (escopo === 'semana') { if (!p.venc || p.venc < ini || p.venc > fim) return false; }
+    if (!isNaN(atrasoMin) && atrasoMin > 0) {
+      const d = (p.venc && p.venc < hoje) ? diffDias(p.venc, hoje) : 0;
+      if (d < atrasoMin) return false;
+    }
+    if (busca) {
+      const txt = (getClienteNome(p.cliente) + ' ' + (p.nf||'') + ' ' + (p.prod ? getProdVendaNome(p.prod) : '')).toLowerCase();
+      if (!txt.includes(busca)) return false;
+    }
+    return true;
+  });
+
+  // KPIs
+  const saldoDe = p => Math.max(0, p.valParc - cobTotalBaixas(p.lancId, p.parcIdx));
+  const totalSaldo   = list.reduce((s,p) => s + saldoDe(p), 0);
+  const totalParcial = list.reduce((s,p) => s + Math.min(p.valParc, cobTotalBaixas(p.lancId, p.parcIdx)), 0);
+  const emAtraso     = list.filter(p => p.venc && p.venc < hoje);
+  const clientesSet  = new Set(emAtraso.map(p => p.cliente));
+  const maiorAtraso  = emAtraso.reduce((m,p) => Math.max(m, diffDias(p.venc, hoje)), 0);
+  document.getElementById('cobranca-kpis').innerHTML = `
+    <div class="card kpi"><div class="kpi-val" style="color:#dc2626">${emAtraso.length}</div><div class="kpi-lbl">Parcelas em atraso</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#dc2626">${fmtBRL(totalSaldo)}</div><div class="kpi-lbl">Saldo a cobrar</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#16a34a">${fmtBRL(totalParcial)}</div><div class="kpi-lbl">Recebido parcial</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#d97706">${clientesSet.size} <small style="font-size:13px;color:#a8a29e">cli · ${maiorAtraso}d</small></div><div class="kpi-lbl">Clientes / maior atraso</div></div>`;
+
+  // Agrupar por dia da semana (segunda → domingo), na vertical
+  const grupos = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], sem:[] };
+  list.forEach(p => {
+    if (!p.venc) { grupos.sem.push(p); return; }
+    grupos[(_dataLocal(p.venc).getDay() + 6) % 7].push(p);
+  });
+  Object.keys(grupos).forEach(k => grupos[k].sort((a,b) =>
+    (a.venc||'').localeCompare(b.venc||'') || getClienteNome(a.cliente).localeCompare(getClienteNome(b.cliente))));
+
+  const ordem = [0,1,2,3,4];                       // segunda a sexta sempre aparecem
+  if (grupos[5].length) ordem.push(5);
+  if (grupos[6].length) ordem.push(6);
+
+  const tb = document.getElementById('tb-cobranca');
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="12" class="empty-state">Nenhuma cobrança ${escopo==='semana' ? 'nesta semana' : 'pendente'} com os filtros atuais. 🎉</td></tr>`;
+    window._pdfLists = window._pdfLists || {}; window._pdfLists.cobranca = [];
+    return;
+  }
+
+  let html = '';
+  let desenhadas = 0;
+  ordem.forEach(i => {
+    const itens = grupos[i];
+    const dataDia = (escopo === 'semana') ? _addDias(ini, i) : null;
+    const somaDia = itens.reduce((s,p) => s + saldoDe(p), 0);
+    html += `<tr class="cob-dia"><td colspan="12">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="cob-dia-nome">${COB_DIAS[i]}${dataDia ? ' · ' + fmtDate(dataDia) : ''}</span>
+        <span class="cob-dia-meta">${itens.length ? itens.length + ' cobrança(s) · ' + fmtBRL(somaDia) : ''}</span>
+      </div></td></tr>`;
+    if (!itens.length) {
+      html += `<tr class="cob-dia-vazio"><td colspan="12">— sem cobranças neste dia —</td></tr>`;
+      return;
+    }
+    itens.forEach(p => { if (desenhadas++ < LIMITE_LINHAS) html += _linhaCobranca(p, hoje); });
+  });
+  if (grupos.sem.length) {
+    html += `<tr class="cob-dia"><td colspan="12"><span class="cob-dia-nome">Sem data prevista</span></td></tr>`;
+    grupos.sem.forEach(p => { if (desenhadas++ < LIMITE_LINHAS) html += _linhaCobranca(p, hoje); });
+  }
+  if (desenhadas > LIMITE_LINHAS) {
+    html += `<tr><td colspan="12" style="text-align:center;padding:14px;background:#fffbeb;color:#92400e;font-size:12px">
+      Mostrando as ${LIMITE_LINHAS} primeiras de <strong>${desenhadas}</strong> linhas. Use os filtros acima para refinar.</td></tr>`;
+  }
+  tb.innerHTML = html;
+  window._pdfLists = window._pdfLists || {}; window._pdfLists.cobranca = list.slice();
+}
+
+function _linhaCobranca(p, hoje) {
+  const reg   = cobGet(p.lancId, p.parcIdx);
+  const pago  = cobTotalBaixas(p.lancId, p.parcIdx);
+  const saldo = Math.max(0, p.valParc - pago);
+  const sit   = situacaoParcela(p.venc);
+  const dias  = (p.venc && p.venc < hoje) ? diffDias(p.venc, hoje) : 0;
+  const taxa  = p.juros != null ? p.juros : getJurosGlobal();
+  const juros = calcJuros(saldo, p.venc, taxa);
+  const nFup  = (reg.followups || []).length;
+  const ultimo = nFup ? reg.followups[nFup-1] : null;
+
+  return `<tr>
+    <td><b>${getClienteNome(p.cliente)}</b>${pago > 0 ? ' <span class="cob-tag-parcial">parcial</span>' : ''}</td>
+    <td style="font-size:12px">${p.prod ? getProdVendaNome(p.prod) : '—'}</td>
+    <td style="font-family:DM Mono,monospace">${p.parcIdx}/${p.totalParc}</td>
+    <td style="font-family:DM Mono,monospace">${fmtBRL(p.valParc)}</td>
+    <td style="font-family:DM Mono,monospace;color:${pago>0?'#16a34a':'#a8a29e'}">${pago>0?fmtBRL(pago):'—'}</td>
+    <td style="font-family:DM Mono,monospace;font-weight:700;color:#dc2626">${fmtBRL(saldo)}</td>
+    <td style="font-family:DM Mono,monospace;font-size:12px;color:${juros>0?'#c2410c':'#a8a29e'}">${juros>0?'+'+fmtBRL(juros):'—'}</td>
+    <td style="white-space:nowrap">
+      <span style="font-family:DM Mono,monospace">${fmtDate(p.venc)}</span>
+      <button class="btn btn-secondary btn-sm" style="padding:2px 7px;margin-left:5px" title="Editar previsão de recebimento"
+        onclick="abrirPrevisaoCobranca('${p.lancId}',${p.parcIdx})">✏️</button>
+    </td>
+    <td>${dias > 0 ? `<span class="cob-tag-atraso">${dias}d</span>` : '<span style="color:#a8a29e">—</span>'}</td>
+    <td style="font-size:11px;color:#57534e">
+      ${ultimo ? `${fmtDate(ultimo.data)}<br><span style="color:#a8a29e">${ultimo.resultado||ultimo.canal||''}</span>` : '<span style="color:#a8a29e">sem registro</span>'}
+    </td>
+    <td><span class="badge ${sit.cls}">${sit.label}</span></td>
+    <td class="actions">
+      <button class="btn btn-sm btn-whats" title="Enviar mensagem no WhatsApp" onclick="abrirWhatsCobranca('${p.lancId}',${p.parcIdx})">📱</button>
+      <button class="btn btn-secondary btn-sm cob-fup-btn" onclick="abrirFollowupCobranca('${p.lancId}',${p.parcIdx})">💬${nFup?`<span class="cob-fup-count">${nFup}</span>`:''}</button>
+      <button class="btn btn-primary btn-sm" onclick="abrirBaixaCobranca('${p.lancId}',${p.parcIdx})">💵 Receber</button>
+      <button class="btn btn-secondary btn-sm" onclick="editLancReceber('${p.lancId}')">Editar</button>
+    </td>
+  </tr>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 1) EDITAR A PREVISÃO DE RECEBIMENTO DA PARCELA
+// ══════════════════════════════════════════════════════════════════════
+var _cobCtx = { lancId: null, parcIdx: null };
+
+function _acharParcela(lancId, parcIdx) {
+  return getParcelasReceber(false).find(p => p.lancId === lancId && p.parcIdx === parcIdx)
+      || getParcelasReceber(true).find(p => p.lancId === lancId && p.parcIdx === parcIdx);
+}
+
+// Grava a data de vencimento de UMA parcela dentro do JSON parcela_datas,
+// sem perder valores/status das demais.
+function _setParcelaDataVenc(l, parcIdx, novaData) {
+  const { datas, valores, pagos, dtpagos } = _parseParcelas(l.parcela_datas);
+  const n = l.parcelas || 1;
+  const nd = datas.slice(0, n), nv = valores.slice(0, n), np = pagos.slice(0, n), ndt = dtpagos.slice(0, n);
+  while (nd.length  < n) nd.push(null);
+  while (nv.length  < n) nv.push(null);
+  while (np.length  < n) np.push(false);
+  while (ndt.length < n) ndt.push('');
+  // mantém as datas já calculadas das outras parcelas para nada "sumir"
+  for (let i = 0; i < n; i++) if (!nd[i]) nd[i] = parcelaVencimentoReceber(l.dtprev, i+1);
+  nd[parcIdx-1] = novaData;
+  return JSON.stringify({ datas: nd, valores: nv, pagos: np, dtpagos: ndt });
+}
+
+function abrirPrevisaoCobranca(lancId, parcIdx) {
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  _cobCtx = { lancId, parcIdx };
+  document.getElementById('cob-prev-info').innerHTML =
+    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)}<br>
+     <span style="color:#a8a29e;font-size:12px">Previsão atual: ${fmtDate(p.venc)}</span>`;
+  document.getElementById('cob-prev-data').value = p.venc || today();
+  openModal('modal-cob-previsao');
+}
+function cobPrevSomarDias(n) {
+  const el = document.getElementById('cob-prev-data');
+  el.value = _addDias(el.value || today(), n);
+}
+async function salvarPrevisaoCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const nova = document.getElementById('cob-prev-data').value;
+  if (!nova) { alert('Informe a nova data prevista.'); return; }
+  const l = db.lancreceber.find(x => x.id === lancId); if (!l) return;
+
+  const anterior = { parcela_datas: l.parcela_datas, dtprev: l.dtprev };
+  l.parcela_datas = _setParcelaDataVenc(l, parcIdx, nova);
+  const payload = { parcela_datas: l.parcela_datas };
+  if ((l.parcelas || 1) === 1) { l.dtprev = nova; payload.dtprev = nova; }
+
+  const ok = await sbFetch('lancreceber', 'PATCH', payload, `?id=eq.${lancId}`);
+  if (!ok) {
+    Object.assign(l, anterior);
+    alert('❌ Não foi possível salvar a nova previsão no banco de dados.' + sbErroMsg());
+    return;
+  }
+  bumpDbVer();
+  closeModal('modal-cob-previsao');
+  renderCobranca(); renderAReceber(); renderLancReceber(); renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 2) FOLLOW-UP — histórico de conversas da cobrança
+// ══════════════════════════════════════════════════════════════════════
+function abrirFollowupCobranca(lancId, parcIdx) {
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  _cobCtx = { lancId, parcIdx };
+  const cli = (db.clientes || []).find(c => c.id === p.cliente);
+  document.getElementById('cob-fup-info').innerHTML =
+    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)} · vence ${fmtDate(p.venc)}`;
+  document.getElementById('cob-fup-contato').textContent = cli
+    ? [cli.contato, cli.tel, cli.email].filter(Boolean).join(' · ') || 'Sem contato cadastrado no cliente.'
+    : '';
+  document.getElementById('cob-fup-data').value = today();
+  document.getElementById('cob-fup-hora').value = new Date().toTimeString().slice(0,5);
+  ['cob-fup-pessoa','cob-fup-obs','cob-fup-proximo'].forEach(id => document.getElementById(id).value = '');
+  renderFollowupsCobranca();
+  openModal('modal-cob-followup');
+}
+
+function renderFollowupsCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const reg = cobGet(lancId, parcIdx);
+  const el = document.getElementById('cob-fup-lista');
+  const lista = (reg.followups || []).slice().sort((a,b) =>
+    (b.data + (b.hora||'')).localeCompare(a.data + (a.hora||'')));
+  if (!lista.length) { el.innerHTML = '<div class="empty-state" style="padding:24px">Nenhuma conversa registrada ainda.</div>'; return; }
+  el.innerHTML = lista.map(f => `<div class="cob-fup-item">
+    <div class="cob-fup-top">
+      <span class="cob-fup-data">${fmtDate(f.data)}${f.hora ? ' · ' + f.hora : ''}</span>
+      <span style="display:flex;gap:6px;align-items:center">
+        <span class="badge badge-blue">${f.canal || '—'}</span>
+        ${f.resultado ? `<span class="badge badge-gray">${f.resultado}</span>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="excluirFollowupCobranca('${f.id}')">Excluir</button>
+      </span>
+    </div>
+    <div class="cob-fup-txt">${(f.obs||'').replace(/</g,'&lt;')}</div>
+    <div class="cob-fup-rodape">
+      ${f.pessoa ? 'Falou com: ' + f.pessoa + ' · ' : ''}
+      ${f.proximo ? 'Próximo contato: ' + fmtDate(f.proximo) + ' · ' : ''}
+      Registrado por ${f.usuario || '—'}
+    </div>
+  </div>`).join('');
+}
+
+async function addFollowupCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const data = document.getElementById('cob-fup-data').value;
+  const obs  = document.getElementById('cob-fup-obs').value.trim();
+  if (!data) { alert('Informe a data da conversa.'); return; }
+  if (!obs)  { alert('Escreva um resumo da conversa.'); return; }
+
+  const reg = cobGet(lancId, parcIdx);
+  const novo = {
+    id: uid(), data,
+    hora: document.getElementById('cob-fup-hora').value || '',
+    canal: document.getElementById('cob-fup-canal').value,
+    pessoa: document.getElementById('cob-fup-pessoa').value.trim(),
+    resultado: document.getElementById('cob-fup-resultado').value,
+    obs,
+    proximo: document.getElementById('cob-fup-proximo').value || '',
+    usuario: (currentUser && (currentUser.nome || currentUser.user)) || '—'
+  };
+  reg.followups.push(novo);
+  const ok = await cobSalvar(lancId, parcIdx);
+  if (!ok) {
+    reg.followups = reg.followups.filter(f => f.id !== novo.id);
+    alert('❌ Não foi possível salvar o follow-up no banco de dados.' + sbErroMsg());
+    return;
+  }
+  ['cob-fup-pessoa','cob-fup-obs','cob-fup-proximo'].forEach(id => document.getElementById(id).value = '');
+  renderFollowupsCobranca();
+  renderCobranca();
+}
+
+async function excluirFollowupCobranca(fid) {
+  if (!confirm('Excluir este registro de conversa?')) return;
+  const { lancId, parcIdx } = _cobCtx;
+  const reg = cobGet(lancId, parcIdx);
+  const backup = reg.followups.slice();
+  reg.followups = reg.followups.filter(f => f.id !== fid);
+  const ok = await cobSalvar(lancId, parcIdx);
+  if (!ok) { reg.followups = backup; alert('❌ Não foi possível excluir no banco de dados.' + sbErroMsg()); return; }
+  renderFollowupsCobranca();
+  renderCobranca();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 3) RECEBIMENTO PARCELADO (baixas parciais)
+//    Ex.: cliente deve R$ 50,00 → PIX 25,00 hoje, dinheiro 20,00 depois
+//    e 5,00 em cheque. Ao fechar os R$ 50,00 a parcela é quitada e vai
+//    para Contas Recebidas.
+// ══════════════════════════════════════════════════════════════════════
+function abrirBaixaCobranca(lancId, parcIdx) {
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  _cobCtx = { lancId, parcIdx };
+  populateBancoSelects();
+  populateFormasRecebSelects();
+  const l = db.lancreceber.find(x => x.id === lancId) || {};
+  document.getElementById('cob-bx-info').innerHTML =
+    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · vencimento ${fmtDate(p.venc)}
+     ${p.nf ? ' · NF ' + p.nf : ''}`;
+  document.getElementById('cob-bx-data').value = today();
+  document.getElementById('cob-bx-valor').value = '';
+  document.getElementById('cob-bx-obs').value = '';
+  const selB = document.getElementById('cob-bx-banco'); if (selB) selB.value = l.banco || '';
+  const selF = document.getElementById('cob-bx-forma'); if (selF) selF.value = '';
+  renderBaixasCobranca();
+  openModal('modal-cob-baixa');
+}
+
+function renderBaixasCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  const reg = cobGet(lancId, parcIdx);
+  const pago = cobTotalBaixas(lancId, parcIdx);
+  const saldo = Math.max(0, p.valParc - pago);
+  const pct = p.valParc > 0 ? Math.min(100, (pago / p.valParc) * 100) : 0;
+
+  document.getElementById('cob-bx-total').textContent = fmtBRL(p.valParc);
+  document.getElementById('cob-bx-pago').textContent  = fmtBRL(pago);
+  document.getElementById('cob-bx-saldo').textContent = fmtBRL(saldo);
+  document.getElementById('cob-bx-progresso').style.width = pct.toFixed(1) + '%';
+
+  const lista = (reg.baixas || []).slice().sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const el = document.getElementById('cob-bx-lista');
+  if (!lista.length) { el.innerHTML = '<div class="empty-state" style="padding:24px">Nenhum recebimento lançado nesta parcela.</div>'; return; }
+  el.innerHTML = lista.map(b => `<div class="cob-bx-linha">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-family:DM Mono,monospace;font-size:12px;color:#57534e">${fmtDate(b.data)}</span>
+      <span class="badge badge-blue">${b.forma || '—'}</span>
+      <span style="font-size:12px;color:#57534e">${b.banco ? getBancoNome(b.banco) : '—'}</span>
+      ${b.obs ? `<span style="font-size:11px;color:#a8a29e">${String(b.obs).replace(/</g,'&lt;')}</span>` : ''}
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <strong style="font-family:DM Mono,monospace;color:#16a34a">${fmtBRL(b.valor)}</strong>
+      <button class="btn btn-danger btn-sm" onclick="excluirBaixaCobranca('${b.id}')">Excluir</button>
+    </div>
+  </div>`).join('');
+}
+
+function cobBaixaUsarSaldo() {
+  const { lancId, parcIdx } = _cobCtx;
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  const saldo = Math.max(0, p.valParc - cobTotalBaixas(lancId, parcIdx));
+  document.getElementById('cob-bx-valor').value = saldo.toFixed(2);
+}
+
+async function addBaixaCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  const data  = document.getElementById('cob-bx-data').value;
+  const valor = parseFloat(document.getElementById('cob-bx-valor').value);
+  const forma = document.getElementById('cob-bx-forma').value;
+  const banco = document.getElementById('cob-bx-banco').value;
+  const obs   = document.getElementById('cob-bx-obs').value.trim();
+
+  if (!data)  { alert('Informe a data do recebimento.'); return; }
+  if (isNaN(valor) || valor <= 0) { alert('Informe um valor maior que zero.'); return; }
+  if (!forma) { alert('Selecione a forma de recebimento (PIX, dinheiro, cheque...).'); return; }
+  if (!banco) { alert('Selecione o banco/conta em que o valor entrou.'); return; }
+
+  const reg = cobGet(lancId, parcIdx);
+  const jaPago = cobTotalBaixas(lancId, parcIdx);
+  const saldo = p.valParc - jaPago;
+  if (valor - saldo > 0.005) {
+    if (!confirm(`O valor lançado (${fmtBRL(valor)}) é maior que o saldo da parcela (${fmtBRL(saldo)}).\n\nDeseja continuar assim mesmo?`)) return;
+  }
+
+  const nova = { id: uid(), data, valor, forma, banco, obs,
+                 usuario: (currentUser && (currentUser.nome || currentUser.user)) || '—' };
+  reg.baixas.push(nova);
+  const ok = await cobSalvar(lancId, parcIdx);
+  if (!ok) {
+    reg.baixas = reg.baixas.filter(b => b.id !== nova.id);
+    alert('❌ Não foi possível salvar o recebimento no banco de dados.' + sbErroMsg());
+    return;
+  }
+
+  document.getElementById('cob-bx-valor').value = '';
+  document.getElementById('cob-bx-obs').value = '';
+
+  // Quitou a parcela inteira? Então ela sai para Contas Recebidas.
+  const totalAgora = cobTotalBaixas(lancId, parcIdx);
+  if (totalAgora >= p.valParc - 0.005) {
+    const quitou = await _quitarParcelaCobranca(lancId, parcIdx);
+    if (quitou) {
+      renderCobranca(); renderAReceber(); renderRecebido(); renderDashboard();
+      closeModal('modal-cob-baixa');
+      alert(`✅ Parcela quitada!\n\n${getClienteNome(p.cliente)} · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)}\nO lançamento foi movido para "Contas Recebidas".`);
+      return;
+    }
+  }
+  renderBaixasCobranca();
+  renderCobranca();
+}
+
+async function excluirBaixaCobranca(bid) {
+  if (!confirm('Excluir este recebimento lançado?')) return;
+  const { lancId, parcIdx } = _cobCtx;
+  const reg = cobGet(lancId, parcIdx);
+  const backup = reg.baixas.slice();
+  reg.baixas = reg.baixas.filter(b => b.id !== bid);
+  const ok = await cobSalvar(lancId, parcIdx);
+  if (!ok) { reg.baixas = backup; alert('❌ Não foi possível excluir no banco de dados.' + sbErroMsg()); return; }
+  renderBaixasCobranca();
+  renderCobranca();
+}
+
+// Quita a parcela usando exatamente o mesmo mecanismo do botão
+// "Marcar Recebido" de Contas a Receber.
+async function _quitarParcelaCobranca(lancId, parcIdx) {
+  const l = db.lancreceber.find(x => x.id === lancId); if (!l) return false;
+  const reg = cobGet(lancId, parcIdx);
+  const baixas = (reg.baixas || []).slice().sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const ultima = baixas[baixas.length - 1] || {};
+  const dtrecebido = ultima.data || today();
+  const banco = ultima.banco || l.banco || '';
+  const formas = [...new Set(baixas.map(b => b.forma).filter(Boolean))];
+  const tipoPag = formas.length > 1 ? 'Misto' : (formas[0] || l.tipo_pag || '');
+
+  const anterior = { banco: l.banco, tipo_pag: l.tipo_pag, parcela_datas: l.parcela_datas,
+                     recebido: l.recebido, dtrecebido: l.dtrecebido };
+  l.banco = banco;
+  l.tipo_pag = tipoPag;
+
+  const n = l.parcelas || 1;
+  let ok;
+  if (n > 1) {
+    l.parcela_datas = _setParcelaPagoStatus(l, parcIdx, true, dtrecebido);
+    const { pagos } = _parseParcelas(l.parcela_datas);
+    const todas = pagos.slice(0, n).every(x => x === true);
+    l.recebido = todas ? 'sim' : 'nao';
+    l.dtrecebido = todas ? dtrecebido : '';
+    ok = await sbFetch('lancreceber', 'PATCH',
+      { parcela_datas: l.parcela_datas, recebido: l.recebido, dtrecebido: l.dtrecebido, banco, tipo_pag: tipoPag },
+      `?id=eq.${lancId}`);
+  } else {
+    l.recebido = 'sim'; l.dtrecebido = dtrecebido;
+    ok = await sbFetch('lancreceber', 'PATCH',
+      { recebido: 'sim', dtrecebido, banco, tipo_pag: tipoPag }, `?id=eq.${lancId}`);
+  }
+
+  if (!ok) {
+    Object.assign(l, anterior);
+    alert('❌ A parcela foi quitada nos lançamentos de cobrança, mas não foi possível marcá-la como recebida no banco de dados.' + sbErroMsg());
+    return false;
+  }
+  bumpDbVer();
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 4) AVISO DE CLIENTE EM DÉBITO
+//    Só aparece dentro do módulo de recebimento (Contas a Receber e
+//    Cobrança), uma vez por dia, e só sai quando o usuário fecha a caixa.
+// ══════════════════════════════════════════════════════════════════════
+function clientesEmAtraso() {
+  const hoje = today();
+  const mapa = new Map();
+  getParcelasReceber(false).forEach(p => {
+    if (!p.venc || p.venc >= hoje) return;
+    const saldo = Math.max(0, p.valParc - cobTotalBaixas(p.lancId, p.parcIdx));
+    if (saldo <= 0.005) return;
+    const k = p.cliente || '__sem__';
+    if (!mapa.has(k)) mapa.set(k, { cliente: p.cliente, nome: getClienteNome(p.cliente), qtd: 0, total: 0, dias: 0 });
+    const r = mapa.get(k);
+    r.qtd += 1; r.total += saldo;
+    r.dias = Math.max(r.dias, diffDias(p.venc, hoje));
+  });
+  return [...mapa.values()].sort((a,b) => b.total - a.total);
+}
+
+function avisoAtrasoAoEntrar() { setTimeout(() => abrirAvisoAtraso(false), 350); }
+
+function abrirAvisoAtraso(forcar) {
+  const lista = clientesEmAtraso();
+  if (!lista.length) {
+    if (forcar) alert('🎉 Nenhum cliente em atraso no momento.');
+    return;
+  }
+  if (!forcar) {
+    let visto = null;
+    try { visto = localStorage.getItem(AVISO_ATRASO_KEY); } catch(e) {}
+    if (visto === today()) return;                       // já avisou hoje
+  }
+  if (document.getElementById('modal-aviso-atraso').classList.contains('open')) return;
+
+  const total = lista.reduce((s,c) => s + c.total, 0);
+  const qtd   = lista.reduce((s,c) => s + c.qtd, 0);
+  document.getElementById('aviso-atraso-lista').innerHTML = lista.slice(0, 40).map(c => `
+    <div class="aviso-atraso-cli">
+      <div>
+        <strong>${c.nome}</strong>
+        <div style="font-size:11px;color:#a8a29e">${c.qtd} parcela(s) · atraso de até ${c.dias} dia(s)</div>
+      </div>
+      <strong style="font-family:DM Mono,monospace;color:#b91c1c">${fmtBRL(c.total)}</strong>
+    </div>`).join('') +
+    (lista.length > 40 ? `<div class="aviso-atraso-cli" style="color:#a8a29e;font-size:12px">+ ${lista.length-40} outro(s) cliente(s)…</div>` : '');
+  document.getElementById('aviso-atraso-resumo').textContent =
+    `${lista.length} cliente(s) · ${qtd} parcela(s) · total em atraso ${fmtBRL(total)}`;
+  openModal('modal-aviso-atraso');
+}
+
+function fecharAvisoAtraso() {
+  try { localStorage.setItem(AVISO_ATRASO_KEY, today()); } catch(e) {}
+  closeModal('modal-aviso-atraso');
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════════
+// MENSAGENS DE COBRANÇA VIA WHATSAPP
+// ----------------------------------------------------------------------
+// Os modelos de texto ficam na tabela `config` (key = cobranca_mensagens),
+// junto com o nome de quem assina e o nome da empresa. O botão 📱 de cada
+// linha da agenda monta a mensagem já preenchida com os dados daquela
+// parcela e abre o WhatsApp do cliente em outra aba.
+// ══════════════════════════════════════════════════════════════════════
+const COB_MSG_KEY = 'cobranca_mensagens';
+var cobMsgConfig = { remetente: '', empresa: '', modelos: [] };
+
+const COB_MSG_VARS = [
+  ['{Nome do Cliente}',   'nome do cliente'],
+  ['{Seu Nome}',          'quem está cobrando'],
+  ['{Nome da Empresa}',   'sua empresa'],
+  ['{Valor}',             'saldo em aberto, sem o R$'],
+  ['{Valor Total}',       'valor cheio da parcela'],
+  ['{Data de Vencimento}','vencimento da parcela'],
+  ['{Mês}',               'mês de competência'],
+  ['{Parcela}',           'ex.: 2/3'],
+  ['{Dias de Atraso}',    'dias vencidos'],
+  ['{NF}',                'número da nota']
+];
+
+function _modelosPadraoCobranca() {
+  const pgto =
+'Opções de pagamento:\n' +
+'- PIX CNPJ: 26.970.226/0001-09 ou PIX Gmail: 477hidraulica@gmail.com\n' +
+'- Transferência bancária para Sicoob 756 (Agência 3087 | C/C 9394-7)\n' +
+'- Dinheiro, diretamente na loja.\n\n' +
+'(Não esqueça de enviar o comprovante de pagamento assim que realizá-lo)';
+  return [
+    { id: 'pad1', titulo: '1 semana de antecedência', gatilho: -7, texto:
+'Olá, {Nome do Cliente}! 👋\n\n' +
+'Aqui é {Seu Nome}, da {Nome da Empresa}.\n\n' +
+'Passando para lembrar que no dia {Data de Vencimento} vence o valor de R$ {Valor}, referente ao serviço do mês de {Mês}.\n\n' +
+pgto + '\n\n' +
+'Estamos enviando este aviso antecipadamente para que você possa se programar com tranquilidade 😊\n\n' +
+'Qualquer dúvida, fico à disposição.' },
+    { id: 'pad2', titulo: '3 dias de atraso', gatilho: 3, texto:
+'Olá, {Nome do Cliente}! 👋\n\n' +
+'Aqui é {Seu Nome}, da {Nome da Empresa}.\n\n' +
+'Verificamos que o valor de R$ {Valor}, com vencimento em {Data de Vencimento}, ainda não foi identificado em nosso sistema.\n\n' +
+'Pedimos, por gentileza, que verifique a situação do pagamento. Caso já tenha realizado, desconsidere esta mensagem e, se possível, nos envie o comprovante 😊\n\n' +
+pgto + '\n\n' +
+'Ficamos no aguardo. Qualquer dúvida, estamos à disposição.' },
+    { id: 'pad3', titulo: '5 dias de atraso', gatilho: 5, texto:
+'Olá, {Nome do Cliente}! 👋\n\n' +
+'Aqui é {Seu Nome}, da {Nome da Empresa}.\n\n' +
+'Até o momento, o valor de R$ {Valor}, com vencimento em {Data de Vencimento}, segue em aberto em nosso sistema.\n\n' +
+'Solicitamos, por gentileza, a regularização o quanto antes para evitar transtornos e mantermos o serviço normalmente.\n\n' +
+pgto + '\n\n' +
+'Caso esteja enfrentando alguma dificuldade, pedimos que nos informe para que possamos verificar a melhor forma de resolver.\n\n' +
+'Agradecemos a atenção.' }
+  ];
+}
+
+function _carregarModelosCobranca(rows) {
+  let obj = null;
+  const linha = (rows || [])[0];
+  if (linha) { try { obj = JSON.parse(linha.value); } catch(e) { obj = null; } }
+  cobMsgConfig = {
+    remetente: (obj && obj.remetente) || '',
+    empresa:   (obj && obj.empresa)   || '',
+    modelos:   (obj && Array.isArray(obj.modelos) && obj.modelos.length) ? obj.modelos : _modelosPadraoCobranca()
+  };
+}
+
+async function _salvarModelosCobranca() {
+  await sbFetch('config', 'DELETE', null, `?key=eq.${COB_MSG_KEY}`);
+  const ok = await sbFetch('config', 'POST', { id: uid(), key: COB_MSG_KEY, value: JSON.stringify(cobMsgConfig) });
+  if (!ok) alert('❌ Não foi possível salvar os modelos no banco de dados.' + sbErroMsg());
+  return !!ok;
+}
+
+// Só os dígitos; assume Brasil (55) quando o número vem sem o país.
+function _foneWhats(tel) {
+  let d = String(tel || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.length <= 11) d = '55' + d;
+  return d;
+}
+
+function _montarMensagemCobranca(texto, p) {
+  const cli = (db.clientes || []).find(c => c.id === p.cliente) || {};
+  const pago  = cobTotalBaixas(p.lancId, p.parcIdx);
+  const saldo = Math.max(0, p.valParc - pago);
+  const hoje  = today();
+  const dias  = (p.venc && p.venc < hoje) ? diffDias(p.venc, hoje) : 0;
+  const semRS = v => fmtBRL(v).replace('R$', '').trim();
+  const mesComp = p.dtvenda ? (meses[parseInt(p.dtvenda.split('-')[1])] || '') : '';
+  const mapa = {
+    '{Nome do Cliente}': cli.nome || getClienteNome(p.cliente),
+    '{Seu Nome}':        cobMsgConfig.remetente || (currentUser && currentUser.nome) || '',
+    '{Nome da Empresa}': cobMsgConfig.empresa || (empresaAtual() ? empresaNome(empresaAtual()) : ''),
+    '{Valor}':           semRS(saldo),
+    '{Valor Total}':     semRS(p.valParc),
+    '{Data de Vencimento}': fmtDate(p.venc),
+    '{Mês}':             mesComp,
+    '{Parcela}':         p.parcIdx + '/' + p.totalParc,
+    '{Dias de Atraso}':  String(dias),
+    '{NF}':              p.nf || ''
+  };
+  let out = String(texto || '');
+  Object.keys(mapa).forEach(k => { out = out.split(k).join(mapa[k]); });
+  return out;
+}
+
+// Escolhe o modelo mais adequado ao atraso da parcela
+function _modeloSugerido(dias) {
+  const mods = cobMsgConfig.modelos || [];
+  if (!mods.length) return null;
+  const candidatos = mods.filter(m => m.gatilho != null && Number(m.gatilho) <= dias);
+  if (candidatos.length) {
+    return candidatos.sort((a,b) => Number(b.gatilho) - Number(a.gatilho))[0];
+  }
+  return mods[0];
+}
+
+function abrirWhatsCobranca(lancId, parcIdx) {
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  _cobCtx = { lancId, parcIdx };
+  const cli = (db.clientes || []).find(c => c.id === p.cliente) || {};
+  const hoje = today();
+  const dias = (p.venc && p.venc < hoje) ? diffDias(p.venc, hoje) : -Math.max(0, diffDias(hoje, p.venc || hoje));
+  const saldo = Math.max(0, p.valParc - cobTotalBaixas(lancId, parcIdx));
+
+  document.getElementById('cob-wa-info').innerHTML =
+    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} ·
+     saldo ${fmtBRL(saldo)} · vencimento ${fmtDate(p.venc)}
+     ${dias > 0 ? `· <span class="cob-tag-atraso">${dias}d de atraso</span>` : ''}`;
+
+  const sel = document.getElementById('cob-wa-modelo');
+  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${m.id}">${m.titulo}</option>`).join('')
+    || '<option value="">(nenhum modelo cadastrado)</option>';
+  const sug = _modeloSugerido(dias);
+  if (sug) sel.value = sug.id;
+
+  document.getElementById('cob-wa-fone').value = cli.tel || '';
+  document.getElementById('cob-wa-registrar').checked = true;
+  aplicarModeloWhats();
+  openModal('modal-cob-whats');
+}
+
+function aplicarModeloWhats() {
+  const { lancId, parcIdx } = _cobCtx;
+  const p = _acharParcela(lancId, parcIdx); if (!p) return;
+  const id = document.getElementById('cob-wa-modelo').value;
+  const mod = (cobMsgConfig.modelos || []).find(m => m.id === id);
+  document.getElementById('cob-wa-texto').value = mod ? _montarMensagemCobranca(mod.texto, p) : '';
+}
+
+function copiarMensagemWhats() {
+  const t = document.getElementById('cob-wa-texto');
+  t.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value);
+    else document.execCommand('copy');
+    alert('✅ Mensagem copiada.');
+  } catch(e) { alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.'); }
+}
+
+async function enviarWhatsCobranca() {
+  const { lancId, parcIdx } = _cobCtx;
+  const texto = document.getElementById('cob-wa-texto').value.trim();
+  const fone = _foneWhats(document.getElementById('cob-wa-fone').value);
+  if (!texto) { alert('A mensagem está vazia.'); return; }
+  if (!fone)  { alert('Informe o número de WhatsApp do cliente.'); return; }
+  if (fone.length < 12) { alert('O número informado parece incompleto. Use DDD + número.'); return; }
+
+  window.open(`https://wa.me/${fone}?text=${encodeURIComponent(texto)}`, '_blank');
+
+  if (document.getElementById('cob-wa-registrar').checked) {
+    const modSel = document.getElementById('cob-wa-modelo');
+    const titulo = modSel.options[modSel.selectedIndex] ? modSel.options[modSel.selectedIndex].text : 'Mensagem';
+    const reg = cobGet(lancId, parcIdx);
+    const novo = {
+      id: uid(), data: today(), hora: new Date().toTimeString().slice(0,5),
+      canal: 'WhatsApp', pessoa: '', resultado: 'Mensagem enviada',
+      obs: `[${titulo}] ${texto}`, proximo: '',
+      usuario: (currentUser && (currentUser.nome || currentUser.user)) || '—'
+    };
+    reg.followups.push(novo);
+    const ok = await cobSalvar(lancId, parcIdx);
+    if (!ok) reg.followups = reg.followups.filter(f => f.id !== novo.id);
+  }
+  closeModal('modal-cob-whats');
+  renderCobranca();
+}
+
+// ── Gestão dos modelos ────────────────────────────────────────────────
+function abrirModelosCobranca() {
+  document.getElementById('cob-msg-remetente').value =
+    cobMsgConfig.remetente || (currentUser && currentUser.nome) || '';
+  document.getElementById('cob-msg-empresa').value =
+    cobMsgConfig.empresa || (empresaAtual() ? empresaNome(empresaAtual()) : '');
+  document.getElementById('cob-msg-vars').innerHTML = COB_MSG_VARS.map(([v, desc]) =>
+    `<span class="cob-var-chip" title="${desc}" onclick="inserirVarModelo('${v}')">${v}</span>`).join('');
+  _recarregarListaModelos();
+  openModal('modal-cob-msgs');
+}
+
+function _recarregarListaModelos(idSelecionado) {
+  const sel = document.getElementById('cob-msg-lista');
+  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${m.id}">${m.titulo}</option>`).join('');
+  if (idSelecionado) sel.value = idSelecionado;
+  carregarModeloCobranca();
+}
+
+function carregarModeloCobranca() {
+  const id = document.getElementById('cob-msg-lista').value;
+  const m = (cobMsgConfig.modelos || []).find(x => x.id === id);
+  document.getElementById('cob-msg-titulo').value = m ? m.titulo : '';
+  document.getElementById('cob-msg-texto').value  = m ? m.texto : '';
+  document.getElementById('cob-msg-gatilho').value = (m && m.gatilho != null) ? m.gatilho : '';
+}
+
+function novoModeloCobranca() {
+  document.getElementById('cob-msg-lista').value = '';
+  document.getElementById('cob-msg-titulo').value = '';
+  document.getElementById('cob-msg-texto').value = '';
+  document.getElementById('cob-msg-gatilho').value = '';
+  document.getElementById('cob-msg-titulo').focus();
+}
+
+function inserirVarModelo(v) {
+  const ta = document.getElementById('cob-msg-texto');
+  const ini = ta.selectionStart || 0, fim = ta.selectionEnd || 0;
+  ta.value = ta.value.slice(0, ini) + v + ta.value.slice(fim);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = ini + v.length;
+}
+
+async function salvarModeloCobranca() {
+  const titulo = document.getElementById('cob-msg-titulo').value.trim();
+  const texto  = document.getElementById('cob-msg-texto').value.trim();
+  const gat    = document.getElementById('cob-msg-gatilho').value;
+  if (!titulo) { alert('Dê um título ao modelo.'); return; }
+  if (!texto)  { alert('Escreva o texto da mensagem.'); return; }
+
+  cobMsgConfig.remetente = document.getElementById('cob-msg-remetente').value.trim();
+  cobMsgConfig.empresa   = document.getElementById('cob-msg-empresa').value.trim();
+
+  const id = document.getElementById('cob-msg-lista').value;
+  const gatilho = (gat === '' ? null : parseInt(gat));
+  const existente = (cobMsgConfig.modelos || []).find(m => m.id === id);
+  let novoId = id;
+  if (existente) { existente.titulo = titulo; existente.texto = texto; existente.gatilho = gatilho; }
+  else { novoId = uid(); cobMsgConfig.modelos.push({ id: novoId, titulo, texto, gatilho }); }
+
+  if (await _salvarModelosCobranca()) {
+    _recarregarListaModelos(novoId);
+    alert('✅ Modelo salvo.');
+  }
+}
+
+async function excluirModeloCobranca() {
+  const id = document.getElementById('cob-msg-lista').value;
+  const m = (cobMsgConfig.modelos || []).find(x => x.id === id);
+  if (!m) { alert('Selecione um modelo para excluir.'); return; }
+  if (!confirm(`Excluir o modelo "${m.titulo}"?`)) return;
+  const backup = cobMsgConfig.modelos.slice();
+  cobMsgConfig.modelos = cobMsgConfig.modelos.filter(x => x.id !== id);
+  if (await _salvarModelosCobranca()) _recarregarListaModelos();
+  else cobMsgConfig.modelos = backup;
+}
+
+async function restaurarModelosPadrao() {
+  if (!confirm('Isso substitui a lista atual pelos três modelos padrão (antecedência, 3 dias e 5 dias de atraso). Continuar?')) return;
+  const backup = cobMsgConfig.modelos.slice();
+  cobMsgConfig.modelos = _modelosPadraoCobranca();
+  if (await _salvarModelosCobranca()) _recarregarListaModelos();
+  else cobMsgConfig.modelos = backup;
+}
+
+
 document.querySelectorAll('.modal-overlay').forEach(ov => {
+  if (ov.dataset && ov.dataset.naoFechar) return;   // aviso bloqueante
   ov.addEventListener('click', e => { if(e.target === ov) { if (ov.id) closeModal(ov.id); else ov.classList.remove('open'); } });
 });
 </script>
