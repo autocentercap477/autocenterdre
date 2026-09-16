@@ -2177,9 +2177,10 @@ tr.cob-dia-vazio > td {
             Considerar apenas lançamentos com Categoria definida
           </label>
           <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Base de apuração:</span>
-          <select id="dre-base" onchange="salvarPrefsDre(); renderDre();" style="width:290px;padding:6px 10px;font-size:13px;">
+          <select id="dre-base" onchange="salvarPrefsDre(); renderDre();" style="width:360px;padding:6px 10px;font-size:13px;">
             <option value="competencia">Competência (data da venda / compra)</option>
-            <option value="vencimento">Vencimento das parcelas (30/60/90...)</option>
+            <option value="venc_amort">Vencimento — só na Amortização de Empréstimos</option>
+            <option value="vencimento">Vencimento — todas as contas (30/60/90...)</option>
           </select>
         </div>
         <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
@@ -10727,6 +10728,19 @@ function getGrupoVarEstoqueId() {
   return g ? g.id : null;
 }
 
+// Detecta o grupo da Amortização de Empréstimos (ex.: "(-) Amortização de
+// Empréstimos"). É a única linha do DRE em que faz sentido enxergar pelo
+// vencimento: as parcelas 30/60/90 do empréstimo caem mês a mês, e não
+// todas no mês em que o contrato foi assinado.
+function getGrupoAmortizacaoId() {
+  const g = db.dre_grupos.find(g => {
+    if (g.tipo !== 'entrada' && g.tipo !== 'saida') return false;
+    const n = normText(g.nome || '');
+    return n.includes('amortiz');
+  });
+  return g ? g.id : null;
+}
+
 // Detecta o grupo de valor (Entrada/Saída) do CPV / Custo do Produto Vendido.
 // A variação de estoque digitada é somada diretamente neste grupo, de modo que
 // tanto o valor monetário quanto o % do CPV recalculam juntos.
@@ -10794,7 +10808,11 @@ function renderDre() {
   if (!window._drePrefsOk) { window._drePrefsOk = true; restaurarPrefsDre(); }
   const ano = parseInt(document.getElementById('dre-ano').value);
   const somenteClassificados = document.getElementById('dre-somente-classificados').checked;
-  // Base de apuração: competência (data da venda/compra) ou vencimento das parcelas
+  // Base de apuração. Três modos:
+  //   'competencia' — tudo pela data da venda/compra (padrão contábil);
+  //   'venc_amort'  — só a Amortização de Empréstimos pelo vencimento das
+  //                   parcelas; o resto do DRE continua por competência;
+  //   'vencimento'  — o DRE inteiro pelo vencimento das parcelas.
   const baseDre = (document.getElementById('dre-base') || {}).value || 'competencia';
   // Ocultar a coluna do acumulado e/ou a linha de Variação do Estoque
   const mostrarAcum   = !((document.getElementById('dre-ocultar-acumulada') || {}).checked);
@@ -10830,6 +10848,14 @@ function renderDre() {
   // "somente classificados" está desmarcado), para o DRE bater com o total vendido.
   const grupoBaseId = (gruposValor.find(g => g.tipo === 'entrada') || gruposValor[0] || {}).id;
 
+  // Qual base vale para cada conta do DRE
+  const amortGrupoId = getGrupoAmortizacaoId();
+  const baseDoGrupo = (gid) => {
+    if (baseDre === 'vencimento') return 'vencimento';
+    if (baseDre === 'venc_amort') return (gid && gid === amortGrupoId) ? 'vencimento' : 'competencia';
+    return 'competencia';
+  };
+
   // Rastreamento por CATEGORIA (independente do grupo): valoresMesCat[mes][catId]
   // = valor bruto lançado (mesmo sinal usado pelo grupo); itensMesCat[mes][catId]
   // = lançamentos que compõem o valor (drill-down das linhas de categoria).
@@ -10842,8 +10868,6 @@ function renderDre() {
 
   // 1. Lançamentos a Receber (competência = data da venda)
   db.lancreceber.forEach(l => {
-    const ocorrencias = _dreOcorrencias(l, baseDre, ano, 'receber');
-    if (!ocorrencias.length) return;
     const prodObj = db.prodvenda.find(x => x.id === l.prod);
     const catId = l.cat_dre || (prodObj ? prodObj.cat : null);
     if (!catId) { if (somenteClassificados) return; }
@@ -10851,6 +10875,9 @@ function renderDre() {
     // Venda sem grupo de DRE => conta como Receita Bruta (grupo-base)
     if (!grupoId && !somenteClassificados) grupoId = grupoBaseId;
     if (!grupoId) return;
+    // A base é decidida depois de saber em que conta o lançamento cai
+    const ocorrencias = _dreOcorrencias(l, baseDoGrupo(grupoId), ano, 'receber');
+    if (!ocorrencias.length) return;
     ocorrencias.forEach(o => {
       const m = o.mes;
       if (valoresMes[m][grupoId] === undefined) return;
@@ -10874,13 +10901,14 @@ function renderDre() {
 
   // 2. Lançamentos a Pagar (competência = data da compra)
   db.lancamentos.forEach(l => {
-    const ocorrencias = _dreOcorrencias(l, baseDre, ano, 'pagar');
-    if (!ocorrencias.length) return;
     const prodObj = db.produtos.find(x => x.id === l.prod);
     const catId = l.cat_dre || (prodObj ? prodObj.cat : null);
     if (!catId) { if (somenteClassificados) return; }
     const grupoId = catId ? getDreCatGrupo(catId) : null;
     if (!grupoId) return;
+    // A base é decidida depois de saber em que conta o lançamento cai
+    const ocorrencias = _dreOcorrencias(l, baseDoGrupo(grupoId), ano, 'pagar');
+    if (!ocorrencias.length) return;
     ocorrencias.forEach(o => {
       const m = o.mes;
       if (valoresMes[m][grupoId] === undefined) return;
@@ -11112,11 +11140,23 @@ function renderDre() {
   const peTot = peCol('total');
   const peRow = `<tr class="dre-row-pe"><td>Ponto de Equilíbrio (R$)</td>${peCells}${mostrarAcum ? `<td class="dfc-col-total">${peTot==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(peTot)}</td>` : ''}</tr>`;
 
-  const avisoBase = baseDre === 'vencimento'
-    ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12px;">
-         📅 Apuração pelo <strong>vencimento das parcelas</strong>: cada parcela (30/60/90...) entra no mês em que vence, e não no mês da venda/compra.
-       </div>`
-    : '';
+  let avisoBase = '';
+  if (baseDre === 'vencimento') {
+    avisoBase = `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12px;">
+        📅 <strong>Todo o DRE</strong> está sendo apurado pelo vencimento das parcelas: cada parcela (30/60/90...) entra no mês em que vence, e não no mês da venda/compra.
+      </div>`;
+  } else if (baseDre === 'venc_amort') {
+    const nomeAmort = amortGrupoId
+      ? (grupos.find(g => g.id === amortGrupoId) || {}).nome
+      : null;
+    avisoBase = nomeAmort
+      ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12px;">
+           📅 Apuração pelo vencimento das parcelas <strong>somente na linha “${esc(nomeAmort)}”</strong>: as parcelas do empréstimo (30/60/90...) entram no mês em que vencem. Todas as demais contas continuam por competência.
+         </div>`
+      : `<div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12px;">
+           ⚠️ Nenhum grupo de <strong>Amortização</strong> foi encontrado no DRE, então nada mudou. Cadastre um grupo com “Amortização” no nome em <strong>DRE → Grupos</strong>, ou escolha outra base de apuração.
+         </div>`;
+  }
   const html = avisoBase + `<table class="dfc-table">
     <thead><tr><th>DRE</th>${mesesHeader}</tr></thead>
     <tbody>${linhasHtml}${peRow}</tbody>
