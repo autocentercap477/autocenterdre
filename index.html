@@ -787,6 +787,18 @@ tr.cob-dia-vazio > td {
   width:100%; min-height:260px; font-family:inherit; font-size:13px; line-height:1.55;
   padding:13px; border:1.5px solid #e7e5e4; border-radius:10px; resize:vertical; background:#fbfdfb;
 }
+/* AUDITORIA */
+.aud-acao {
+  display:inline-block; border-radius:6px; padding:2px 8px;
+  font-size:11px; font-weight:800; letter-spacing:.4px;
+}
+.aud-POST   { background:#dcfce7; color:#166534; }
+.aud-PATCH  { background:#dbeafe; color:#1e40af; }
+.aud-DELETE { background:#fee2e2; color:#991b1b; }
+.aud-tabela {
+  font-family:'DM Mono',monospace; font-size:11px; color:#57534e;
+  background:#f5f4f2; border-radius:6px; padding:2px 7px;
+}
 </style>
 </head>
 <body>
@@ -975,6 +987,10 @@ tr.cob-dia-vazio > td {
       <div class="nav-item" id="nav-item-empresas" onclick="showPage('empresas')" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="9" y1="12" x2="9" y2="12.01"/><line x1="9" y1="15" x2="9" y2="15.01"/></svg>
         Empresas
+      </div>
+      <div class="nav-item" id="nav-item-auditoria" onclick="showPage('auditoria')" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Auditoria
       </div>
       <div class="nav-item" id="nav-item-usuarios" onclick="showPage('usuarios')" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -1638,6 +1654,63 @@ tr.cob-dia-vazio > td {
         <div class="table-scroll"><table><thead><tr id="th-areceber-row">
           <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Juros</th><th>Total c/ Juros</th><th>Dt. Competência</th><th>Vencimento</th><th>Situação</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
         </tr></thead><tbody id="tb-areceber"><tr><td colspan="14" class="empty-state">Nenhuma parcela em aberto.</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ AUDITORIA ══ -->
+    <div class="page" id="page-auditoria">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Auditoria</div>
+          <div class="page-sub" style="margin-bottom:0">Quem alterou ou excluiu o quê, e quando</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-pdf" onclick="renderAuditoria(true)">↻ Atualizar</button>
+          <button class="btn-pdf" onclick="imprimirPagina('auditoria')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button>
+        </div>
+      </div>
+
+      <div id="auditoria-kpis" class="grid4" style="margin-bottom:20px;"></div>
+
+      <div class="card">
+        <div class="card-title">Registros</div>
+        <div class="filter-row">
+          <div class="form-group"><label>Usuário</label>
+            <select id="aud-usuario" onchange="renderAuditoria()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Ação</label>
+            <select id="aud-acao" onchange="renderAuditoria()">
+              <option value="">Todas</option>
+              <option value="POST">Criação</option>
+              <option value="PATCH">Alteração</option>
+              <option value="DELETE">Exclusão</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Tabela</label>
+            <select id="aud-tabela" onchange="renderAuditoria()"><option value="">Todas</option></select>
+          </div>
+          <div class="form-group"><label>De</label><input type="date" id="aud-de" onchange="renderAuditoria()" /></div>
+          <div class="form-group"><label>Até</label><input type="date" id="aud-ate" onchange="renderAuditoria()" /></div>
+          <div class="form-group"><label>Buscar</label>
+            <input type="text" id="aud-busca" oninput="renderAuditoria()" placeholder="Cliente, valor, NF..." style="width:200px" />
+          </div>
+          <div style="align-self:flex-end;display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="clearAuditoriaFiltros()">Limpar</button>
+            <button class="btn btn-danger" onclick="limparAuditoriaAntiga()">Apagar &gt; 180 dias</button>
+          </div>
+        </div>
+
+        <div class="table-scroll" style="max-height:none">
+          <table><thead><tr>
+            <th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Detalhe</th>
+          </tr></thead><tbody id="tb-auditoria">
+            <tr><td colspan="6" class="empty-state">Nenhum registro.</td></tr>
+          </tbody></table>
+        </div>
+        <p style="font-size:11px;color:#a8a29e;margin-top:12px;">
+          O registro é gravado no navegador de quem faz a alteração. Ele mostra o que o sistema enviou ao banco — não
+          substitui as regras de permissão (RLS) do Supabase, que são a proteção de verdade contra acesso indevido.
+        </p>
       </div>
     </div>
 
@@ -3781,6 +3854,7 @@ const PAGES_CONFIG = [
   { id:'lancreceber',       label:'Lançamentos (Venda)', grupo:'receber' },
   { id:'areceber',          label:'Contas a Receber',    grupo:'receber' },
   { id:'cobranca',          label:'Cobrança',            grupo:'receber' },
+  { id:'auditoria',         label:'Auditoria',           grupo:'admin' },
   { id:'recebido',          label:'Contas Recebidas',    grupo:'receber' },
   { id:'pedidoscancelados', label:'Pedidos Cancelados',  grupo:'receber' },
   { id:'reposicao',         label:'Reposição',           grupo:'receber' },
@@ -3963,7 +4037,11 @@ async function sbFetch(table, method='GET', body=null, params='') {
   }
   const url = `${SB_URL}/rest/v1/${table}${params}`;
   const gravacao = (method !== 'GET');
-  const bodyFinal = body ? sbNormalizarDatas(body) : body;
+  // Segurança: nenhum texto com tag HTML entra no banco. A tabela `config`
+  // fica de fora porque o campo `value` guarda JSON — limpar as aspas ali
+  // quebraria o conteúdo.
+  const bodyLimpo = (body && table !== 'config') ? limparDados(body) : body;
+  const bodyFinal = bodyLimpo ? sbNormalizarDatas(bodyLimpo) : bodyLimpo;
   _sbUltimoErro = null;
 
   const enviar = async (accessToken) => {
@@ -3978,6 +4056,11 @@ async function sbFetch(table, method='GET', body=null, params='') {
     if (bodyFinal) opts.body = JSON.stringify(bodyFinal);
     return await fetch(url, opts);
   };
+
+  // Para exclusões, descreve o registro ANTES de ele sumir do banco —
+  // depois não haveria mais como saber o que foi apagado.
+  const alvoAntes = (method === 'DELETE' || method === 'PATCH')
+    ? _auditAlvo(table, params) : null;
 
   // [OTIMIZADO] Qualquer gravação invalida os índices e o cache de parcelas.
   if (gravacao && typeof bumpDbVer === 'function') bumpDbVer();
@@ -4008,14 +4091,88 @@ async function sbFetch(table, method='GET', body=null, params='') {
       console.warn(`[477] Dado NÃO salvo no banco! Tabela: ${table} | Status: ${res.status} | Detalhe:`, err);
       return null;
     }
-    if (method === 'DELETE' || method === 'PATCH') return true;
+    if (method === 'DELETE' || method === 'PATCH') {
+      registrarAuditoria(table, method, params, bodyFinal, alvoAntes);
+      return true;
+    }
     const text = await res.text();
-    return text ? JSON.parse(text) : [];
+    const retorno = text ? JSON.parse(text) : [];
+    if (method === 'POST') registrarAuditoria(table, method, params, bodyFinal, alvoAntes);
+    return retorno;
   } catch(e) {
     _sbUltimoErro = { tipo: 'rede', detalhe: String((e && e.message) || e) };
     console.error(`sbFetch ${method} ${table} exceção:`, e);
     return null;
   }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SEGURANÇA: LIMPEZA DO TEXTO QUE VEM DO USUÁRIO
+// ----------------------------------------------------------------------
+// O sistema monta as telas juntando texto dentro de HTML. Se alguém
+// cadastrasse um cliente com um nome contendo uma tag (<script>, <img ...>),
+// esse código rodaria no navegador de quem abrisse a tela — e como o token
+// da sessão fica guardado no navegador, daria para roubá-lo.
+//
+// A defesa é feita na fronteira dos dados, e não em cada uma das centenas
+// de telas: tudo que sai do banco e tudo que entra nele passa por
+// `limparTexto()`. Sem "<" e ">" não existe tag para injetar; a aspa dupla
+// vira apóstrofo para não escapar de um atributo HTML. Nenhum nome de
+// cliente, fornecedor, produto ou nota fiscal usa esses caracteres de
+// verdade, então na prática nada legítimo é perdido.
+//
+// `esc()` é a proteção de segunda camada, usada ao exibir texto que não
+// passa pelo banco de dados (follow-ups, mensagens, auditoria).
+// ══════════════════════════════════════════════════════════════════════
+function limparTexto(v) {
+  if (typeof v !== 'string') return v;
+  return v.replace(/[<>]/g, '').replace(/"/g, "'");
+}
+
+// Campos que NÃO podem ser limpos. `parcela_datas` e `value` guardam JSON
+// dentro de um texto — trocar as aspas ali destruiria o conteúdo (as
+// parcelas de um lançamento, por exemplo). Os demais são identificadores
+// internos, que nunca contêm texto digitado pelo usuário.
+const CAMPOS_SEM_LIMPEZA = {
+  parcela_datas: 1, value: 1, key: 1, id: 1, empresa_id: 1
+};
+
+// Percorre objetos e listas limpando todo campo de texto.
+function limparDados(x, chave, prof) {
+  prof = prof || 0;
+  if (chave && CAMPOS_SEM_LIMPEZA[chave]) return x;
+  if (prof > 6 || x == null) return x;
+  if (typeof x === 'string') return limparTexto(x);
+  if (Array.isArray(x)) return x.map(i => limparDados(i, chave, prof + 1));
+  if (typeof x === 'object') {
+    const out = {};
+    for (const k in x) out[k] = limparDados(x[k], k, prof + 1);
+    return out;
+  }
+  return x;
+}
+
+// Limpa as tabelas de dados já carregadas na memória. NÃO toca em
+// `custosfixos` nem em `metas`, que são mapas de números, nem nos valores
+// da tabela `config` (são JSON — trocar aspas quebraria o texto).
+const TABELAS_LIMPAR = [
+  'fornecedores', 'produtos', 'lancamentos', 'faturamento', 'recebimentos',
+  'clientes', 'prodvenda', 'lancreceber', 'dfc_cats', 'dfc_lans',
+  'dre_grupos', 'bancos', 'transferencias', 'pedidos_cancelados',
+  'reposicoes', 'empresas'
+];
+function limparDb() {
+  TABELAS_LIMPAR.forEach(t => {
+    if (Array.isArray(db[t])) db[t] = db[t].map(r => limparDados(r));
+  });
+}
+
+// Escapa texto para exibir dentro de HTML com segurança.
+function esc(v) {
+  if (v == null) return '';
+  return String(v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // [OTIMIZADO] versão dos dados em memória (usada pelos índices e caches)
@@ -4165,7 +4322,9 @@ async function loadAllData() {
       // 19 — Cobrança: follow-ups e recebimentos parciais (tabela `config`)
       sbFetch('config', 'GET', null, '?key=like.cobranca:*&limit=5000'),
       // 20 — Modelos de mensagem de cobrança (WhatsApp)
-      sbFetch('config', 'GET', null, '?key=eq.cobranca_mensagens&limit=1')
+      sbFetch('config', 'GET', null, '?key=eq.cobranca_mensagens&limit=1'),
+      // 21 — Auditoria: histórico de alterações (tabela `config`)
+      sbFetch('config', 'GET', null, '?key=like.audit:*&order=key.desc&limit=3000')
     ]);
 
     const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
@@ -4207,11 +4366,21 @@ async function loadAllData() {
       try { obj = JSON.parse(c.value); } catch(e) { obj = null; }
       if (obj) cobrancaDados[chave] = { followups: obj.followups || [], baixas: obj.baixas || [] };
     });
+    // Histórico de auditoria
+    auditLog = [];
+    (val(21) || []).forEach(c => {
+      try { const o = JSON.parse(c.value); if (o && o.ts) auditLog.push(o); } catch(e) {}
+    });
+    auditLog.sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
     // Modelos de mensagem do WhatsApp usados na Cobrança
     _carregarModelosCobranca(val(20));
     db.pedidos_cancelados = val(15) || [];
     db.reposicoes = val(16) || [];
     db.empresas = val(17) || [];
+
+    // Segurança: registros antigos, gravados antes desta proteção existir,
+    // são limpos aqui na leitura.
+    limparDb();
     const dreGruposRes = val(12);
     db.dre_grupos    = dreGruposRes || [];
     window._dreGruposError = (dreGruposRes === null || dreGruposRes === undefined);
@@ -4345,7 +4514,7 @@ function _finalizarLogin(found) {
   if (sll) sll.textContent = prev ? 'Último acesso: ' + fmtTs(prev.ts) : 'Primeiro acesso';
   // Mostrar/ocultar nav admin
   const isAdmin = found.role === 'admin';
-  ['nav-label-admin','nav-item-usuarios','nav-item-empresas'].forEach(id => {
+  ['nav-label-admin','nav-item-usuarios','nav-item-empresas','nav-item-auditoria'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = isAdmin ? '' : 'none';
   });
@@ -4406,6 +4575,10 @@ function showPage(p) {
   // Telas ocultas não abrem nem por chamada direta
   if (paginaOculta(p)) return;
   // Verificar permissão (exceto admin e páginas de administração)
+  // A auditoria é exclusiva do administrador
+  if (p === 'auditoria' && (!currentUser || currentUser.role !== 'admin')) {
+    alert('A tela de Auditoria é exclusiva do administrador.'); return;
+  }
   if (p !== 'usuarios' && p !== 'empresas' && currentUser && currentUser.role !== 'admin') {
     const allowed = currentUser.pages || [];
     if (!allowed.includes(p)) { alert('Acesso não permitido para seu perfil.'); return; }
@@ -4431,6 +4604,7 @@ function showPage(p) {
   if (p === 'lancreceber')    renderLancReceber();
   if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
   if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
+  if (p === 'auditoria')      renderAuditoria(true);
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -4468,6 +4642,7 @@ function renderPaginaAtual() {
   if (p === 'lancreceber')    renderLancReceber();
   if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
   if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
+  if (p === 'auditoria')      renderAuditoria(true);
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -8246,7 +8421,7 @@ function abrirDetalheDia(dia, mes, ano) {
       else              totalARec     += valParc;
       const parcTxt = p.totalParc > 1 ? ` <span style="font-size:11px;color:#a8a29e">(parc. ${p.parcIdx}/${p.totalParc})</span>` : '';
       return `<tr>
-        <td><b>${getClienteNome(p.cliente)}</b>${parcTxt}${p.prod ? '<br><span style="font-size:11px;color:#a8a29e">'+getProdVendaNome(p.prod)+'</span>' : ''}</td>
+        <td><b>${esc(getClienteNome(p.cliente))}</b>${parcTxt}${p.prod ? '<br><span style="font-size:11px;color:#a8a29e">'+esc(getProdVendaNome(p.prod))+'</span>' : ''}</td>
         <td style="font-family:DM Mono,monospace;white-space:nowrap">${fmtBRL(valParc)}</td>
         <td>${badge}</td>
       </tr>`;
@@ -12449,6 +12624,7 @@ function imprimirPagina(pagina) {
     'custos-fixos': 'Custos Fixos',
     areceber:    'Contas a Receber',
     cobranca:    'Cobrança — Clientes em Atraso',
+    auditoria:   'Auditoria — Histórico de Alterações',
     recebido:    'Contas Recebidas',
     pedidoscancelados: 'Pedidos Cancelados',
     reposicao:   'Reposições'
@@ -12460,6 +12636,7 @@ function imprimirPagina(pagina) {
     'custos-fixos': 'tb-custos-fixos',
     areceber:    'tb-areceber',
     cobranca:    'tb-cobranca',
+    auditoria:   'tb-auditoria',
     recebido:    'tb-recebido',
     pedidoscancelados: 'tb-pedidoscancelados',
     reposicao:   'tb-reposicao'
@@ -12470,6 +12647,7 @@ function imprimirPagina(pagina) {
     'custos-fixos': 'cf-kpis',
     areceber: 'areceber-kpis',
     cobranca: 'cobranca-kpis',
+    auditoria: 'auditoria-kpis',
     recebido: 'recebido-kpis',
     pedidoscancelados: 'pc-kpis',
     reposicao:   'rp-kpis'
@@ -14698,8 +14876,8 @@ function _linhaCobranca(p, hoje) {
   const ultimo = nFup ? reg.followups[nFup-1] : null;
 
   return `<tr>
-    <td><b>${getClienteNome(p.cliente)}</b>${pago > 0 ? ' <span class="cob-tag-parcial">parcial</span>' : ''}</td>
-    <td style="font-size:12px">${p.prod ? getProdVendaNome(p.prod) : '—'}</td>
+    <td><b>${esc(getClienteNome(p.cliente))}</b>${pago > 0 ? ' <span class="cob-tag-parcial">parcial</span>' : ''}</td>
+    <td style="font-size:12px">${p.prod ? esc(getProdVendaNome(p.prod)) : '—'}</td>
     <td style="font-family:DM Mono,monospace">${p.parcIdx}/${p.totalParc}</td>
     <td style="font-family:DM Mono,monospace">${fmtBRL(p.valParc)}</td>
     <td style="font-family:DM Mono,monospace;color:${pago>0?'#16a34a':'#a8a29e'}">${pago>0?fmtBRL(pago):'—'}</td>
@@ -14712,7 +14890,7 @@ function _linhaCobranca(p, hoje) {
     </td>
     <td>${dias > 0 ? `<span class="cob-tag-atraso">${dias}d</span>` : '<span style="color:#a8a29e">—</span>'}</td>
     <td style="font-size:11px;color:#57534e">
-      ${ultimo ? `${fmtDate(ultimo.data)}<br><span style="color:#a8a29e">${ultimo.resultado||ultimo.canal||''}</span>` : '<span style="color:#a8a29e">sem registro</span>'}
+      ${ultimo ? `${fmtDate(ultimo.data)}<br><span style="color:#a8a29e">${esc(ultimo.resultado||ultimo.canal)}</span>` : '<span style="color:#a8a29e">sem registro</span>'}
     </td>
     <td><span class="badge ${sit.cls}">${sit.label}</span></td>
     <td class="actions">
@@ -14754,7 +14932,7 @@ function abrirPrevisaoCobranca(lancId, parcIdx) {
   const p = _acharParcela(lancId, parcIdx); if (!p) return;
   _cobCtx = { lancId, parcIdx };
   document.getElementById('cob-prev-info').innerHTML =
-    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)}<br>
+    `<strong>${esc(getClienteNome(p.cliente))}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)}<br>
      <span style="color:#a8a29e;font-size:12px">Previsão atual: ${fmtDate(p.venc)}</span>`;
   document.getElementById('cob-prev-data').value = p.venc || today();
   openModal('modal-cob-previsao');
@@ -14793,7 +14971,7 @@ function abrirFollowupCobranca(lancId, parcIdx) {
   _cobCtx = { lancId, parcIdx };
   const cli = (db.clientes || []).find(c => c.id === p.cliente);
   document.getElementById('cob-fup-info').innerHTML =
-    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)} · vence ${fmtDate(p.venc)}`;
+    `<strong>${esc(getClienteNome(p.cliente))}</strong> · parcela ${p.parcIdx}/${p.totalParc} · ${fmtBRL(p.valParc)} · vence ${fmtDate(p.venc)}`;
   document.getElementById('cob-fup-contato').textContent = cli
     ? [cli.contato, cli.tel, cli.email].filter(Boolean).join(' · ') || 'Sem contato cadastrado no cliente.'
     : '';
@@ -14815,16 +14993,16 @@ function renderFollowupsCobranca() {
     <div class="cob-fup-top">
       <span class="cob-fup-data">${fmtDate(f.data)}${f.hora ? ' · ' + f.hora : ''}</span>
       <span style="display:flex;gap:6px;align-items:center">
-        <span class="badge badge-blue">${f.canal || '—'}</span>
-        ${f.resultado ? `<span class="badge badge-gray">${f.resultado}</span>` : ''}
+        <span class="badge badge-blue">${esc(f.canal) || '—'}</span>
+        ${f.resultado ? `<span class="badge badge-gray">${esc(f.resultado)}</span>` : ''}
         <button class="btn btn-danger btn-sm" onclick="excluirFollowupCobranca('${f.id}')">Excluir</button>
       </span>
     </div>
-    <div class="cob-fup-txt">${(f.obs||'').replace(/</g,'&lt;')}</div>
+    <div class="cob-fup-txt">${esc(f.obs)}</div>
     <div class="cob-fup-rodape">
-      ${f.pessoa ? 'Falou com: ' + f.pessoa + ' · ' : ''}
+      ${f.pessoa ? 'Falou com: ' + esc(f.pessoa) + ' · ' : ''}
       ${f.proximo ? 'Próximo contato: ' + fmtDate(f.proximo) + ' · ' : ''}
-      Registrado por ${f.usuario || '—'}
+      Registrado por ${esc(f.usuario) || '—'}
     </div>
   </div>`).join('');
 }
@@ -14884,8 +15062,8 @@ function abrirBaixaCobranca(lancId, parcIdx) {
   populateFormasRecebSelects();
   const l = db.lancreceber.find(x => x.id === lancId) || {};
   document.getElementById('cob-bx-info').innerHTML =
-    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} · vencimento ${fmtDate(p.venc)}
-     ${p.nf ? ' · NF ' + p.nf : ''}`;
+    `<strong>${esc(getClienteNome(p.cliente))}</strong> · parcela ${p.parcIdx}/${p.totalParc} · vencimento ${fmtDate(p.venc)}
+     ${p.nf ? ' · NF ' + esc(p.nf) : ''}`;
   document.getElementById('cob-bx-data').value = today();
   document.getElementById('cob-bx-valor').value = '';
   document.getElementById('cob-bx-obs').value = '';
@@ -14914,9 +15092,9 @@ function renderBaixasCobranca() {
   el.innerHTML = lista.map(b => `<div class="cob-bx-linha">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span style="font-family:DM Mono,monospace;font-size:12px;color:#57534e">${fmtDate(b.data)}</span>
-      <span class="badge badge-blue">${b.forma || '—'}</span>
-      <span style="font-size:12px;color:#57534e">${b.banco ? getBancoNome(b.banco) : '—'}</span>
-      ${b.obs ? `<span style="font-size:11px;color:#a8a29e">${String(b.obs).replace(/</g,'&lt;')}</span>` : ''}
+      <span class="badge badge-blue">${esc(b.forma) || '—'}</span>
+      <span style="font-size:12px;color:#57534e">${b.banco ? esc(getBancoNome(b.banco)) : '—'}</span>
+      ${b.obs ? `<span style="font-size:11px;color:#a8a29e">${esc(b.obs)}</span>` : ''}
     </div>
     <div style="display:flex;align-items:center;gap:10px">
       <strong style="font-family:DM Mono,monospace;color:#16a34a">${fmtBRL(b.valor)}</strong>
@@ -15077,7 +15255,7 @@ function abrirAvisoAtraso(forcar) {
   document.getElementById('aviso-atraso-lista').innerHTML = lista.slice(0, 40).map(c => `
     <div class="aviso-atraso-cli">
       <div>
-        <strong>${c.nome}</strong>
+        <strong>${esc(c.nome)}</strong>
         <div style="font-size:11px;color:#a8a29e">${c.qtd} parcela(s) · atraso de até ${c.dias} dia(s)</div>
       </div>
       <strong style="font-family:DM Mono,monospace;color:#b91c1c">${fmtBRL(c.total)}</strong>
@@ -15223,12 +15401,12 @@ function abrirWhatsCobranca(lancId, parcIdx) {
   const saldo = Math.max(0, p.valParc - cobTotalBaixas(lancId, parcIdx));
 
   document.getElementById('cob-wa-info').innerHTML =
-    `<strong>${getClienteNome(p.cliente)}</strong> · parcela ${p.parcIdx}/${p.totalParc} ·
+    `<strong>${esc(getClienteNome(p.cliente))}</strong> · parcela ${p.parcIdx}/${p.totalParc} ·
      saldo ${fmtBRL(saldo)} · vencimento ${fmtDate(p.venc)}
      ${dias > 0 ? `· <span class="cob-tag-atraso">${dias}d de atraso</span>` : ''}`;
 
   const sel = document.getElementById('cob-wa-modelo');
-  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${m.id}">${m.titulo}</option>`).join('')
+  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${esc(m.id)}">${esc(m.titulo)}</option>`).join('')
     || '<option value="">(nenhum modelo cadastrado)</option>';
   const sug = _modeloSugerido(dias);
   if (sug) sel.value = sug.id;
@@ -15299,7 +15477,7 @@ function abrirModelosCobranca() {
 
 function _recarregarListaModelos(idSelecionado) {
   const sel = document.getElementById('cob-msg-lista');
-  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${m.id}">${m.titulo}</option>`).join('');
+  sel.innerHTML = (cobMsgConfig.modelos || []).map(m => `<option value="${esc(m.id)}">${esc(m.titulo)}</option>`).join('');
   if (idSelecionado) sel.value = idSelecionado;
   carregarModeloCobranca();
 }
@@ -15368,6 +15546,235 @@ async function restaurarModelosPadrao() {
   cobMsgConfig.modelos = _modelosPadraoCobranca();
   if (await _salvarModelosCobranca()) _recarregarListaModelos();
   else cobMsgConfig.modelos = backup;
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════════
+// AUDITORIA — quem alterou ou excluiu o quê
+// ----------------------------------------------------------------------
+// Toda gravação bem-sucedida no banco (criação, alteração, exclusão)
+// deixa um registro com autor, data/hora, tabela, o registro afetado e um
+// resumo do que mudou. Os registros ficam na tabela `config` já existente,
+// com a chave "audit:<data>:<id>", então não é preciso criar tabela nova.
+//
+// Limite honesto desta função: ela é gravada pelo próprio sistema, no
+// navegador de quem faz a alteração. Serve para responder "quem apagou
+// esse lançamento?" no uso normal da empresa. NÃO é uma trava de
+// segurança — quem fala direto com a API do banco não passa por aqui.
+// Essa proteção é o RLS, configurado no painel do Supabase.
+// ══════════════════════════════════════════════════════════════════════
+const AUDIT_PREFIX = 'audit:';
+var auditLog = [];
+var _auditEmCurso = false;
+
+// Nome amigável de cada tabela, e onde ela mora em memória
+const AUDIT_TABELAS = {
+  lancamentos:        { nome: 'Contas a Pagar',      db: 'lancamentos' },
+  lancreceber:        { nome: 'Contas a Receber',    db: 'lancreceber' },
+  clientes:           { nome: 'Clientes',            db: 'clientes' },
+  fornecedores:       { nome: 'Fornecedores',        db: 'fornecedores' },
+  produtos:           { nome: 'Produtos (compra)',   db: 'produtos' },
+  prodvenda:          { nome: 'Produtos (venda)',    db: 'prodvenda' },
+  bancos:             { nome: 'Bancos',              db: 'bancos' },
+  transferencias:     { nome: 'Transferências',      db: 'transferencias' },
+  dfc_categorias:     { nome: 'Categorias DFC',      db: 'dfc_cats' },
+  dfc_lancamentos:    { nome: 'Lançamentos DFC',     db: 'dfc_lans' },
+  dre_grupos:         { nome: 'Grupos do DRE',       db: 'dre_grupos' },
+  faturamento:        { nome: 'Faturamento',         db: 'faturamento' },
+  recebimentos:       { nome: 'Recebimentos',        db: 'recebimentos' },
+  pedidos_cancelados: { nome: 'Pedidos cancelados',  db: 'pedidos_cancelados' },
+  reposicoes:         { nome: 'Reposições',          db: 'reposicoes' },
+  empresas:           { nome: 'Empresas',            db: 'empresas' },
+  metas:              { nome: 'Metas',               db: null },
+  usuarios:           { nome: 'Usuários',            db: null }
+};
+function _auditNomeTabela(t) {
+  return (AUDIT_TABELAS[t] && AUDIT_TABELAS[t].nome) || t;
+}
+
+// Descreve um registro em uma linha legível
+function _auditDescrever(tabela, o) {
+  if (!o || typeof o !== 'object') return '';
+  const p = [];
+  if (o.nome)    p.push(o.nome);
+  if (o.cliente) p.push(getClienteNome(o.cliente));
+  if (o.forn)    p.push(getFornNome(o.forn));
+  if (o.prod)    p.push(tabela === 'lancreceber' ? getProdVendaNome(o.prod) : getProdNome(o.prod));
+  if (o.nf)      p.push('NF ' + o.nf);
+  if (o.valor != null && !isNaN(parseFloat(o.valor))) p.push(fmtBRL(parseFloat(o.valor)));
+  const dt = o.dtvenda || o.dtcompra || o.data || o.dt_reposicao || o.dt_cancelamento;
+  if (dt) p.push(fmtDate(dt));
+  if (o.mes) p.push(o.mes);
+  return p.join(' · ');
+}
+
+// Localiza, ANTES da gravação, o registro que vai ser alterado ou apagado
+function _auditAlvo(tabela, params) {
+  const m = /id=eq\.([^&]+)/.exec(params || '');
+  const id = m ? decodeURIComponent(m[1]) : '';
+  const cfg = AUDIT_TABELAS[tabela];
+  let desc = '';
+  if (id && cfg && cfg.db && Array.isArray(db[cfg.db])) {
+    const reg = db[cfg.db].find(x => x && x.id === id);
+    if (reg) desc = _auditDescrever(tabela, reg);
+  }
+  return { id, desc };
+}
+
+// Resume o que foi enviado ao banco
+function _auditResumo(tabela, metodo, body) {
+  const o = Array.isArray(body) ? body[0] : body;
+  if (!o || typeof o !== 'object') return '';
+  if (metodo === 'POST') return _auditDescrever(tabela, o);
+  // PATCH: lista os campos alterados
+  const ignorar = { id: 1, empresa_id: 1, parcela_datas: 1 };
+  const campos = Object.keys(o).filter(k => !ignorar[k]);
+  const partes = campos.slice(0, 6).map(k => {
+    let v = o[k];
+    if (v == null || v === '') v = '(vazio)';
+    else if (k === 'valor' && !isNaN(parseFloat(v))) v = fmtBRL(parseFloat(v));
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) v = fmtDate(v);
+    else v = String(v).slice(0, 40);
+    return k + ' → ' + v;
+  });
+  if (campos.length > 6) partes.push('+' + (campos.length - 6) + ' campo(s)');
+  if (o.parcela_datas) partes.push('parcelas atualizadas');
+  return partes.join(' | ');
+}
+
+async function registrarAuditoria(tabela, metodo, params, body, alvoAntes) {
+  // `config` guarda os próprios registros de auditoria e outras
+  // configurações internas — registrá-la criaria um laço infinito.
+  if (tabela === 'config') return;
+  if (_auditEmCurso) return;
+  if (!currentUser) return;
+
+  _auditEmCurso = true;
+  try {
+    const alvo = alvoAntes || _auditAlvo(tabela, params);
+    const reg = {
+      id: uid(),
+      ts: new Date().toISOString(),
+      usuario: (currentUser.nome || currentUser.user || '—'),
+      email: currentUser.user || '',
+      acao: metodo,
+      tabela: tabela,
+      alvoId: alvo.id || '',
+      alvo: alvo.desc || '',
+      resumo: (metodo === 'DELETE') ? (alvo.desc || '') : _auditResumo(tabela, metodo, body),
+      empresa: (typeof empresaAtual === 'function' && empresaAtual()) ? empresaNome(empresaAtual()) : ''
+    };
+    auditLog.unshift(reg);
+    await sbFetch('config', 'POST', {
+      id: uid(),
+      key: AUDIT_PREFIX + reg.ts + ':' + reg.id,
+      value: JSON.stringify(reg)
+    });
+    if (paginaVisivel('auditoria')) renderAuditoria();
+  } catch (e) {
+    console.error('Auditoria: não foi possível registrar.', e);
+  } finally {
+    _auditEmCurso = false;
+  }
+}
+
+// ── Tela ──────────────────────────────────────────────────────────────
+function clearAuditoriaFiltros() {
+  ['aud-usuario', 'aud-acao', 'aud-tabela', 'aud-de', 'aud-ate', 'aud-busca']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderAuditoria();
+}
+
+function _popularFiltrosAuditoria() {
+  const selU = document.getElementById('aud-usuario');
+  const selT = document.getElementById('aud-tabela');
+  if (!selU || !selT) return;
+  const antesU = selU.value, antesT = selT.value;
+  const usuarios = [...new Set(auditLog.map(r => r.usuario).filter(Boolean))].sort();
+  selU.innerHTML = '<option value="">Todos</option>' +
+    usuarios.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('');
+  selU.value = antesU;
+  const tabelas = [...new Set(auditLog.map(r => r.tabela).filter(Boolean))].sort();
+  selT.innerHTML = '<option value="">Todas</option>' +
+    tabelas.map(t => `<option value="${esc(t)}">${esc(_auditNomeTabela(t))}</option>`).join('');
+  selT.value = antesT;
+}
+
+function renderAuditoria(repopular) {
+  if (!paginaVisivel('auditoria')) return;
+  if (repopular) _popularFiltrosAuditoria();
+
+  const fUser  = document.getElementById('aud-usuario').value;
+  const fAcao  = document.getElementById('aud-acao').value;
+  const fTab   = document.getElementById('aud-tabela').value;
+  const fDe    = document.getElementById('aud-de').value;
+  const fAte   = document.getElementById('aud-ate').value;
+  const fBusca = (document.getElementById('aud-busca').value || '').trim().toLowerCase();
+
+  const lista = auditLog.filter(r => {
+    if (fUser && r.usuario !== fUser) return false;
+    if (fAcao && r.acao !== fAcao) return false;
+    if (fTab  && r.tabela !== fTab) return false;
+    const dia = (r.ts || '').slice(0, 10);
+    if (fDe  && dia < fDe)  return false;
+    if (fAte && dia > fAte) return false;
+    if (fBusca) {
+      const txt = [r.usuario, r.alvo, r.resumo, _auditNomeTabela(r.tabela)].join(' ').toLowerCase();
+      if (!txt.includes(fBusca)) return false;
+    }
+    return true;
+  });
+
+  const hoje = today();
+  document.getElementById('auditoria-kpis').innerHTML = `
+    <div class="card kpi"><div class="kpi-val">${lista.length}</div><div class="kpi-lbl">Registros exibidos</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#dc2626">${lista.filter(r => r.acao === 'DELETE').length}</div><div class="kpi-lbl">Exclusões</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#1e40af">${lista.filter(r => r.acao === 'PATCH').length}</div><div class="kpi-lbl">Alterações</div></div>
+    <div class="card kpi"><div class="kpi-val" style="color:#166534">${lista.filter(r => (r.ts || '').slice(0,10) === hoje).length}</div><div class="kpi-lbl">Hoje</div></div>`;
+
+  const tb = document.getElementById('tb-auditoria');
+  if (!lista.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum registro com os filtros atuais.</td></tr>';
+    return;
+  }
+  const rotulo = { POST: 'CRIOU', PATCH: 'ALTEROU', DELETE: 'EXCLUIU' };
+  tb.innerHTML = lista.slice(0, LIMITE_LINHAS).map(r => {
+    const d = new Date(r.ts);
+    const quando = isNaN(d) ? esc(r.ts)
+      : `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `<tr>
+      <td style="font-family:DM Mono,monospace;font-size:12px;white-space:nowrap">${quando}</td>
+      <td><b>${esc(r.usuario)}</b>${r.empresa ? `<br><span style="font-size:11px;color:#a8a29e">${esc(r.empresa)}</span>` : ''}</td>
+      <td><span class="aud-acao aud-${esc(r.acao)}">${rotulo[r.acao] || esc(r.acao)}</span></td>
+      <td><span class="aud-tabela">${esc(_auditNomeTabela(r.tabela))}</span></td>
+      <td style="font-size:12px">${esc(r.alvo) || '<span style="color:#a8a29e">—</span>'}</td>
+      <td style="font-size:12px;color:#57534e">${esc(r.resumo) || '<span style="color:#a8a29e">—</span>'}</td>
+    </tr>`;
+  }).join('') + (lista.length > LIMITE_LINHAS
+    ? `<tr><td colspan="6" style="text-align:center;padding:14px;background:#fffbeb;color:#92400e;font-size:12px">
+         Mostrando os ${LIMITE_LINHAS} mais recentes de <strong>${lista.length}</strong>. Use os filtros para refinar.</td></tr>`
+    : '');
+}
+
+async function limparAuditoriaAntiga() {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode limpar a auditoria.'); return; }
+  const corte = _addDias(today(), -180);
+  const antigos = auditLog.filter(r => (r.ts || '').slice(0, 10) < corte);
+  if (!antigos.length) { alert('Não há registros com mais de 180 dias.'); return; }
+  if (!confirm(`Apagar definitivamente ${antigos.length} registro(s) de auditoria anteriores a ${fmtDate(corte)}?`)) return;
+
+  _auditEmCurso = true;
+  try {
+    const ok = await sbFetch('config', 'DELETE', null,
+      `?key=like.audit:*&key=lt.${encodeURIComponent(AUDIT_PREFIX + corte)}`);
+    if (!ok) { alert('❌ Não foi possível apagar os registros antigos.' + sbErroMsg()); return; }
+    auditLog = auditLog.filter(r => (r.ts || '').slice(0, 10) >= corte);
+    renderAuditoria(true);
+    alert(`✅ ${antigos.length} registro(s) apagados.`);
+  } finally {
+    _auditEmCurso = false;
+  }
 }
 
 
