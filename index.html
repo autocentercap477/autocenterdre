@@ -842,6 +842,8 @@ tr.cob-dia-vazio > td {
   text-transform:uppercase; letter-spacing:.6px; white-space:nowrap;
 }
 .fd-analise-txt { font-size:13px; font-weight:700; }
+.dfc-table td.num-click { cursor:pointer; }
+.dfc-table td.num-click:hover { outline:2px solid #ea580c; outline-offset:-2px; border-radius:4px; }
 .fd-tabela td.fd-click { cursor:pointer; }
 .fd-tabela td.fd-click:hover { outline:2px solid #ea580c; outline-offset:-2px; }
 .fd-tabela td.fd-res.fd-click:hover { outline-color:#0f172a; }
@@ -10203,10 +10205,13 @@ function renderDfc() {
 
   // Montar dados por mês (1-12) e por grupo
   const dados = {}; // dados[mes][grupoId] = valor
+  const itens = {}; // itens[mes][grupoId] = [lançamentos que formaram o valor]
   for (let m = 1; m <= 12; m++) {
-    dados[m] = {};
-    grupos.forEach(g => dados[m][g.id] = 0);
+    dados[m] = {}; itens[m] = {};
+    grupos.forEach(g => { dados[m][g.id] = 0; itens[m][g.id] = []; });
   }
+  // Guarda para o clique no número poder listar exatamente o que somou ali
+  const _guardar = (m, gid, item) => { if (itens[m] && itens[m][gid]) itens[m][gid].push(item); };
 
   // 1. Contas a Receber → Categoria do lançamento, senão do produto de venda, senão Receitas
   if (inclReceber) {
@@ -10223,7 +10228,12 @@ function renderDfc() {
       const catProd = !catLanc && prodObj && prodObj.cat ? db.dfc_cats.find(x => x.id === prodObj.cat) : null;
       const catObj  = catLanc || catProd;
       const grupoId = catObj ? catObj.grupo : (grupoPadraoReceita && grupoPadraoReceita.id);
-      if (grupoId && dados[m][grupoId] !== undefined) dados[m][grupoId] += valParc;
+      if (grupoId && dados[m][grupoId] !== undefined) {
+        dados[m][grupoId] += valParc;
+        _guardar(m, grupoId, { kind: 'rec', lancId: l.id, cliente: l.cliente, prod: l.prod,
+          valParc, venc: dtRef, nf: l.nf, banco: l.banco, tipo_pag: l.tipo_pag,
+          parcIdx: 1, totalParc: l.parcelas || 1, isRecebido: l.recebido === 'sim' });
+      }
     });
   }
 
@@ -10244,7 +10254,14 @@ function renderDfc() {
         const parts = venc.split('-');
         if (parseInt(parts[0]) !== ano) continue;
         const m = parseInt(parts[1]);
-        if (grupoId && dados[m][grupoId] !== undefined) dados[m][grupoId] += valParc;
+        if (grupoId && dados[m][grupoId] !== undefined) {
+          dados[m][grupoId] += valParc;
+          const pagos = _parseParcelas(l.parcela_datas).pagos;
+          _guardar(m, grupoId, { kind: 'des', lancId: l.id, forn: l.forn, prod: l.prod,
+            valParc, venc, nf: l.nf, banco: l.banco, tipo_pag: l.tipo_pag,
+            parcIdx: i, totalParc: n,
+            isPago: n > 1 ? (pagos[i-1] === true) : (l.pago === 'sim') });
+        }
       }
     });
   }
@@ -10260,8 +10277,14 @@ function renderDfc() {
     const key = catObj.grupo;
     if (dados[m][key] !== undefined) {
       dados[m][key] += (l.valor || 0);
+      _guardar(m, key, { kind: 'dfc', id: l.id, cat: l.cat, desc: l.desc,
+        valor: l.valor || 0, data: l.data, recorrente: l.recorrente,
+        tipoEntrada: catObj.tipo === 'entrada' });
     }
   });
+
+  // Disponibiliza para o clique nos números
+  _dfcDetalhe = { ano, itens, grupos };
 
   // Calcular resultado líquido por mês (Entradas − todas as Saídas)
   const liquido = {};
@@ -10288,16 +10311,20 @@ function renderDfc() {
   const linha = (g) => {
     const cells = Array.from({length:12},(_,i)=>{
       const v = dados[i+1][g.id];
-      return `<td>${v>0?fmtDfcVal(v):'<span class="dfc-val-zero">—</span>'}</td>`;
+      if (!(v > 0)) return '<td><span class="dfc-val-zero">—</span></td>';
+      return `<td class="num-click" title="Ver lançamentos" onclick="abrirDetalheDfc('${g.id}',${i+1})">${fmtDfcVal(v)}</td>`;
     }).join('');
     const tot = totais[g.id];
-    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}<td class="dfc-col-total">${tot>0?fmtDfcVal(tot):'<span class="dfc-val-zero">—</span>'}</td></tr>`;
+    const celTot = tot > 0
+      ? `<td class="dfc-col-total num-click" title="Ver lançamentos do ano" onclick="abrirDetalheDfc('${g.id}',0)">${fmtDfcVal(tot)}</td>`
+      : '<td class="dfc-col-total"><span class="dfc-val-zero">—</span></td>';
+    return `<tr class="dfc-row-sub"><td>${esc(g.nome)}</td>${cells}${celTot}</tr>`;
   };
 
   // Linha de resultado
   const linhaResult = (label, valores, total) => {
     const cells = Array.from({length:12},(_,i)=>
-      `<td>${fmtDfcResult(valores[i+1])}</td>`).join('');
+      `<td class="num-click" title="Ver todos os lançamentos do mês" onclick="abrirDetalheDfc('__todos__',${i+1})">${fmtDfcResult(valores[i+1])}</td>`).join('');
     const rlCls = 'dfc-row-total-rl' + (total < 0 ? ' negativo' : '');
     return `<tr class="${rlCls}"><td>${label}</td>${cells}<td class="dfc-col-total">${fmtDfcResult(total)}</td></tr>`;
   };
@@ -12400,10 +12427,10 @@ function renderFluxoFuturo() {
     return `<tr class="${rowCls}">
       <td style="font-weight:700;white-space:nowrap">${fmtDate(d)}${isHoje ? ' <span style="font-size:9px;color:#ea580c">HOJE</span>' : ''}</td>
       <td>${diasSemana[dt.getDay()]}</td>
-      <td>${receber > 0.005 ? `<span class="dfc-val-pos">+ ${fmtBRL(receber)}</span>` : '<span class="dfc-val-zero">—</span>'}</td>
-      <td>${pagar > 0.005 ? `<span class="dfc-val-neg">− ${fmtBRL(pagar)}</span>` : '<span class="dfc-val-zero">—</span>'}</td>
-      <td>${Math.abs(receber - pagar) > 0.005 ? fmtDreVal(receber - pagar) : '<span class="dfc-val-zero">—</span>'}</td>
-      <td class="${saldoCls}" style="font-weight:700">${fmtBRL(saldoAcum)}${isRisco ? ' ⚠️' : ''}</td>
+      <td class="${receber > 0.005 ? 'num-click' : ''}" ${receber > 0.005 ? `title="Ver lançamentos" onclick="abrirDetalheFluxoFuturo('${d}','receber')"` : ''}>${receber > 0.005 ? `<span class="dfc-val-pos">+ ${fmtBRL(receber)}</span>` : '<span class="dfc-val-zero">—</span>'}</td>
+      <td class="${pagar > 0.005 ? 'num-click' : ''}" ${pagar > 0.005 ? `title="Ver lançamentos" onclick="abrirDetalheFluxoFuturo('${d}','pagar')"` : ''}>${pagar > 0.005 ? `<span class="dfc-val-neg">− ${fmtBRL(pagar)}</span>` : '<span class="dfc-val-zero">—</span>'}</td>
+      <td class="${Math.abs(receber - pagar) > 0.005 ? 'num-click' : ''}" ${Math.abs(receber - pagar) > 0.005 ? `title="Ver lançamentos" onclick="abrirDetalheFluxoFuturo('${d}','ambos')"` : ''}>${Math.abs(receber - pagar) > 0.005 ? fmtDreVal(receber - pagar) : '<span class="dfc-val-zero">—</span>'}</td>
+      <td class="${saldoCls} num-click" style="font-weight:700" title="Ver os lançamentos deste dia" onclick="abrirDetalheFluxoFuturo('${d}','ambos')">${fmtBRL(saldoAcum)}${isRisco ? ' ⚠️' : ''}</td>
     </tr>`;
   }).join('');
 
@@ -16157,98 +16184,119 @@ function renderFluxoDiario(repopular) {
   wrap.innerHTML = html;
 }
 
-// ── Lançamentos que formaram o valor de um dia ────────────────────────
-// Clicar em Receita, Despesa ou Resultado abre a lista por trás do número,
-// com os mesmos botões de editar e excluir das telas de lançamentos.
-var _fdCtx = { ano: 0, mes: 0, base: 'realizado', banco: '' };
-var _fdDetCtx = { dia: 0, tipo: 'ambos' };
+// ══════════════════════════════════════════════════════════════════════
+// DETALHE DE LANÇAMENTOS (compartilhado)
+// ----------------------------------------------------------------------
+// Um único modal atende as três telas de fluxo: clicar num número abre os
+// lançamentos que formaram aquele valor, com os mesmos botões de editar e
+// excluir das telas de lançamento.
+//
+// Cada tela entrega uma função `recarregar()` que devolve as listas
+// atualizadas. Depois de excluir, o modal chama essa função de novo — por
+// isso a lista nunca fica desatualizada na tela.
+// ══════════════════════════════════════════════════════════════════════
+var _detCtx = { titulo: '', recarregar: null };
 
-function _fdLancamentosDoDia(dia, tipo) {
-  const { ano, mes, base, banco } = _fdCtx;
-  const data = `${ano}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-  const rec = [], des = [];
-
-  const bate = (d) => d === data;
-
-  if (tipo === 'receita' || tipo === 'ambos') {
-    const lista = base === 'realizado'
-      ? getParcelasReceber(true).filter(p => (!banco || p.banco === banco) && bate(p.dtrecebido))
-      : getParcelasReceber(false).concat(getParcelasReceber(true)).filter(p => bate(p.venc));
-    lista.forEach(p => rec.push(p));
-  }
-  if (tipo === 'despesa' || tipo === 'ambos') {
-    const lista = base === 'realizado'
-      ? getParcelas(true).filter(p => (!banco || p.banco === banco) && bate(p.dtpago))
-      : getParcelas(false).concat(getParcelas(true)).filter(p => bate(p.venc));
-    lista.forEach(p => des.push(p));
-  }
-  return { rec, des, data };
-}
-
-function abrirDetalheFluxoDiario(dia, tipo) {
-  _fdDetCtx = { dia, tipo };
-  renderDetalheFluxoDiario();
+function abrirListaLancamentos(titulo, recarregar) {
+  _detCtx = { titulo, recarregar };
+  renderListaLancamentos();
   openModal('modal-fd-detalhe');
 }
 
-function renderDetalheFluxoDiario() {
-  const { dia, tipo } = _fdDetCtx;
-  const { rec, des, data } = _fdLancamentosDoDia(dia, tipo);
-  const totR = rec.reduce((a, p) => a + (p.valParc || 0), 0);
-  const totD = des.reduce((a, p) => a + (p.valParc || 0), 0);
-
-  const rotulo = tipo === 'receita' ? 'Receitas' : (tipo === 'despesa' ? 'Despesas' : 'Lançamentos');
-  document.getElementById('fd-det-titulo').textContent = `${rotulo} de ${fmtDate(data)}`;
-  document.getElementById('fd-det-resumo').innerHTML =
-    `${_fdCtx.base === 'realizado' ? 'Realizado' : 'Previsto (pelo vencimento)'}`
-    + (rec.length ? ` · <span style="color:#166534;font-weight:700">Receita ${fmtBRL(totR)}</span>` : '')
-    + (des.length ? ` · <span style="color:#b91c1c;font-weight:700">Despesa ${fmtBRL(totD)}</span>` : '')
-    + ((rec.length && des.length) ? ` · <strong>Resultado ${fmtBRL(totR - totD)}</strong>` : '');
-
-  const linha = (p, kind) => {
-    const nome = kind === 'rec' ? getClienteNome(p.cliente) : getFornNome(p.forn);
-    const prod = p.prod ? (kind === 'rec' ? getProdVendaNome(p.prod) : getProdNome(p.prod)) : '';
-    const meta = [
-      p.totalParc > 1 ? `parcela ${p.parcIdx}/${p.totalParc}` : null,
-      p.nf ? 'NF ' + p.nf : null,
-      p.banco ? getBancoNome(p.banco) : null,
-      p.tipoPag || p.tipo_pag || null,
-      p.venc ? 'vence ' + fmtDate(p.venc) : null
-    ].filter(Boolean).join(' · ');
-    const tabela = kind === 'rec' ? 'receber' : 'pagar';
-    return `<div class="fd-det-linha ${kind === 'rec' ? 'fd-det-rec' : 'fd-det-des'}">
+function _detLinha(p, kind) {
+  if (kind === 'dfc') {
+    const cat = getDfcCatNome(p.cat);
+    return `<div class="fd-det-linha ${p.tipoEntrada ? 'fd-det-rec' : 'fd-det-des'}">
       <div>
-        <strong>${esc(nome)}</strong>${prod ? ' · <span style="font-size:12px">' + esc(prod) + '</span>' : ''}
-        <div class="fd-det-meta">${esc(meta) || '—'}</div>
+        <strong>${esc(p.desc || cat)}</strong>
+        <div class="fd-det-meta">Lançamento avulso do DFC · ${esc(cat)} · ${fmtDate(p.data)}${p.recorrente === 'sim' ? ' · mensal' : ''}</div>
       </div>
-      <strong style="font-family:DM Mono,monospace;color:${kind === 'rec' ? '#166534' : '#b91c1c'}">${fmtBRL(p.valParc)}</strong>
+      <strong style="font-family:DM Mono,monospace;color:${p.tipoEntrada ? '#166534' : '#b91c1c'}">${fmtBRL(p.valor)}</strong>
       <span style="display:flex;gap:6px">
-        <button class="btn btn-secondary btn-sm" onclick="editarDoFluxoDiario('${tabela}','${p.lancId}')">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="excluirDoFluxoDiario('${tabela}','${p.lancId}')">Excluir</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirDoDetalhe('dfc','${p.id}')">Excluir</button>
       </span>
     </div>`;
-  };
+  }
+  const nome = kind === 'rec' ? getClienteNome(p.cliente) : getFornNome(p.forn);
+  const prod = p.prod ? (kind === 'rec' ? getProdVendaNome(p.prod) : getProdNome(p.prod)) : '';
+  const quitado = kind === 'rec' ? p.isRecebido : p.isPago;
+  const meta = [
+    p.totalParc > 1 ? `parcela ${p.parcIdx}/${p.totalParc}` : null,
+    p.nf ? 'NF ' + p.nf : null,
+    p.venc ? 'vence ' + fmtDate(p.venc) : null,
+    p.banco ? getBancoNome(p.banco) : null,
+    p.tipoPag || p.tipo_pag || null,
+    quitado ? (kind === 'rec' ? 'recebido' : 'pago') : 'em aberto'
+  ].filter(Boolean).join(' · ');
+  const tabela = kind === 'rec' ? 'receber' : 'pagar';
+  return `<div class="fd-det-linha ${kind === 'rec' ? 'fd-det-rec' : 'fd-det-des'}">
+    <div>
+      <strong>${esc(nome)}</strong>${prod ? ' · <span style="font-size:12px">' + esc(prod) + '</span>' : ''}
+      <div class="fd-det-meta">${esc(meta) || '—'}</div>
+    </div>
+    <strong style="font-family:DM Mono,monospace;color:${kind === 'rec' ? '#166534' : '#b91c1c'}">${fmtBRL(p.valParc)}</strong>
+    <span style="display:flex;gap:6px">
+      <button class="btn btn-secondary btn-sm" onclick="editarDoDetalhe('${tabela}','${p.lancId}')">Editar</button>
+      <button class="btn btn-danger btn-sm" onclick="excluirDoDetalhe('${tabela}','${p.lancId}')">Excluir</button>
+    </span>
+  </div>`;
+}
+
+function renderListaLancamentos() {
+  if (!_detCtx.recarregar) return;
+  const d = _detCtx.recarregar() || {};
+  const rec = d.rec || [], des = d.des || [], extras = d.extras || [];
+
+  const totR = rec.reduce((a, p) => a + (p.valParc || 0), 0);
+  const totD = des.reduce((a, p) => a + (p.valParc || 0), 0);
+  const totE = extras.reduce((a, p) => a + (p.tipoEntrada ? 1 : -1) * (p.valor || 0), 0);
+
+  document.getElementById('fd-det-titulo').textContent = d.titulo || _detCtx.titulo || 'Lançamentos';
+  document.getElementById('fd-det-resumo').innerHTML =
+    (d.subtitulo ? esc(d.subtitulo) : '')
+    + (rec.length ? ` · <span style="color:#166534;font-weight:700">Entradas ${fmtBRL(totR)}</span>` : '')
+    + (des.length ? ` · <span style="color:#b91c1c;font-weight:700">Saídas ${fmtBRL(totD)}</span>` : '')
+    + (extras.length ? ` · <span style="font-weight:700">Avulsos ${fmtBRL(Math.abs(totE))}</span>` : '')
+    + ((rec.length && des.length) ? ` · <strong>Resultado ${fmtBRL(totR - totD)}</strong>` : '');
 
   let html = '';
-  if (rec.length) html += '<div class="fd-det-sec">Receitas</div>' + rec.map(p => linha(p, 'rec')).join('');
-  if (des.length) html += '<div class="fd-det-sec">Despesas</div>' + des.map(p => linha(p, 'des')).join('');
-  if (!html) html = '<div class="empty-state" style="padding:24px">Nenhum lançamento neste dia.</div>';
+  if (rec.length)    html += '<div class="fd-det-sec">Entradas / A receber</div>' + rec.map(p => _detLinha(p, 'rec')).join('');
+  if (des.length)    html += '<div class="fd-det-sec">Saídas / A pagar</div>'     + des.map(p => _detLinha(p, 'des')).join('');
+  if (extras.length) html += '<div class="fd-det-sec">Lançamentos avulsos do DFC</div>' + extras.map(p => _detLinha(p, 'dfc')).join('');
+  if (!html) html = '<div class="empty-state" style="padding:24px">Nenhum lançamento aqui.</div>';
 
-  if (rec.some(p => p.totalParc > 1) || des.some(p => p.totalParc > 1)) {
+  const temParcelado = rec.some(p => p.totalParc > 1) || des.some(p => p.totalParc > 1);
+  if (temParcelado) {
     html += `<p style="font-size:11px;color:#a8a29e;margin-top:12px;">
       Alguns itens são parcelas. Editar ou excluir age sobre o <strong>lançamento inteiro</strong>, com todas as suas parcelas.</p>`;
+  }
+  if (extras.length) {
+    html += `<p style="font-size:11px;color:#a8a29e;margin-top:6px;">
+      Os lançamentos avulsos do DFC são editados em <strong>DFC → Lançamentos</strong>.</p>`;
   }
   document.getElementById('fd-det-lista').innerHTML = html;
 }
 
-function editarDoFluxoDiario(tabela, id) {
+function editarDoDetalhe(tabela, id) {
   closeModal('modal-fd-detalhe');
-  // Abre o mesmo formulário de edição das telas de lançamentos
   if (tabela === 'receber') editLancReceber(id);
   else                      editLancamento(id);
 }
 
-async function excluirDoFluxoDiario(tabela, id) {
+async function excluirDoDetalhe(tabela, id) {
+  if (tabela === 'dfc') {
+    const l = db.dfc_lans.find(x => x.id === id);
+    if (!l) { alert('Lançamento não encontrado.'); return; }
+    if (!confirm(`Excluir o lançamento avulso "${l.desc || getDfcCatNome(l.cat)}" de ${fmtBRL(l.valor)}?`)) return;
+    const ok = await sbFetch('dfc_lancamentos', 'DELETE', null, `?id=eq.${id}`);
+    if (!ok) { alert('❌ Não foi possível excluir no banco de dados.' + sbErroMsg()); return; }
+    db.dfc_lans = db.dfc_lans.filter(x => x.id !== id);
+    bumpDbVer();
+    _atualizarTelasAposExcluir('dfc');
+    renderListaLancamentos();
+    return;
+  }
+
   const reg = tabela === 'receber'
     ? db.lancreceber.find(x => x.id === id)
     : db.lancamentos.find(x => x.id === id);
@@ -16267,12 +16315,107 @@ async function excluirDoFluxoDiario(tabela, id) {
   if (tabela === 'receber') db.lancreceber = db.lancreceber.filter(x => x.id !== id);
   else                      db.lancamentos = db.lancamentos.filter(x => x.id !== id);
   bumpDbVer();
+  _atualizarTelasAposExcluir(tabela);
+  renderListaLancamentos();
+}
 
-  renderDetalheFluxoDiario();
+function _atualizarTelasAposExcluir(tabela) {
   renderFluxoDiario();
+  if (typeof renderFluxoFuturo === 'function') renderFluxoFuturo();
+  if (typeof renderDfc === 'function' && paginaVisivel('dfc-demonstrativo')) renderDfc();
   if (tabela === 'receber') { renderLancReceber(); renderAReceber(); renderRecebido(); renderCobranca(); }
-  else                      { renderLancamentos(); renderApagar(); renderPagas(); }
+  else if (tabela === 'pagar') { renderLancamentos(); renderApagar(); renderPagas(); }
+  else if (tabela === 'dfc') { if (typeof renderDfcLancamentos === 'function') renderDfcLancamentos(); }
   renderDashboard();
+}
+
+// ── Fluxo de Caixa Futuro ─────────────────────────────────────────────
+// Mostra o que vence naquele dia e ainda está em aberto — exatamente o
+// que a tela soma na linha.
+function abrirDetalheFluxoFuturo(data, tipo) {
+  const rotulo = tipo === 'receber' ? 'A receber' : (tipo === 'pagar' ? 'A pagar' : 'Lançamentos');
+  abrirListaLancamentos('', () => {
+    const rec = [], des = [];
+    if (tipo === 'receber' || tipo === 'ambos') {
+      getParcelasReceber(false).forEach(p => {
+        if ((p.venc || p.dtvenda) === data) rec.push(p);
+      });
+    }
+    if (tipo === 'pagar' || tipo === 'ambos') {
+      getParcelas(false).forEach(p => {
+        if ((p.venc || p.dtcompra) === data) des.push(p);
+      });
+    }
+    return {
+      titulo: `${rotulo} — ${fmtDate(data)}`,
+      subtitulo: 'Somente o que vence neste dia e ainda está em aberto',
+      rec, des
+    };
+  });
+}
+
+// ── Demonstrativo de Fluxo de Caixa (DFC) ─────────────────────────────
+// Os itens são recolhidos durante o próprio cálculo da tabela, então a
+// lista bate sempre com o número exibido na célula.
+var _dfcDetalhe = { ano: 0, itens: {}, grupos: [] };
+
+function abrirDetalheDfc(grupoId, mes) {
+  abrirListaLancamentos('', () => {
+    const { ano, itens, grupos } = _dfcDetalhe;
+    const todos = [];
+    const mesesAlvo = mes ? [mes] : Array.from({ length: 12 }, (_, i) => i + 1);
+    const gruposAlvo = grupoId === '__todos__' ? grupos.map(g => g.id) : [grupoId];
+
+    mesesAlvo.forEach(m => gruposAlvo.forEach(gid => {
+      ((itens[m] || {})[gid] || []).forEach(it => todos.push(it));
+    }));
+
+    const g = grupos.find(x => x.id === grupoId);
+    const nomeGrupo = grupoId === '__todos__' ? 'Resultado líquido' : (g ? g.nome : 'Grupo');
+    const periodo = mes ? `${meses[mes]} de ${ano}` : `ano de ${ano}`;
+
+    return {
+      titulo: `${nomeGrupo} — ${periodo}`,
+      subtitulo: 'Pela previsão de vencimento, como no demonstrativo',
+      rec:    todos.filter(i => i.kind === 'rec'),
+      des:    todos.filter(i => i.kind === 'des'),
+      extras: todos.filter(i => i.kind === 'dfc')
+    };
+  });
+}
+
+// ── Fluxo de Caixa Diário ─────────────────────────────────────────────
+function _fdLancamentosDoDia(dia, tipo) {
+  const { ano, mes, base, banco } = _fdCtx;
+  const data = `${ano}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+  const rec = [], des = [];
+  const bate = (d) => d === data;
+
+  if (tipo === 'receita' || tipo === 'ambos') {
+    (base === 'realizado'
+      ? getParcelasReceber(true).filter(p => (!banco || p.banco === banco) && bate(p.dtrecebido))
+      : getParcelasReceber(false).concat(getParcelasReceber(true)).filter(p => bate(p.venc))
+    ).forEach(p => rec.push(p));
+  }
+  if (tipo === 'despesa' || tipo === 'ambos') {
+    (base === 'realizado'
+      ? getParcelas(true).filter(p => (!banco || p.banco === banco) && bate(p.dtpago))
+      : getParcelas(false).concat(getParcelas(true)).filter(p => bate(p.venc))
+    ).forEach(p => des.push(p));
+  }
+  return { rec, des, data };
+}
+
+function abrirDetalheFluxoDiario(dia, tipo) {
+  const rotulo = tipo === 'receita' ? 'Receitas' : (tipo === 'despesa' ? 'Despesas' : 'Lançamentos');
+  abrirListaLancamentos('', () => {
+    const { rec, des, data } = _fdLancamentosDoDia(dia, tipo);
+    return {
+      titulo: `${rotulo} de ${fmtDate(data)}`,
+      subtitulo: _fdCtx.base === 'realizado' ? 'Realizado' : 'Previsto (pelo vencimento)',
+      rec, des
+    };
+  });
 }
 
 function imprimirFluxoDiario() {
