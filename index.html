@@ -1597,6 +1597,11 @@ tr.cob-dia-vazio > td {
           <div class="form-group"><label>Cliente</label>
             <select id="lrf-cliente" onchange="renderLancReceber()"><option value="">Todos</option></select>
           </div>
+          <div class="form-group"><label>Tipo de Pessoa</label>
+            <select id="lrf-tipodoc" onchange="renderLancReceber()">
+              <option value="">Todos</option><option value="cnpj">Pessoa Jurídica (CNPJ)</option><option value="cpf">Pessoa Física (CPF)</option>
+            </select>
+          </div>
           <div class="form-group"><label>Status</label>
             <select id="lrf-recebido" onchange="renderLancReceber()">
               <option value="">Todos</option><option value="sim">Recebido</option><option value="nao">Pendente</option>
@@ -1855,6 +1860,11 @@ tr.cob-dia-vazio > td {
         <div class="filter-row">
           <div class="form-group"><label>Cliente</label>
             <select id="cob-cliente" onchange="renderCobranca()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Tipo de Pessoa</label>
+            <select id="cob-tipodoc" onchange="renderCobranca()">
+              <option value="">Todos</option><option value="cnpj">Pessoa Jurídica (CNPJ)</option><option value="cpf">Pessoa Física (CPF)</option>
+            </select>
           </div>
           <div class="form-group"><label>Situação</label>
             <select id="cob-situacao" onchange="renderCobranca()">
@@ -9024,6 +9034,19 @@ function renderLoginLog() {
 // ══════════════════════════════════════════════════════════
 // HELPERS RECEBER
 // ══════════════════════════════════════════════════════════
+// ── Filtro Pessoa Física (CPF) × Pessoa Jurídica (CNPJ) ───────────────
+// 1º pelo documento cadastrado no cliente (14 dígitos = CNPJ, 11 = CPF).
+// Sem documento: nomes com LTDA, ME, EIRELI, S/A, SPE, etc. contam como
+// Pessoa Jurídica; os demais, como Pessoa Física.
+const _RE_PJ_NOME = /\b(LTDA|EIRELI|EPP|MEI|ME|S\/?A|S\.A\.?|SPE|CIA|COMERCIO|COMÉRCIO|INDUSTRIA|INDÚSTRIA|IND|COM|SERVICOS|SERVIÇOS|TRANSPORTES?|ASSOCIA[CÇ][AÃ]O|COOPERATIVA|CONDOM[IÍ]NIO|PREFEITURA|MUNIC[IÍ]PIO|IGREJA|INSTITUTO|FUNDA[CÇ][AÃ]O|HOLDING|ENGENHARIA|CONSTRUTORA|AGRO)\b/i;
+function getClienteDocTipo(id){
+  const c = _lookup('cli', db.clientes).get(id);
+  const d = String((c && c.cnpj) || '').replace(/\D/g,'');
+  if (d.length >= 14) return 'cnpj';
+  if (d.length === 11) return 'cpf';
+  const nome = (c && c.nome) || String(id || '');
+  return _RE_PJ_NOME.test(nome) ? 'cnpj' : 'cpf';
+}
 function getClienteNome(id) {
   const f = _lookup('cli', db.clientes).get(id);
   return f ? f.nome : (id||'—');
@@ -9320,6 +9343,7 @@ function renderLancReceber() {
   const valorMin = document.getElementById('lrf-valor-min') ? parseFloat(document.getElementById('lrf-valor-min').value) : NaN;
   const valorMax = document.getElementById('lrf-valor-max') ? parseFloat(document.getElementById('lrf-valor-max').value) : NaN;
   const nfLR = document.getElementById('lrf-nf') ? document.getElementById('lrf-nf').value.trim().toLowerCase() : '';
+  const tipoDocLR = document.getElementById('lrf-tipodoc') ? document.getElementById('lrf-tipodoc').value : '';
   const tb=document.getElementById('tb-lancreceber');
   let list=db.lancreceber.filter(l=>{
     // Os campos de data (Específica/De/Até) filtram pela Data da Venda ou pelo
@@ -9340,6 +9364,7 @@ function renderLancReceber() {
     if(!isNaN(valorMin) && (l.valor||0) < valorMin) return false;
     if(!isNaN(valorMax) && (l.valor||0) > valorMax) return false;
     if(nfLR && !String(l.nf||'').toLowerCase().includes(nfLR)) return false;
+    if(tipoDocLR && getClienteDocTipo(l.cliente) !== tipoDocLR) return false;
     return true;
   });
   const _catDeVenda = l => l.cat_dre || (l.prod ? ((db.prodvenda.find(x=>x.id===l.prod)||{}).cat) : null);
@@ -9385,7 +9410,7 @@ function renderLancReceber() {
   }).join('');
 }
 function clearLancReceberFiltros() {
-  ['lrf-mes','lrf-ano','lrf-cliente','lrf-recebido','lrf-categoria','lrf-data','lrf-data-de','lrf-data-ate','lrf-valor-min','lrf-valor-max','lrf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['lrf-mes','lrf-ano','lrf-cliente','lrf-recebido','lrf-categoria','lrf-data','lrf-data-de','lrf-data-ate','lrf-valor-min','lrf-valor-max','lrf-nf','lrf-tipodoc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const tipoDataEl = document.getElementById('lrf-tipo-data'); if (tipoDataEl) tipoDataEl.value = 'venda';
   renderLancReceber();
 }
@@ -14944,7 +14969,7 @@ function navSemanaCobranca(passo) {
   renderCobranca();
 }
 function clearCobrancaFiltros() {
-  ['cob-cliente','cob-busca','cob-atraso-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['cob-cliente','cob-busca','cob-atraso-min','cob-tipodoc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('cob-situacao').value = 'atraso';
   document.getElementById('cob-escopo').value = 'semana';
   renderCobranca();
@@ -14954,6 +14979,7 @@ function clearCobrancaFiltros() {
 function renderCobranca() {
   if (!paginaVisivel('cobranca')) return;
   popularSemanasCobranca();
+  _sincronizarQuitadasCobranca();
 
   const ano      = parseInt(document.getElementById('cob-ano').value) || new Date().getFullYear();
   const sem      = parseInt(document.getElementById('cob-semana').value) || 1;
@@ -14962,6 +14988,7 @@ function renderCobranca() {
   const situacao = document.getElementById('cob-situacao').value || 'atraso';
   const busca    = (document.getElementById('cob-busca').value || '').trim().toLowerCase();
   const atrasoMin = parseInt(document.getElementById('cob-atraso-min').value);
+  const tipoDocCob = document.getElementById('cob-tipodoc') ? document.getElementById('cob-tipodoc').value : '';
 
   const seg = segundaDaSemana(ano, sem);
   const dom = new Date(seg); dom.setDate(seg.getDate()+6);
@@ -14972,6 +14999,9 @@ function renderCobranca() {
   const hoje = today();
   const list = getParcelasReceber(false).filter(p => {
     if (cliente && p.cliente !== cliente) return false;
+    if (tipoDocCob && getClienteDocTipo(p.cliente) !== tipoDocCob) return false;
+    // Saldo zerado = parcela paga: nunca aparece na cobrança.
+    if (p.valParc - cobTotalBaixas(p.lancId, p.parcIdx) <= 0.005) return false;
     if (situacao === 'atraso' && !(p.venc && p.venc < hoje)) return false;
     if (situacao === 'hoje'   && p.venc !== hoje) return false;
     if (escopo === 'semana') { if (!p.venc || p.venc < ini || p.venc > fim) return false; }
@@ -15355,9 +15385,40 @@ async function excluirBaixaCobranca(bid) {
   renderCobranca();
 }
 
+// Parcelas cujas baixas já somam o valor total mas que ainda constam
+// como "em aberto" (ex.: quitação anterior falhou ou foi lançada antes
+// desta correção) são marcadas como recebidas automaticamente.
+var _cobSyncTentadas = new Set();
+var _cobSyncRodando = false;
+async function _sincronizarQuitadasCobranca() {
+  if (_cobSyncRodando) return;
+  const pendentes = getParcelasReceber(false).filter(p => {
+    const k = _cobKey(p.lancId, p.parcIdx);
+    if (_cobSyncTentadas.has(k)) return false;
+    const reg = cobrancaDados[k];
+    if (!reg || !(reg.baixas || []).length) return false;
+    return cobTotalBaixas(p.lancId, p.parcIdx) >= p.valParc - 0.005;
+  });
+  if (!pendentes.length) return;
+  _cobSyncRodando = true;
+  let alguma = false;
+  try {
+    for (const p of pendentes) {
+      _cobSyncTentadas.add(_cobKey(p.lancId, p.parcIdx));
+      if (await _quitarParcelaCobranca(p.lancId, p.parcIdx, true)) alguma = true;
+    }
+  } finally { _cobSyncRodando = false; }
+  if (alguma) {
+    renderCobranca();
+    if (typeof renderAReceber === 'function') renderAReceber();
+    if (typeof renderRecebido === 'function') renderRecebido();
+    if (typeof renderLancReceber === 'function') renderLancReceber();
+  }
+}
+
 // Quita a parcela usando exatamente o mesmo mecanismo do botão
 // "Marcar Recebido" de Contas a Receber.
-async function _quitarParcelaCobranca(lancId, parcIdx) {
+async function _quitarParcelaCobranca(lancId, parcIdx, silencioso) {
   const l = db.lancreceber.find(x => x.id === lancId); if (!l) return false;
   const reg = cobGet(lancId, parcIdx);
   const baixas = (reg.baixas || []).slice().sort((a,b) => (a.data||'').localeCompare(b.data||''));
@@ -15391,6 +15452,7 @@ async function _quitarParcelaCobranca(lancId, parcIdx) {
 
   if (!ok) {
     Object.assign(l, anterior);
+    if (silencioso) { console.warn('Cobrança: falha ao marcar parcela como recebida', lancId, parcIdx); return false; }
     alert('❌ A parcela foi quitada nos lançamentos de cobrança, mas não foi possível marcá-la como recebida no banco de dados.' + sbErroMsg());
     return false;
   }
