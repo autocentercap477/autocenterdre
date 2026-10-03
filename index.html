@@ -333,9 +333,96 @@ th.ef-th { padding:8px 8px 8px 12px; }
 #dre-tabela-wrap .dfc-table th { padding:5px 10px; font-size:10px; }
 #dre-tabela-wrap .dfc-table td { padding:3px 10px; font-size:11px; }
 /* Item 2: caixas do modal de detalhe do DRE — números não estouram */
-#dre-detalhe-kpis { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important; }
-#dre-detalhe-kpis .kpi { padding:12px 14px; overflow:hidden; }
-#dre-detalhe-kpis .kpi-val { font-size:18px; line-height:1.15; word-break:break-word; }
+/* ── DRE: barra de filtros compacta ── */
+.dre-tb { padding:10px 16px !important; margin-bottom:12px; }
+.dre-tb-row { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; }
+.dre-tb-row + .dre-tb-row { margin-top:8px; padding-top:8px; border-top:1px solid #f5f4f2; }
+.dre-tb-field { display:inline-flex; align-items:center; gap:8px; margin:0; }
+.dre-tb-lbl { font-size:12px; color:#78716c; font-weight:500; white-space:nowrap; }
+.dre-tb select { padding:5px 28px 5px 9px; font-size:12.5px; height:30px; background-color:#fff; }
+.dre-tb-sep { width:1px; height:20px; background:#e7e5e4; }
+.dre-tb-check { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#44403c; cursor:pointer; white-space:nowrap; margin:0; }
+.dre-tb input[type=checkbox] { width:14px; height:14px; padding:0; margin:0; flex:none; accent-color:#ea580c; cursor:pointer; }
+.dre-seg { display:inline-flex; border:1px solid #e7e5e4; border-radius:8px; overflow:hidden; background:#fff; }
+.dre-seg-m { position:relative; margin:0; cursor:pointer; }
+.dre-seg-m + .dre-seg-m { border-left:1px solid #f0efed; }
+.dre-seg-m input[type=checkbox] { position:absolute; opacity:0; width:1px; height:1px; }
+.dre-seg-m span { display:block; padding:5px 9px; font-size:12px; color:#a8a29e; user-select:none; transition:background .12s, color .12s; }
+.dre-seg-m input:checked + span { background:#fff1e6; color:#c2410c; font-weight:600; }
+.dre-seg-m:hover span { background:#faf9f7; }
+.dre-seg-m input:checked:hover + span, .dre-seg-m:hover input:checked + span { background:#ffe4cc; }
+.dre-seg-m input:focus-visible + span { outline:2px solid #ea580c; outline-offset:-2px; }
+.dre-tb-link { background:none; border:none; padding:2px 4px; font-size:12px; color:#c2410c; cursor:pointer; font-family:inherit; }
+.dre-tb-link:hover { text-decoration:underline; }
+.dre-tb-btn { background:#fff; border:1px solid #e7e5e4; border-radius:7px; padding:4px 10px; font-size:12px; color:#44403c; cursor:pointer; font-family:inherit; }
+.dre-tb-btn:hover { background:#faf9f7; border-color:#d6d3d1; }
+/* ── Transferência: janela de lançamento ── */
+.transf-modal { width:600px; padding:22px 24px 18px; }
+.transf-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:18px; }
+.transf-title { font-size:17px; font-weight:700; color:#1f2937; }
+.transf-sub { font-size:12px; color:#78716c; margin-top:3px; }
+.transf-contas { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:10px; align-items:end; }
+.transf-swap { margin-bottom:16px; width:36px; height:38px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #e7e5e4; background:#fff; border-radius:8px; color:#ea580c; cursor:pointer; }
+.transf-swap svg { width:16px; height:16px; }
+.transf-swap:hover { background:#fff1e6; border-color:#fed7aa; }
+.transf-swap:focus-visible { outline:2px solid #ea580c; outline-offset:1px; }
+@media (max-width:560px) {
+  .transf-contas { grid-template-columns:1fr; }
+  .transf-swap { justify-self:center; margin:-6px 0 10px; transform:rotate(90deg); }
+}
+/* Modal de detalhe do DRE: compacto, todas as colunas visíveis, com editar/excluir */
+.dre-det-modal { width:1060px; max-width:96vw; max-height:90vh; padding:20px 22px 16px; display:flex; flex-direction:column; overflow:hidden; }
+.dre-det-head { flex:none; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.dre-det-title { font-size:16px; font-weight:700; color:#1f2937; line-height:1.25; }
+.dre-det-sub { font-size:12px; color:#78716c; margin-top:2px; }
+.dre-det-x { flex:none; width:30px; height:30px; border:1px solid #e7e5e4; background:#fff; border-radius:8px; font-size:20px; line-height:1; color:#78716c; cursor:pointer; }
+.dre-det-x:hover { color:#1f2937; background:#faf9f7; }
+.dre-det-kpis { flex:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid #e7e5e4; border-radius:10px; margin-bottom:12px; overflow:hidden; }
+.dre-det-kpi { padding:9px 14px; border-left:1px solid #e7e5e4; min-width:0; }
+.dre-det-kpi:first-child { border-left:none; }
+.dre-det-kpi-lbl { font-size:11px; color:#78716c; }
+.dre-det-kpi-val { font-family:'DM Mono',monospace; font-feature-settings:'tnum' 1; font-size:15px; font-weight:600; color:#1f2937; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dre-det-tools { flex:none; display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.dre-det-tools input { flex:1; max-width:360px; padding:6px 10px; font-size:12px; border:1px solid #e7e5e4; border-radius:7px; }
+.dre-det-cont { font-size:11px; color:#a8a29e; margin-left:auto; white-space:nowrap; }
+.dre-det-scroll { flex:1; min-height:0; overflow:auto; border:1px solid #e7e5e4; border-radius:10px; }
+.dre-det-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+.dre-det-table th { position:sticky; top:0; z-index:1; background:#faf9f7; padding:7px 10px; font-size:11px; font-weight:600; color:#57534e; text-align:left; border-bottom:1px solid #e7e5e4; white-space:nowrap; }
+.dre-det-table td { padding:6px 10px; line-height:1.35; border-bottom:1px solid #f5f4f2; color:#1f2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:middle; }
+.dre-det-table tbody tr:hover td { background:#fafaf9; }
+.dre-det-table .c-data { width:96px; font-family:'DM Mono',monospace; font-feature-settings:'tnum' 1; color:#57534e; }
+.dre-det-table .c-prod { width:26%; color:#57534e; }
+.dre-det-table .c-nf { width:72px; color:#78716c; }
+.dre-det-table .c-sit { width:92px; }
+.dre-det-table .c-val { width:118px; text-align:right; font-family:'DM Mono',monospace; font-feature-settings:'tnum' 1; }
+.dre-det-table th.c-val, .dre-det-table th.c-data { font-family:inherit; color:#57534e; }
+.dre-det-table .c-acao { width:80px; text-align:right; padding-right:8px; overflow:visible; text-overflow:clip; }
+.dre-det-table td.c-acao { padding-top:2px; padding-bottom:2px; }
+.dre-det-table tfoot td { position:sticky; bottom:0; background:#faf9f7; border-top:1px solid #e7e5e4; border-bottom:none; font-weight:700; padding:7px 10px; }
+.dre-det-sit { display:inline-block; padding:1px 8px; border-radius:10px; font-size:10.5px; font-weight:600; }
+.dre-det-sit.ok { background:#dcfce7; color:#166534; }
+.dre-det-sit.rec { background:#dbeafe; color:#1e40af; }
+.dre-det-sit.pag { background:#fee2e2; color:#991b1b; }
+.dre-det-btn { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border:1px solid transparent; background:none; border-radius:6px; color:#a8a29e; cursor:pointer; padding:0; }
+.dre-det-btn svg { width:14px; height:14px; }
+.dre-det-btn:hover { color:#1f2937; background:#f5f4f2; border-color:#e7e5e4; }
+.dre-det-btn.del:hover { color:#b91c1c; background:#fef2f2; border-color:#fecaca; }
+.dre-det-btn:focus-visible, .dre-det-x:focus-visible { outline:2px solid #ea580c; outline-offset:1px; }
+.dre-det-btn:disabled { opacity:.35; cursor:default; }
+.dre-det-nota { font-size:11px; color:#a8a29e; margin-top:8px; min-height:0; }
+.dre-det-nota:empty { display:none; }
+.dre-det-foot { display:flex; justify-content:flex-end; margin-top:12px; }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+@media (max-width:760px) {
+  .dre-det-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dre-det-kpi:nth-child(3) { border-left:none; }
+  .dre-det-kpi:nth-child(n+3) { border-top:1px solid #e7e5e4; }
+  .dre-det-table .c-prod, .dre-det-table .c-nf, .dre-det-table .c-sit { display:none; }
+  .dre-det-table .c-data { width:94px; padding-right:4px; }
+  .dre-det-table .c-acao { width:66px; }
+  .dre-det-table .c-val { width:96px; }
+  .dre-det-modal { padding:16px 14px 12px; }
+}
 #dre-tabela-wrap .dre-row-final td { font-size:12px; }
 /* ── Item 4: fonte mais bonita, escopada só ao DRE ── */
 #dre-tabela-wrap .dfc-table { font-family:'Sora',sans-serif; }
@@ -365,6 +452,12 @@ th.ef-th { padding:8px 8px 8px 12px; }
 .dre-cat-row:hover td:first-child { color:#57534e; }
 #dre-tabela-wrap .dre-cat-row td { font-size:10px; padding-top:2px; padding-bottom:2px; }
 #dre-tabela-wrap .dre-cat-row td:first-child { padding-left:36px; }
+/* ── DRE: coluna % sobre a Receita Bruta ao lado de cada mês ── */
+#dre-tabela-wrap .dfc-table th.dre-pct { padding-left:4px; padding-right:8px; color:#a8a29e; }
+#dre-tabela-wrap .dfc-table td.dre-pct { padding-left:4px; padding-right:8px; min-width:46px; font-size:10px; color:#a8a29e; font-weight:400; border-right:1px solid #f5f4f2; }
+#dre-tabela-wrap .dre-row-subtotal td.dre-pct,
+#dre-tabela-wrap .dre-row-final td.dre-pct { color:#57534e; font-weight:700; }
+#dre-tabela-wrap .dre-cat-row td.dre-pct { font-size:9px; }
 
 
 /* ── CALENDÁRIO — RECEBER ── */
@@ -2276,58 +2369,35 @@ tr.cob-dia-vazio > td {
     <div class="page" id="page-dre-demonstrativo">
       <div class="page-header"><div><div class="page-title">Demonstração de Resultado do Exercício (DRE) <span class="empresa-tag"></span></div><div class="page-sub" style="margin-bottom:0">Visão mensal de Janeiro a Dezembro com acumulado do ano</div></div><button class="btn-pdf" onclick="imprimirDre()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button></div>
 
-      <!-- Filtro Ano -->
-      <div class="card" style="padding:14px 20px;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Ano:</span>
-          <select id="dre-ano" onchange="renderDre()" style="width:110px;padding:6px 10px;font-size:13px;">
-            <option value="">Selecione</option>
-          </select>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" id="dre-somente-classificados" onchange="renderDre()" />
-            Considerar apenas lançamentos com Categoria definida
+      <!-- Filtros do DRE (barra compacta) -->
+      <div class="card dre-tb">
+        <div class="dre-tb-row">
+          <label class="dre-tb-field"><span class="dre-tb-lbl">Ano</span>
+            <select id="dre-ano" onchange="renderDre()" style="width:96px"><option value="">Selecione</option></select>
           </label>
-          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;">Base de apuração:</span>
-          <select id="dre-base" onchange="salvarPrefsDre(); renderDre();" style="width:360px;padding:6px 10px;font-size:13px;">
-            <option value="competencia">Competência (data da venda / compra)</option>
-            <option value="venc_amort">Vencimento — só na Amortização de Empréstimos</option>
-            <option value="vencimento">Vencimento — todas as contas (30/60/90...)</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
-          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Ocultar:</span>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" id="dre-ocultar-acumulada" onchange="salvarPrefsDre(); renderDre();" />
-            Coluna &quot;DRE Acumulada&quot;
+          <label class="dre-tb-field"><span class="dre-tb-lbl">Base de apuração</span>
+            <select id="dre-base" onchange="salvarPrefsDre(); renderDre();" style="width:300px">
+              <option value="competencia">Competência (data da venda / compra)</option>
+              <option value="venc_amort">Vencimento — só na Amortização de Empréstimos</option>
+              <option value="vencimento">Vencimento — todas as contas (30/60/90...)</option>
+            </select>
           </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" id="dre-ocultar-varestoque" onchange="salvarPrefsDre(); renderDre();" />
-            Linha &quot;Variação do Estoque&quot;
-          </label>
-          <span style="font-size:11px;color:#a8a29e;">Ocultar a variação só esconde a linha; o valor já digitado continua somando no CPV.</span>
+          <span class="dre-tb-sep" aria-hidden="true"></span>
+          <label class="dre-tb-check" title="Ignora vendas e compras sem categoria de DRE"><input type="checkbox" id="dre-somente-classificados" onchange="renderDre()" />Somente com categoria</label>
+          <label class="dre-tb-check"><input type="checkbox" id="dre-ocultar-acumulada" onchange="salvarPrefsDre(); renderDre();" />Ocultar acumulado</label>
+          <label class="dre-tb-check" title="Ocultar a variação só esconde a linha; o valor já digitado continua somando no CPV."><input type="checkbox" id="dre-ocultar-varestoque" onchange="salvarPrefsDre(); renderDre();" />Ocultar variação do estoque</label>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
-          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Meses visíveis:</span>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-1" checked onchange="renderDre()" />Jan</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-2" checked onchange="renderDre()" />Fev</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-3" checked onchange="renderDre()" />Mar</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-4" checked onchange="renderDre()" />Abr</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-5" checked onchange="renderDre()" />Mai</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-6" checked onchange="renderDre()" />Jun</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-7" checked onchange="renderDre()" />Jul</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-8" checked onchange="renderDre()" />Ago</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-9" checked onchange="renderDre()" />Set</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-10" checked onchange="renderDre()" />Out</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-11" checked onchange="renderDre()" />Nov</label>
-          <label class="dre-mes-chip"><input type="checkbox" id="dre-mes-12" checked onchange="renderDre()" />Dez</label>
-          <button class="btn btn-secondary btn-sm" onclick="dreMesesTodos(true)">Marcar todos</button>
-          <button class="btn btn-secondary btn-sm" onclick="dreMesesTodos(false)">Ocultar todos</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f4f2;">
-          <span style="font-size:11px;color:#a8a29e;font-weight:600;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Categorias:</span>
-          <button class="btn btn-secondary btn-sm" onclick="dreCategoriasTodas(true)">▾ Expandir todas</button>
-          <button class="btn btn-secondary btn-sm" onclick="dreCategoriasTodas(false)">▸ Recolher todas</button>
-          <span style="font-size:12px;color:#a8a29e;">Clique no ▸ ao lado de cada conta para ver o detalhamento por categoria</span>
+        <div class="dre-tb-row">
+          <div class="dre-tb-field"><span class="dre-tb-lbl">Meses</span>
+            <div class="dre-seg" role="group" aria-label="Meses visíveis"><label class="dre-seg-m" title="Mostrar/ocultar Jan"><input type="checkbox" id="dre-mes-1" checked onchange="renderDre()" /><span>Jan</span></label><label class="dre-seg-m" title="Mostrar/ocultar Fev"><input type="checkbox" id="dre-mes-2" checked onchange="renderDre()" /><span>Fev</span></label><label class="dre-seg-m" title="Mostrar/ocultar Mar"><input type="checkbox" id="dre-mes-3" checked onchange="renderDre()" /><span>Mar</span></label><label class="dre-seg-m" title="Mostrar/ocultar Abr"><input type="checkbox" id="dre-mes-4" checked onchange="renderDre()" /><span>Abr</span></label><label class="dre-seg-m" title="Mostrar/ocultar Mai"><input type="checkbox" id="dre-mes-5" checked onchange="renderDre()" /><span>Mai</span></label><label class="dre-seg-m" title="Mostrar/ocultar Jun"><input type="checkbox" id="dre-mes-6" checked onchange="renderDre()" /><span>Jun</span></label><label class="dre-seg-m" title="Mostrar/ocultar Jul"><input type="checkbox" id="dre-mes-7" checked onchange="renderDre()" /><span>Jul</span></label><label class="dre-seg-m" title="Mostrar/ocultar Ago"><input type="checkbox" id="dre-mes-8" checked onchange="renderDre()" /><span>Ago</span></label><label class="dre-seg-m" title="Mostrar/ocultar Set"><input type="checkbox" id="dre-mes-9" checked onchange="renderDre()" /><span>Set</span></label><label class="dre-seg-m" title="Mostrar/ocultar Out"><input type="checkbox" id="dre-mes-10" checked onchange="renderDre()" /><span>Out</span></label><label class="dre-seg-m" title="Mostrar/ocultar Nov"><input type="checkbox" id="dre-mes-11" checked onchange="renderDre()" /><span>Nov</span></label><label class="dre-seg-m" title="Mostrar/ocultar Dez"><input type="checkbox" id="dre-mes-12" checked onchange="renderDre()" /><span>Dez</span></label></div>
+            <button type="button" class="dre-tb-link" onclick="dreMesesTodos(true)">Todos</button>
+            <button type="button" class="dre-tb-link" onclick="dreMesesTodos(false)">Nenhum</button>
+          </div>
+          <span class="dre-tb-sep" aria-hidden="true"></span>
+          <div class="dre-tb-field" title="Clique no ▸ ao lado de cada conta para ver o detalhamento por categoria"><span class="dre-tb-lbl">Categorias</span>
+            <button type="button" class="dre-tb-btn" onclick="dreCategoriasTodas(true)">▾ Expandir</button>
+            <button type="button" class="dre-tb-btn" onclick="dreCategoriasTodas(false)">▸ Recolher</button>
+          </div>
         </div>
       </div>
 
@@ -2475,33 +2545,46 @@ tr.cob-dia-vazio > td {
     <div class="page" id="page-transferencias">
       <div class="page-header">
         <div><div class="page-title">Transferência entre Contas</div><div class="page-sub" style="margin-bottom:0">Movimente valores entre bancos/caixas e mantenha o histórico salvo</div></div>
+        <button class="btn-novo" onclick="abrirNovaTransferencia()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova transferência
+        </button>
       </div>
-      <div class="card">
-        <div class="card-title">Nova Transferência</div>
-        <div class="grid3">
-          <div class="form-group"><label>Conta de Origem *</label>
-            <select id="transf-origem"><option value="">Selecione...</option></select>
+
+      <!-- MODAL: Nova transferência -->
+      <div class="modal-overlay" id="modal-transf">
+        <div class="modal transf-modal" role="dialog" aria-labelledby="transf-modal-title">
+          <div class="transf-head">
+            <div>
+              <div class="transf-title" id="transf-modal-title">Nova transferência</div>
+              <div class="transf-sub">O valor sai da conta de origem e entra na conta de destino na data informada.</div>
+            </div>
+            <button type="button" class="dre-det-x" onclick="closeModal('modal-transf')" aria-label="Fechar" title="Fechar (Esc)">&times;</button>
           </div>
-          <div class="form-group" style="display:flex;align-items:center;justify-content:center;padding-top:18px;">
-            <span style="font-size:22px;color:#ea580c;">➜</span>
+          <div class="transf-contas">
+            <div class="form-group"><label for="transf-origem">Conta de origem *</label>
+              <select id="transf-origem"><option value="">Selecione...</option></select>
+            </div>
+            <button type="button" class="transf-swap" onclick="inverterContasTransf()" title="Inverter origem e destino" aria-label="Inverter origem e destino">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 4l3 3-3 3"/><path d="M20 7H4"/><path d="M7 20l-3-3 3-3"/><path d="M4 17h16"/></svg>
+            </button>
+            <div class="form-group"><label for="transf-destino">Conta de destino *</label>
+              <select id="transf-destino"><option value="">Selecione...</option></select>
+            </div>
           </div>
-          <div class="form-group"><label>Conta de Destino *</label>
-            <select id="transf-destino"><option value="">Selecione...</option></select>
+          <div class="grid2" style="gap:14px">
+            <div class="form-group"><label for="transf-valor">Valor (R$) *</label><input id="transf-valor" type="number" step="0.01" min="0" placeholder="0,00" /></div>
+            <div class="form-group"><label for="transf-data">Data *</label><input id="transf-data" type="date" /></div>
           </div>
-        </div>
-        <div class="grid3">
-          <div class="form-group"><label>Valor (R$) *</label><input id="transf-valor" type="number" step="0.01" placeholder="0,00" /></div>
-          <div class="form-group"><label>Data *</label><input id="transf-data" type="date" /></div>
-          <div class="form-group"><label>Observação</label><input id="transf-obs" type="text" placeholder="Informações adicionais" /></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveTransferencia()">Registrar Transferência</button>
-          <button class="btn btn-secondary" onclick="clearTransferencia()">Limpar</button>
+          <div class="form-group"><label for="transf-obs">Observação</label><input id="transf-obs" type="text" placeholder="Informações adicionais (opcional)" /></div>
+          <div class="modal-footer" style="margin-top:8px;padding-top:16px">
+            <button class="btn btn-secondary" onclick="closeModal('modal-transf')">Cancelar</button>
+            <button class="btn btn-primary" id="transf-btn-salvar" onclick="saveTransferencia()">Registrar transferência</button>
+          </div>
         </div>
       </div>
 
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Transferências Realizadas</div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">Transferências realizadas</div>
         <div class="table-scroll"><table><thead><tr id="th-transferencias-row">
           <th>Data</th><th>Conta de Origem</th><th>Conta de Destino</th><th>Valor</th><th>Observação</th><th>Ações</th>
         </tr></thead><tbody id="tb-transferencias"><tr><td colspan="6" class="empty-state">Nenhuma transferência registrada.</td></tr></tbody></table></div>
@@ -3900,19 +3983,36 @@ tr.cob-dia-vazio > td {
 
 <!-- ══ MODAL DETALHE DE CONTA DO DRE ══ -->
 <div class="modal-overlay" id="modal-dre-detalhe">
-  <div class="modal" style="width:800px;">
-    <div class="modal-title" id="dre-detalhe-title" style="margin-bottom:16px;">Detalhe da Conta</div>
-    <div class="grid4" id="dre-detalhe-kpis" style="margin-bottom:16px;"></div>
-    <div style="max-height:50vh;overflow-y:auto">
-      <table class="dfc-table" style="width:100%">
+  <div class="modal dre-det-modal" role="dialog" aria-labelledby="dre-detalhe-title">
+    <div class="dre-det-head">
+      <div style="min-width:0">
+        <div class="dre-det-title" id="dre-detalhe-title">Detalhe da Conta</div>
+        <div class="dre-det-sub" id="dre-detalhe-sub"></div>
+      </div>
+      <button type="button" class="dre-det-x" onclick="closeModal('modal-dre-detalhe')" aria-label="Fechar" title="Fechar (Esc)">&times;</button>
+    </div>
+    <div class="dre-det-kpis" id="dre-detalhe-kpis"></div>
+    <div class="dre-det-tools">
+      <input type="search" id="dre-detalhe-busca" placeholder="Buscar por cliente, fornecedor, produto ou NF" oninput="_dreDetFiltrar()" autocomplete="off" />
+      <span class="dre-det-cont" id="dre-detalhe-cont"></span>
+    </div>
+    <div class="dre-det-scroll">
+      <table class="dre-det-table">
         <thead><tr>
-          <th style="text-align:left">Data</th><th style="text-align:left">Despesas/Fornecedor / Cliente</th>
-          <th style="text-align:left">Produto</th><th>Situação</th><th>Valor</th>
+          <th class="c-data">Data</th>
+          <th class="c-nome">Cliente / Fornecedor</th>
+          <th class="c-prod">Produto</th>
+          <th class="c-nf">NF</th>
+          <th class="c-sit">Situação</th>
+          <th class="c-val">Valor</th>
+          <th class="c-acao"><span class="sr-only">Ações</span></th>
         </tr></thead>
         <tbody id="dre-detalhe-tbody"></tbody>
+        <tfoot id="dre-detalhe-tfoot"></tfoot>
       </table>
     </div>
-    <div class="modal-footer">
+    <div class="dre-det-nota" id="dre-detalhe-nota"></div>
+    <div class="dre-det-foot">
       <button class="btn btn-secondary" onclick="closeModal('modal-dre-detalhe')">Fechar</button>
     </div>
   </div>
@@ -4854,6 +4954,7 @@ function closeModal(id) {
   if (el) el.classList.remove('open');
   const limpar = MODAIS_LIMPAR_AO_FECHAR[id];
   if (limpar) limpar();
+  if (typeof _dreDetAposEditar === 'function') _dreDetAposEditar(id);
 }
 
 // Esc fecha o modal aberto (passando pela limpeza acima)
@@ -11048,7 +11149,7 @@ function renderDre() {
       const m = o.mes;
       if (valoresMes[m][grupoId] === undefined) return;
       const item = {
-        tipo: 'receber', data: o.data, nome: getClienteNome(l.cliente),
+        tipo: 'receber', id: l.id, nf: l.nf || '', data: o.data, nome: getClienteNome(l.cliente),
         prod: (l.prod ? getProdVendaNome(l.prod) : '') + (o.parcela ? ` (parc. ${o.parcela})` : ''),
         valor: o.valor,
         status: o.quitado ? 'Recebido' : 'A Receber'
@@ -11079,7 +11180,7 @@ function renderDre() {
       const m = o.mes;
       if (valoresMes[m][grupoId] === undefined) return;
       const item = {
-        tipo: 'pagar', data: o.data, nome: getFornNome(l.forn),
+        tipo: 'pagar', id: l.id, nf: l.nf || '', data: o.data, nome: getFornNome(l.forn),
         prod: (l.prod ? getProdNome(l.prod) : '') + (o.parcela ? ` (parc. ${o.parcela})` : ''),
         valor: o.valor,
         status: o.quitado ? 'Pago' : 'A Pagar'
@@ -11151,6 +11252,20 @@ function renderDre() {
   // Grupo-base para os percentuais: o primeiro grupo do tipo "entrada" (ex: Receita Operacional Bruta)
   const grupoBase = gruposValor.find(g => g.tipo === 'entrada') || gruposValor[0];
 
+  // Coluna "%" ao lado de cada mês: valor da linha ÷ Receita Bruta (grupo-base)
+  // da mesma coluna. Receitas/deduções/custos aparecem em % positivo (peso sobre
+  // a receita); subtotais mantêm o sinal (resultado negativo sai em vermelho).
+  const receitaCol = (col) => grupoBase ? valorBruto(grupoBase.id, col) : 0;
+  const pctCell = (v, col, absoluto, totalCls) => {
+    const cls = 'dre-pct' + (totalCls ? ' dfc-col-total' : '');
+    const base = receitaCol(col);
+    if (!base) return `<td class="${cls}"><span class="dfc-val-zero">—</span></td>`;
+    const p = ((absoluto ? Math.abs(v) : v) / base) * 100;
+    const txt = (Math.abs(p) < 0.05 ? 0 : p).toFixed(1) + '%';
+    return `<td class="${cls}">${p < -0.05 ? `<span class="dfc-val-neg">${txt}</span>` : txt}</td>`;
+  };
+  const pctVazio = (totalCls) => `<td class="dre-pct${totalCls ? ' dfc-col-total' : ''}"></td>`;
+
   // linhaCalc[grupoId][col] = valor a exibir (assinado, em R$, para entrada/saida/subtotal; percentual em %)
   const linhaCalc = {};
   grupos.forEach(g => linhaCalc[g.id] = {});
@@ -11175,8 +11290,8 @@ function renderDre() {
     });
   });
 
-  const mesesHeader = mesesVisiveis.map(m => `<th>${MESES_ABR[m]}</th>`).join('')
-    + (mostrarAcum ? '<th class="dfc-col-total">DRE Acumulada</th>' : '');
+  const mesesHeader = mesesVisiveis.map(m => `<th>${MESES_ABR[m]}</th><th class="dre-pct">%</th>`).join('')
+    + (mostrarAcum ? '<th class="dfc-col-total">DRE Acumulada</th><th class="dfc-col-total dre-pct">%</th>' : '');
 
   // Linha de uma categoria, exibida dentro do grupo expandido (herda o sinal
   // do grupo-pai, para que a soma das categorias bata com a linha do grupo).
@@ -11185,29 +11300,30 @@ function renderDre() {
     const cells = mesesVisiveis.map(mes => {
       const v = sinal * valorBrutoCat(catId, mes);
       if (Math.abs(v) >= 0.005) {
-        return `<td class="dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}',${mes})" title="Ver lançamentos desta categoria">${fmtDreVal(v)}</td>`;
+        return `<td class="dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}',${mes})" title="Ver lançamentos desta categoria">${fmtDreVal(v)}</td>` + pctCell(v, mes, true);
       }
-      return `<td>${fmtDreVal(v)}</td>`;
+      return `<td>${fmtDreVal(v)}</td>` + pctCell(v, mes, true);
     }).join('');
     const totalVal = sinal * valorBrutoCat(catId, 'total');
-    const totalCell = Math.abs(totalVal) >= 0.005
+    const totalCell = (Math.abs(totalVal) >= 0.005
       ? `<td class="dfc-col-total dre-cell-click" onclick="abrirDetalheDreCategoria('${catId}','total')" title="Ver lançamentos desta categoria">${fmtDreVal(totalVal)}</td>`
-      : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`;
+      : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`) + pctCell(totalVal, 'total', true, true);
     return `<tr class="dre-cat-row"><td>${nomeCat}</td>${cells}${mostrarAcum ? totalCell : ''}</tr>`;
   };
 
   const linhaValor = (g, cls, clicavel) => {
+    const absPct = g.tipo !== 'subtotal';
     const cells = mesesVisiveis.map(mes => {
       const v = linhaCalc[g.id][mes];
       if (clicavel && Math.abs(v) >= 0.005) {
-        return `<td class="dre-cell-click" onclick="abrirDetalheDreGrupo('${g.id}',${mes})" title="Ver lançamentos desta conta">${fmtDreVal(v)}</td>`;
+        return `<td class="dre-cell-click" onclick="abrirDetalheDreGrupo('${g.id}',${mes})" title="Ver lançamentos desta conta">${fmtDreVal(v)}</td>` + pctCell(v, mes, absPct);
       }
-      return `<td>${fmtDreVal(v)}</td>`;
+      return `<td>${fmtDreVal(v)}</td>` + pctCell(v, mes, absPct);
     }).join('');
     const totalVal = linhaCalc[g.id]['total'];
-    const totalCell = (clicavel && Math.abs(totalVal) >= 0.005)
+    const totalCell = ((clicavel && Math.abs(totalVal) >= 0.005)
       ? `<td class="dfc-col-total dre-cell-click" onclick="abrirDetalheDreGrupo('${g.id}','total')" title="Ver lançamentos desta conta">${fmtDreVal(totalVal)}</td>`
-      : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`;
+      : `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>`) + pctCell(totalVal, 'total', absPct, true);
 
     // Rastreamento por categoria: linhas de categoria expansíveis dentro do
     // grupo, com drill-down clicável e opção de recolher/expandir. "Sem
@@ -11233,8 +11349,8 @@ function renderDre() {
     return html;
   };
   const linhaPercentual = (g) => {
-    const cells = mesesVisiveis.map(mes => `<td>${fmtDrePercent(linhaCalc[g.id][mes])}</td>`).join('');
-    return `<tr class="dre-row-percent"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDrePercent(linhaCalc[g.id]['total'])}</td>` : ''}</tr>`;
+    const cells = mesesVisiveis.map(mes => `<td>${fmtDrePercent(linhaCalc[g.id][mes])}</td>` + pctVazio()).join('');
+    return `<tr class="dre-row-percent"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDrePercent(linhaCalc[g.id]['total'])}</td>` + pctVazio(true) : ''}</tr>`;
   };
 
   // Última linha do tipo "subtotal" cadastrada = resultado final (Lucro/Prejuízo)
@@ -11242,9 +11358,9 @@ function renderDre() {
   const ultimoSubtotalId = subtotais.length ? subtotais[subtotais.length - 1].id : null;
 
   const linhaFinal = (g, cls) => {
-    const cells = mesesVisiveis.map(mes => `<td>${fmtDreVal(linhaCalc[g.id][mes])}</td>`).join('');
+    const cells = mesesVisiveis.map(mes => `<td>${fmtDreVal(linhaCalc[g.id][mes])}</td>` + pctCell(linhaCalc[g.id][mes], mes, false)).join('');
     const totalVal = linhaCalc[g.id]['total'];
-    return `<tr class="${cls}"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>` : ''}</tr>`;
+    return `<tr class="${cls}"><td>${g.nome}</td>${cells}${mostrarAcum ? `<td class="dfc-col-total">${fmtDreVal(totalVal)}</td>` + pctCell(totalVal, 'total', false, true) : ''}</tr>`;
   };
 
   // Linha da Variação de Estoque: células editáveis em formato contábil (digite
@@ -11255,11 +11371,11 @@ function renderDre() {
       const val = parseFloat(mapaAno[mes]) || 0;
       const disp = fmtContabil(val);
       const cor = val < 0 ? '#dc2626' : '#1f2937';
-      return `<td style="padding:2px 4px"><input type="text" inputmode="decimal" value="${disp}" onchange="setVarEstoque(${mes}, this.value)" onfocus="this.select()" title="Variação de estoque do mês (+ soma ao CPV, − reduz o CPV)" placeholder="0,00" style="width:100%;min-width:88px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;padding:5px 7px;border:1px solid #e7e5e4;border-radius:6px;background:#fff;color:${cor}" /></td>`;
+      return `<td style="padding:2px 4px"><input type="text" inputmode="decimal" value="${disp}" onchange="setVarEstoque(${mes}, this.value)" onfocus="this.select()" title="Variação de estoque do mês (+ soma ao CPV, − reduz o CPV)" placeholder="0,00" style="width:100%;min-width:88px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;padding:5px 7px;border:1px solid #e7e5e4;border-radius:6px;background:#fff;color:${cor}" /></td>` + pctVazio();
     }).join('');
     let soma = 0; mesesVisiveis.forEach(mes => { soma += parseFloat(mapaAno[mes]) || 0; });
     const totalCell = `<td class="dfc-col-total">${Math.abs(soma) < 0.005 ? '<span class="dfc-val-zero">—</span>' : (soma > 0 ? '+ ' : '− ') + fmtBRL(Math.abs(soma))}</td>`;
-    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}${mostrarAcum ? totalCell : ''}</tr>`;
+    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}${mostrarAcum ? totalCell + pctVazio(true) : ''}</tr>`;
   };
 
   const linhasHtml = grupos.map(g => {
@@ -11301,10 +11417,10 @@ function renderDre() {
   };
   const peCells = mesesVisiveis.map(m => {
     const v = peCol(m);
-    return `<td>${v==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(v)}</td>`;
+    return `<td>${v==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(v)}</td>` + pctVazio();
   }).join('');
   const peTot = peCol('total');
-  const peRow = `<tr class="dre-row-pe"><td>Ponto de Equilíbrio (R$)</td>${peCells}${mostrarAcum ? `<td class="dfc-col-total">${peTot==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(peTot)}</td>` : ''}</tr>`;
+  const peRow = `<tr class="dre-row-pe"><td>Ponto de Equilíbrio (R$)</td>${peCells}${mostrarAcum ? `<td class="dfc-col-total">${peTot==null ? '<span class="dfc-val-zero">—</span>' : fmtBRL(peTot)}</td>` + pctVazio(true) : ''}</tr>`;
 
   let avisoBase = '';
   if (baseDre === 'vencimento') {
@@ -11464,7 +11580,7 @@ function renderAnaliseCategoria() {
     if (!catId || !valoresMes[catId]) return;
     valoresMes[catId][m] += (l.valor || 0);
     itensMes[m][catId].push({
-      tipo: 'receber', data: dtRef, nome: getClienteNome(l.cliente),
+      tipo: 'receber', id: l.id, nf: l.nf || '', data: dtRef, nome: getClienteNome(l.cliente),
       prod: l.prod ? getProdVendaNome(l.prod) : '', valor: l.valor || 0,
       status: l.recebido === 'sim' ? 'Recebido' : 'A Receber'
     });
@@ -11480,7 +11596,7 @@ function renderAnaliseCategoria() {
     if (!catId || !valoresMes[catId]) return;
     valoresMes[catId][m] += (l.valor || 0);
     itensMes[m][catId].push({
-      tipo: 'pagar', data: dtRef, nome: getFornNome(l.forn),
+      tipo: 'pagar', id: l.id, nf: l.nf || '', data: dtRef, nome: getFornNome(l.forn),
       prod: l.prod ? getProdNome(l.prod) : '', valor: l.valor || 0,
       status: l.pago === 'sim' ? 'Pago' : 'A Pagar'
     });
@@ -11616,44 +11732,7 @@ function abrirDetalheAcCategoria(catId, mes) {
   }
   itens = [...itens].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
-  const titleEl = document.getElementById('dre-detalhe-title');
-  if (titleEl) titleEl.textContent = `${nomeCat} — ${periodoTxt}`;
-
-  const total = itens.reduce((s, it) => s + it.valor, 0);
-  const totalConfirmado = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
-  const totalPendente = total - totalConfirmado;
-
-  const kpisEl = document.getElementById('dre-detalhe-kpis');
-  if (kpisEl) {
-    kpisEl.innerHTML = `
-      <div class="card kpi"><div class="kpi-val">${itens.length}</div><div class="kpi-lbl">Lançamentos</div></div>
-      <div class="card kpi"><div class="kpi-val">${fmtBRL(total)}</div><div class="kpi-lbl">Total do período</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#166534">${fmtBRL(totalConfirmado)}</div><div class="kpi-lbl">Já confirmado</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#d97706">${fmtBRL(totalPendente)}</div><div class="kpi-lbl">Ainda pendente</div></div>`;
-  }
-
-  const tbody = document.getElementById('dre-detalhe-tbody');
-  if (tbody) {
-    if (!itens.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum lançamento encontrado.</td></tr>';
-    } else {
-      tbody.innerHTML = itens.map(it => {
-        let badge;
-        if (it.status === 'Recebido' || it.status === 'Pago') badge = `<span class="badge badge-green">${it.status}</span>`;
-        else if (it.status === 'A Receber') badge = `<span class="badge" style="background:#dbeafe;color:#1e6fad;font-weight:600">${it.status}</span>`;
-        else badge = `<span class="badge badge-red">${it.status}</span>`;
-        return `<tr>
-          <td>${fmtDate(it.data)}</td>
-          <td>${it.nome || '—'}</td>
-          <td>${it.prod || '—'}</td>
-          <td>${badge}</td>
-          <td style="font-family:DM Mono,monospace;text-align:right">${fmtBRL(it.valor)}</td>
-        </tr>`;
-      }).join('');
-    }
-  }
-
-  openModal('modal-dre-detalhe');
+  _dreDetalheRender(nomeCat, periodoTxt, itens, { origem:'ac', chave:catId, mes });
 }
 
 // Gera o PDF da Análise por Categoria (usa a tabela já renderizada em tela,
@@ -11742,44 +11821,7 @@ function abrirDetalheDreGrupo(grupoId, mes) {
   }
   itens = [...itens].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
-  const titleEl = document.getElementById('dre-detalhe-title');
-  if (titleEl) titleEl.textContent = `${nomeGrupo} — ${periodoTxt}`;
-
-  const total = itens.reduce((s, it) => s + it.valor, 0);
-  const totalConfirmado = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
-  const totalPendente = total - totalConfirmado;
-
-  const kpisEl = document.getElementById('dre-detalhe-kpis');
-  if (kpisEl) {
-    kpisEl.innerHTML = `
-      <div class="card kpi"><div class="kpi-val">${itens.length}</div><div class="kpi-lbl">Lançamentos</div></div>
-      <div class="card kpi"><div class="kpi-val">${fmtBRL(total)}</div><div class="kpi-lbl">Total do período</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#166534">${fmtBRL(totalConfirmado)}</div><div class="kpi-lbl">Já confirmado</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#d97706">${fmtBRL(totalPendente)}</div><div class="kpi-lbl">Ainda pendente</div></div>`;
-  }
-
-  const tbody = document.getElementById('dre-detalhe-tbody');
-  if (tbody) {
-    if (!itens.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum lançamento encontrado.</td></tr>';
-    } else {
-      tbody.innerHTML = itens.map(it => {
-        let badge;
-        if (it.status === 'Recebido' || it.status === 'Pago') badge = `<span class="badge badge-green">${it.status}</span>`;
-        else if (it.status === 'A Receber') badge = `<span class="badge" style="background:#dbeafe;color:#1e6fad;font-weight:600">${it.status}</span>`;
-        else badge = `<span class="badge badge-red">${it.status}</span>`;
-        return `<tr>
-          <td>${fmtDate(it.data)}</td>
-          <td>${it.nome || '—'}</td>
-          <td>${it.prod || '—'}</td>
-          <td>${badge}</td>
-          <td style="font-family:DM Mono,monospace;text-align:right">${fmtBRL(it.valor)}</td>
-        </tr>`;
-      }).join('');
-    }
-  }
-
-  openModal('modal-dre-detalhe');
+  _dreDetalheRender(nomeGrupo, periodoTxt, itens, { origem:'grupo', chave:grupoId, mes });
 }
 
 // Drill-down da linha de CATEGORIA (dentro de um grupo expandido do DRE):
@@ -11800,44 +11842,140 @@ function abrirDetalheDreCategoria(catId, mes) {
   }
   itens = [...itens].sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
+  _dreDetalheRender(nomeCat, periodoTxt, itens, { origem:'cat', chave:catId, mes });
+}
+
+// ══════════════════════════════════════════
+// Modal de detalhe (DRE e Análise por Categoria)
+// ══════════════════════════════════════════
+let _dreDetItens = [];
+let _dreDetCtx = null;          // de onde o modal foi aberto (para reabrir após editar/excluir)
+let _dreDetVoltarAposEditar = false;
+
+const _DRE_ICO_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const _DRE_ICO_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+
+function _dreDetalheRender(nome, periodoTxt, itens, ctx) {
+  _dreDetItens = itens;
+  _dreDetCtx = ctx || null;
   const titleEl = document.getElementById('dre-detalhe-title');
-  if (titleEl) titleEl.textContent = `${nomeCat} — ${periodoTxt}`;
+  if (titleEl) titleEl.textContent = nome;
+  const subEl = document.getElementById('dre-detalhe-sub');
+  if (subEl) subEl.textContent = periodoTxt;
 
   const total = itens.reduce((s, it) => s + it.valor, 0);
-  const totalConfirmado = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
-  const totalPendente = total - totalConfirmado;
-
+  const conf  = itens.filter(it => it.status === 'Recebido' || it.status === 'Pago').reduce((s, it) => s + it.valor, 0);
+  const kpi = (lbl, val, cor) => `<div class="dre-det-kpi"><div class="dre-det-kpi-lbl">${lbl}</div><div class="dre-det-kpi-val"${cor ? ` style="color:${cor}"` : ''} title="${val}">${val}</div></div>`;
   const kpisEl = document.getElementById('dre-detalhe-kpis');
-  if (kpisEl) {
-    kpisEl.innerHTML = `
-      <div class="card kpi"><div class="kpi-val">${itens.length}</div><div class="kpi-lbl">Lançamentos</div></div>
-      <div class="card kpi"><div class="kpi-val">${fmtBRL(total)}</div><div class="kpi-lbl">Total do período</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#166534">${fmtBRL(totalConfirmado)}</div><div class="kpi-lbl">Já confirmado</div></div>
-      <div class="card kpi"><div class="kpi-val" style="color:#d97706">${fmtBRL(totalPendente)}</div><div class="kpi-lbl">Ainda pendente</div></div>`;
-  }
+  if (kpisEl) kpisEl.innerHTML =
+      kpi('Lançamentos', itens.length)
+    + kpi('Total do período', fmtBRL(total))
+    + kpi('Já confirmado', fmtBRL(conf), '#166534')
+    + kpi('Ainda pendente', fmtBRL(total - conf), '#b45309');
 
-  const tbody = document.getElementById('dre-detalhe-tbody');
-  if (tbody) {
-    if (!itens.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum lançamento encontrado.</td></tr>';
-    } else {
-      tbody.innerHTML = itens.map(it => {
-        let badge;
-        if (it.status === 'Recebido' || it.status === 'Pago') badge = `<span class="badge badge-green">${it.status}</span>`;
-        else if (it.status === 'A Receber') badge = `<span class="badge" style="background:#dbeafe;color:#1e6fad;font-weight:600">${it.status}</span>`;
-        else badge = `<span class="badge badge-red">${it.status}</span>`;
-        return `<tr>
-          <td>${fmtDate(it.data)}</td>
-          <td>${it.nome || '—'}</td>
-          <td>${it.prod || '—'}</td>
-          <td>${badge}</td>
-          <td style="font-family:DM Mono,monospace;text-align:right">${fmtBRL(it.valor)}</td>
-        </tr>`;
-      }).join('');
-    }
-  }
+  const nota = document.getElementById('dre-detalhe-nota');
+  if (nota) nota.textContent = itens.some(it => /\(parc\./.test(it.prod || ''))
+    ? 'Alguns itens são parcelas. Editar ou excluir age sobre o lançamento inteiro, com todas as parcelas.'
+    : '';
 
+  const busca = document.getElementById('dre-detalhe-busca');
+  if (busca && !(ctx && ctx._manterBusca)) busca.value = '';
+  _dreDetFiltrar();
   openModal('modal-dre-detalhe');
+}
+
+function _dreDetFiltrar() {
+  const q = ((document.getElementById('dre-detalhe-busca') || {}).value || '').trim().toLowerCase();
+  const lista = q
+    ? _dreDetItens.filter(it => [it.nome, it.prod, it.nf, it.status].join(' ').toLowerCase().includes(q))
+    : _dreDetItens;
+  const tbody = document.getElementById('dre-detalhe-tbody');
+  const tfoot = document.getElementById('dre-detalhe-tfoot');
+  const cont  = document.getElementById('dre-detalhe-cont');
+  if (cont) cont.textContent = q ? `${lista.length} de ${_dreDetItens.length}` : '';
+  if (!tbody) return;
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:#a8a29e;white-space:normal">${_dreDetItens.length ? 'Nenhum lançamento corresponde à busca.' : 'Nenhum lançamento neste período.'}</td></tr>`;
+    if (tfoot) tfoot.innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = lista.map(it => {
+    const ok = it.status === 'Recebido' || it.status === 'Pago';
+    const sitCls = ok ? 'ok' : (it.status === 'A Receber' ? 'rec' : 'pag');
+    const nomeTxt = esc(it.nome || '—');
+    const prodTxt = esc(it.prod || '—');
+    const pode = !!it.id;
+    const acoes = `<button type="button" class="dre-det-btn" ${pode ? `onclick="editarDoDetalheDre('${it.tipo}','${it.id}')"` : 'disabled'} title="Editar lançamento" aria-label="Editar lançamento de ${nomeTxt}">${_DRE_ICO_EDIT}</button>`
+                + `<button type="button" class="dre-det-btn del" ${pode ? `onclick="excluirDoDetalheDre('${it.tipo}','${it.id}')"` : 'disabled'} title="Excluir lançamento" aria-label="Excluir lançamento de ${nomeTxt}">${_DRE_ICO_DEL}</button>`;
+    return `<tr>
+      <td class="c-data">${fmtDate(it.data)}</td>
+      <td class="c-nome" title="${nomeTxt}">${nomeTxt}</td>
+      <td class="c-prod" title="${prodTxt}">${prodTxt}</td>
+      <td class="c-nf">${esc(it.nf || '—')}</td>
+      <td class="c-sit"><span class="dre-det-sit ${sitCls}">${it.status}</span></td>
+      <td class="c-val">${fmtBRL(it.valor)}</td>
+      <td class="c-acao">${acoes}</td>
+    </tr>`;
+  }).join('');
+  const soma = lista.reduce((s, it) => s + it.valor, 0);
+  if (tfoot) tfoot.innerHTML = `<tr><td colspan="2">${q ? 'Total filtrado' : 'Total'} · ${lista.length} lançamento${lista.length === 1 ? '' : 's'}</td><td class="c-prod"></td><td class="c-nf"></td><td class="c-sit"></td><td class="c-val">${fmtBRL(soma)}</td><td class="c-acao"></td></tr>`;
+}
+
+// Reconstrói a tela de origem (DRE ou Análise por Categoria) e reabre o detalhe
+// com os números atualizados.
+function _dreDetReabrir() {
+  const ctx = _dreDetCtx;
+  if (!ctx) return;
+  if (ctx.origem === 'ac') {
+    if (typeof renderAnaliseCategoria === 'function') renderAnaliseCategoria();
+    abrirDetalheAcCategoria(ctx.chave, ctx.mes);
+  } else {
+    renderDre();
+    if (ctx.origem === 'grupo') abrirDetalheDreGrupo(ctx.chave, ctx.mes);
+    else abrirDetalheDreCategoria(ctx.chave, ctx.mes);
+  }
+}
+
+function editarDoDetalheDre(tipo, id) {
+  const existe = tipo === 'receber' ? db.lancreceber.some(x => x.id === id) : db.lancamentos.some(x => x.id === id);
+  if (!existe) { alert('Lançamento não encontrado. Ele pode ter sido excluído.'); return; }
+  closeModal('modal-dre-detalhe');
+  _dreDetVoltarAposEditar = true;
+  if (tipo === 'receber') editLancReceber(id); else editLancamento(id);
+}
+
+// Chamado ao fechar o modal de edição (salvando ou cancelando): volta ao detalhe.
+function _dreDetAposEditar(modalId) {
+  if (!_dreDetVoltarAposEditar) return;
+  if (modalId !== 'modal-lanc' && modalId !== 'modal-lancreceber') return;
+  _dreDetVoltarAposEditar = false;
+  setTimeout(_dreDetReabrir, 0);
+}
+
+async function excluirDoDetalheDre(tipo, id) {
+  const reg = tipo === 'receber' ? db.lancreceber.find(x => x.id === id) : db.lancamentos.find(x => x.id === id);
+  if (!reg) { alert('Lançamento não encontrado. Ele pode ter sido excluído.'); return; }
+  const quem = tipo === 'receber' ? getClienteNome(reg.cliente) : getFornNome(reg.forn);
+  const nParc = reg.parcelas || 1;
+  const aviso = nParc > 1 ? `\n\nEste lançamento tem ${nParc} parcelas. Todas serão excluídas.` : '';
+  if (!confirm(`Excluir o lançamento de ${quem}, no valor de ${fmtBRL(reg.valor)}?${aviso}`)) return;
+
+  const ok = await sbFetch(tipo === 'receber' ? 'lancreceber' : 'lancamentos', 'DELETE', null, `?id=eq.${id}`);
+  if (!ok) { alert('❌ Não foi possível excluir no banco de dados.' + sbErroMsg()); return; }
+  if (tipo === 'receber') {
+    db.lancreceber = db.lancreceber.filter(x => x.id !== id);
+  } else {
+    if (typeof cfEhCustoFixo === 'function' && cfEhCustoFixo(id)) await cfSalvarNoBanco(id, false, []);
+    db.lancamentos = db.lancamentos.filter(x => x.id !== id);
+    if (typeof renderCustosFixos === 'function') renderCustosFixos();
+  }
+  bumpDbVer();
+  try { _atualizarTelasAposExcluir(tipo); } catch (e) { console.error(e); }
+  const busca = document.getElementById('dre-detalhe-busca');
+  const termo = busca ? busca.value : '';
+  _dreDetReabrir();
+  if (busca && termo) { busca.value = termo; _dreDetFiltrar(); }
 }
 
 function renderDreChart(grupos, gruposValor, linhaCalc, ultimoSubtotalId) {
@@ -12323,7 +12461,24 @@ async function saveTransferencia() {
   if (!res) { alert('Erro ao salvar! Verifique se a tabela "transferencias" existe no Supabase e o RLS está configurado.'); return; }
   db.transferencias.push(rec);
   clearTransferencia();
+  closeModal('modal-transf');
   renderTransferencias(); renderBancos(); renderFluxoBancoDiario(); renderDashboard();
+}
+
+function abrirNovaTransferencia() {
+  populateTransfSelects();
+  clearTransferencia();
+  const d = new Date();
+  const dt = document.getElementById('transf-data');
+  if (dt) dt.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  openModal('modal-transf');
+  setTimeout(() => { const o = document.getElementById('transf-origem'); if (o) o.focus(); }, 50);
+}
+
+function inverterContasTransf() {
+  const o = document.getElementById('transf-origem'), d = document.getElementById('transf-destino');
+  if (!o || !d) return;
+  const tmp = o.value; o.value = d.value; d.value = tmp;
 }
 
 function clearTransferencia() {
@@ -12980,6 +13135,8 @@ function imprimirDre() {
     '.dre-row-percent td { color:#a8a29e; font-style:italic; font-size:9px; border-bottom:1px dashed #faf9f7; }',
     '.dre-row-percent td:first-child { padding-left:20px; }',
     '.dre-row-final td { font-weight:800; font-size:11px; border-top:1.5px solid #d6d3d1; border-bottom:1.5px solid #d6d3d1; }',
+    'th.dre-pct, td.dre-pct { padding-left:2px; padding-right:6px; color:#a8a29e; font-size:8.5px; font-weight:400; }',
+    '.dre-row-subtotal td.dre-pct, .dre-row-final td.dre-pct { color:#57534e; font-weight:700; }',
     '.dre-lucro-tag { display:inline-block; font-size:9px; font-weight:700; padding:1px 7px; border-radius:8px; margin-left:6px; }',
     '.dre-lucro-tag.pos { background:#dcfce7; color:#166534; }',
     '.dre-lucro-tag.neg { background:#fee2e2; color:#991b1b; }',
