@@ -1001,6 +1001,16 @@ tr.cob-dia-vazio > td {
         <option value="">🏢 Consolidado (todas)</option>
       </select>
     </div>
+    <div id="tipodoc-switch" style="padding:8px 14px 10px;border-bottom:1px solid #e7e5e4;background:#f5f5f4;">
+      <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#57534e;margin-bottom:5px;">Clientes</label>
+      <select id="tipodoc-ativo" onchange="trocarTipoDoc(this.value)"
+              style="width:100%;padding:7px 10px;font-size:12.5px;font-weight:600;border:1.5px solid #d6d3d1;border-radius:6px;background:#fff;color:#3A3B3D;cursor:pointer;">
+        <option value="">👥 CPF e CNPJ (todos)</option>
+        <option value="cpf">👤 Somente CPF (Pessoa Física)</option>
+        <option value="cnpj">🏢 Somente CNPJ (Pessoa Jurídica)</option>
+      </select>
+      <div id="tipodoc-lock-msg" style="display:none;font-size:10px;color:#a8a29e;margin-top:4px;">🔒 Definido pelo administrador</div>
+    </div>
 
     <nav class="nav">
       <!-- Dashboard -->
@@ -1918,10 +1928,9 @@ tr.cob-dia-vazio > td {
       <div class="page-header">
         <div>
           <div class="page-title">Cobrança</div>
-          <div class="page-sub" style="margin-bottom:0">Agenda semanal de clientes em atraso · follow-up de conversas · recebimento parcelado</div>
+          <div class="page-sub" style="margin-bottom:0">Clientes em atraso · follow-up de conversas · recebimento parcelado</div>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btn-pdf" style="background:#b91c1c" onclick="abrirAvisoAtraso(true)">🔔 Avisos de Atraso</button>
           <button class="btn-pdf" style="background:#15803d" onclick="abrirModelosCobranca()">✉️ Mensagens</button>
           <button class="btn-pdf" onclick="imprimirPagina('cobranca')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF</button>
         </div>
@@ -1930,27 +1939,24 @@ tr.cob-dia-vazio > td {
       <div id="cobranca-kpis" class="grid4" style="margin-bottom:20px;"></div>
 
       <div class="card">
-        <div class="card-title">Semana de cobrança</div>
-        <div class="cob-semana-bar">
-          <div class="form-group"><label>Ano</label>
-            <select id="cob-ano" onchange="popularSemanasCobranca(true); renderCobranca();" style="width:110px"></select>
-          </div>
-          <div class="form-group"><label>Semana</label>
-            <select id="cob-semana" onchange="renderCobranca()" style="min-width:230px"></select>
-          </div>
-          <button class="cob-nav-btn" onclick="navSemanaCobranca(-1)" title="Semana anterior">◀</button>
-          <button class="cob-nav-btn" onclick="semanaAtualCobranca()">Semana atual</button>
-          <button class="cob-nav-btn" onclick="navSemanaCobranca(1)" title="Próxima semana">▶</button>
-          <span class="cob-periodo" id="cob-periodo">—</span>
-          <div class="form-group" style="margin-left:auto"><label>Exibir</label>
-            <select id="cob-escopo" onchange="renderCobranca()" style="min-width:190px">
-              <option value="semana">Somente a semana escolhida</option>
-              <option value="todas">Todas as pendências</option>
-            </select>
-          </div>
-        </div>
+        <div class="card-title">Filtros (pelo vencimento)</div>
 
         <div class="filter-row">
+          <div class="form-group"><label>Mês</label>
+            <select id="cob-mes" onchange="renderCobranca()">
+              <option value="">Todos</option>
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+              <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+              <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Ano</label>
+            <select id="cob-ano" onchange="renderCobranca()" style="width:110px"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group"><label>Dia</label>
+            <input type="date" id="cob-dia" onchange="renderCobranca()" style="padding:7px 10px;font-size:13px" />
+          </div>
           <div class="form-group"><label>Cliente</label>
             <select id="cob-cliente" onchange="renderCobranca()"><option value="">Todos</option></select>
           </div>
@@ -1980,10 +1986,10 @@ tr.cob-dia-vazio > td {
         <div class="table-scroll" style="max-height:none">
           <table><thead><tr>
             <th>Cliente</th><th>Produto</th><th>Parcela</th><th>Valor</th>
-            <th>Recebido</th><th>Saldo</th><th>Juros</th>
+            <th>Recebido</th><th>Saldo</th><th>Juros</th><th>Dt. Competência</th>
             <th>Previsão / Venc.</th><th>Atraso</th><th>Follow-up</th><th>Situação</th><th>Ações</th>
           </tr></thead><tbody id="tb-cobranca">
-            <tr><td colspan="12" class="empty-state">Nenhuma cobrança nesta semana.</td></tr>
+            <tr><td colspan="13" class="empty-state">Nenhuma cobrança encontrada.</td></tr>
           </tbody></table>
         </div>
       </div>
@@ -2967,7 +2973,14 @@ tr.cob-dia-vazio > td {
         <select id="lr-financeiro"><option value="nao">Não</option><option value="sim">Sim</option></select>
       </div>
       <div class="form-group"><label>Recebido?</label>
-        <select id="lr-recebido"><option value="nao">Não</option><option value="sim">Sim</option></select>
+        <select id="lr-recebido" onchange="toggleDtRecebido('lr')"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+    </div>
+    <div class="grid3" id="lr-dtrecebido-wrap" style="display:none;">
+      <div class="form-group">
+        <label style="color:#047857">Data do Recebimento *</label>
+        <input id="lr-dtrecebido" type="date" />
+        <div style="font-size:11px;color:#a8a29e;margin-top:4px;">Obrigatória quando o lançamento é salvo como <b>Recebido</b>.</div>
       </div>
     </div>
     <div id="lr-parcela-dates" style="display:none;margin-bottom:16px;">
@@ -3119,7 +3132,14 @@ tr.cob-dia-vazio > td {
         <select id="elr-financeiro"><option value="nao">Não</option><option value="sim">Sim</option></select>
       </div>
       <div class="form-group"><label>Recebido?</label>
-        <select id="elr-recebido"><option value="nao">Não</option><option value="sim">Sim</option></select>
+        <select id="elr-recebido" onchange="toggleDtRecebido('elr')"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+    </div>
+    <div class="grid3" id="elr-dtrecebido-wrap" style="display:none;">
+      <div class="form-group">
+        <label style="color:#047857">Data do Recebimento *</label>
+        <input id="elr-dtrecebido" type="date" />
+        <div style="font-size:11px;color:#a8a29e;margin-top:4px;">Obrigatória quando o lançamento é salvo como <b>Recebido</b>.</div>
       </div>
     </div>
     <div class="grid3">
@@ -4549,7 +4569,9 @@ async function loadAllData() {
       // 20 — Modelos de mensagem de cobrança (WhatsApp)
       sbFetch('config', 'GET', null, '?key=eq.cobranca_mensagens&limit=1'),
       // 21 — Auditoria: histórico de alterações (tabela `config`)
-      sbFetch('config', 'GET', null, '?key=like.audit:*&order=key.desc&limit=3000')
+      sbFetch('config', 'GET', null, '?key=like.audit:*&order=key.desc&limit=3000'),
+      // 22 — Tipo de cliente (CPF/CNPJ) travado pelo admin para este login
+      (currentUser ? sbFetch('config', 'GET', null, `?key=eq.${encodeURIComponent(TIPODOC_PREFIX + currentUser.user)}&limit=1`) : Promise.resolve(null))
     ]);
 
     const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
@@ -4606,6 +4628,10 @@ async function loadAllData() {
     // Segurança: registros antigos, gravados antes desta proteção existir,
     // são limpos aqui na leitura.
     limparDb();
+    // Trava CPF/CNPJ por login + filtro de toda a parte de clientes
+    _tipoDocTravado = '';
+    try { const r22 = (val(22) || [])[0]; if (r22) _tipoDocTravado = String(r22.value || '').replace(/"/g, ''); } catch(e) {}
+    aplicarFiltroTipoDoc();
     const dreGruposRes = val(12);
     db.dre_grupos    = dreGruposRes || [];
     window._dreGruposError = (dreGruposRes === null || dreGruposRes === undefined);
@@ -4956,6 +4982,46 @@ function closeModal(id) {
   if (limpar) limpar();
   if (typeof _dreDetAposEditar === 'function') _dreDetAposEditar(id);
 }
+
+// ══════════════════════════════════════════════════════════
+// ENTER = próximo campo (vale para o sistema todo)
+// Em campos de texto, data, número e listas, ENTER leva ao próximo campo
+// da mesma janela/tela. No último campo de uma janela, o foco vai para o
+// botão principal (ex.: "Salvar") — aí um ENTER confirma.
+// Textos longos (textarea) continuam aceitando ENTER para quebrar linha.
+// ══════════════════════════════════════════════════════════
+function _camposNavegaveis(container) {
+  return [...container.querySelectorAll('input, select, textarea, .ef-combo-trigger')].filter(el =>
+    !el.disabled && el.type !== 'hidden' && el.type !== 'file' &&
+    !el.classList.contains('ef-combo-native') &&
+    !el.closest('.ef-combo-panel, .ef-dropdown') &&
+    el.offsetParent !== null && !el.readOnly);
+}
+function focarProximoCampo(atual) {
+  if (!atual) return false;
+  const container = atual.closest('.modal') || atual.closest('.page') || atual.closest('.login-box') || document.body;
+  const lista = _camposNavegaveis(container);
+  const i = lista.indexOf(atual);
+  if (i >= 0 && i < lista.length - 1) {
+    const prox = lista[i + 1];
+    prox.focus();
+    try { if (prox.select && /^(text|number|email|search|tel)$/.test(prox.type)) prox.select(); } catch(e) {}
+    return true;
+  }
+  const btn = container.querySelector('.modal-footer .btn-primary, .btn-login');
+  if (btn) btn.focus();
+  return false;
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey || e.isComposing) return;
+  const t = e.target;
+  if (!t || !t.matches || !t.matches('input, select')) return;
+  if (['button','submit','reset','file','image'].includes(t.type)) return;
+  if (t.hasAttribute('onkeydown')) return;              // campos com ação própria no ENTER (login, cadastro rápido)
+  if (t.closest('.ef-combo-panel, .ef-dropdown')) return; // buscas dos seletores
+  e.preventDefault();
+  focarProximoCampo(t);
+});
 
 // Esc fecha o modal aberto (passando pela limpeza acima)
 document.addEventListener('keydown', function (e) {
@@ -5607,6 +5673,53 @@ function popularSeletorEmpresa() {
   atualizarTagsEmpresa();
 }
 
+// ══════════════════════════════════════════
+// FILTRO CPF × CNPJ
+// Cada login pode trabalhar só com clientes Pessoa Física (CPF), só
+// Pessoa Jurídica (CNPJ) ou com os dois. A escolha fica no seletor
+// "Clientes" do menu (salva no navegador). O administrador pode travar
+// um login em um tipo na Gestão de Usuários — aí o seletor fica bloqueado.
+// Com o filtro ligado, clientes, contas a receber, cobrança, recebidos,
+// cancelados, reposições, dashboard e DRE só enxergam aquele tipo.
+// ══════════════════════════════════════════
+const TIPODOC_PREFIX = 'tipodoc:';
+var _tipoDocTravado = '';
+function _tipoDocKey() { return 'cap_tipodoc_' + ((currentUser && currentUser.user) || ''); }
+function tipoDocAtivo() {
+  if (_tipoDocTravado) return _tipoDocTravado;
+  try { return localStorage.getItem(_tipoDocKey()) || ''; } catch(e) { return ''; }
+}
+function aplicarFiltroTipoDoc() {
+  const td = tipoDocAtivo();
+  const sel = document.getElementById('tipodoc-ativo');
+  if (sel) { sel.value = td; sel.disabled = !!_tipoDocTravado; sel.style.opacity = _tipoDocTravado ? '.7' : ''; }
+  const msg = document.getElementById('tipodoc-lock-msg');
+  if (msg) msg.style.display = _tipoDocTravado ? '' : 'none';
+  if (!td) return;
+  bumpDbVer(); // garante o índice de clientes atualizado antes de classificar
+  const ok = id => getClienteDocTipo(id) === td;
+  db.lancreceber        = db.lancreceber.filter(l => ok(l.cliente));
+  db.pedidos_cancelados = db.pedidos_cancelados.filter(l => ok(l.cliente));
+  db.reposicoes         = db.reposicoes.filter(l => ok(l.cliente));
+  db.clientes           = db.clientes.filter(c => ok(c.id));
+  bumpDbVer();
+}
+async function trocarTipoDoc(v) {
+  if (_tipoDocTravado) return;
+  try { if (v) localStorage.setItem(_tipoDocKey(), v); else localStorage.removeItem(_tipoDocKey()); } catch(e) {}
+  await loadAllData();
+  populateClienteSelects();
+  renderPaginaAtual();
+}
+async function salvarTipoDocUsuario(email, v) {
+  const key = TIPODOC_PREFIX + email;
+  const del = await sbFetch('config', 'DELETE', null, `?key=eq.${encodeURIComponent(key)}`);
+  let ok = del !== null;
+  if (ok && v) ok = !!(await sbFetch('config', 'POST', { id: uid(), key, value: v }));
+  if (!ok) { alert('❌ Não foi possível salvar o tipo de cliente deste usuário.' + sbErroMsg()); return; }
+  if (currentUser && currentUser.user === email) { await loadAllData(); populateClienteSelects(); }
+}
+
 // Etiqueta que aparece ao lado do título das telas de análise (DRE, DFC,
 // Dashboard), deixando claro se o número na tela é de uma empresa só ou
 // do consolidado do grupo.
@@ -5860,7 +5973,8 @@ async function saveLancamento() {
   const rL = await sbFetch('lancamentos', 'POST', lanc);
   if(!rL) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
   if (ehCustoFixo) {
-    const okCf = await cfSalvarNoBanco(lanc.id, true, _vigTemp.l);
+    const geradosCf = await cfSincronizarRecorrencias(lanc, _vigTemp.l, true);
+    const okCf = await cfSalvarNoBanco(lanc.id, true, _vigTemp.l, geradosCf);
     if (!okCf) alert('⚠ O lançamento foi salvo, mas as vigências do custo fixo não puderam ser gravadas.' + sbErroMsg());
   }
   // Só mantém no array em memória (e portanto visível na tela) se pertencer
@@ -6092,7 +6206,8 @@ async function updateLancamento() {
     parcela_datas: l.parcela_datas
   }, `?id=eq.${l.id}`);
   if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados.' + sbErroMsg()); return; }
-  const okCfE = await cfSalvarNoBanco(l.id, ehCustoFixoEdit, _vigTemp.edit);
+  const geradosCfE = await cfSincronizarRecorrencias(l, _vigTemp.edit, ehCustoFixoEdit);
+  const okCfE = await cfSalvarNoBanco(l.id, ehCustoFixoEdit, _vigTemp.edit, geradosCfE);
   if (!okCfE) alert('⚠ O lançamento foi salvo, mas o custo fixo/vigências não puderam ser gravados.' + sbErroMsg());
   // Se a empresa foi trocada para uma diferente da ativa no seletor, o
   // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
@@ -6103,10 +6218,17 @@ async function updateLancamento() {
 
 async function deleteLancamento(id) {
   if(!confirm('Excluir este lançamento?')) return;
+  const baseCf = db.lancamentos.find(x => x.id === id);
+  if (baseCf && cfEhCustoFixo(id)) {
+    const temFuturos = ((cfDadosDoLanc(id) || {}).gerados || []).length > 0;
+    if (temFuturos && confirm('Este é um custo fixo. Excluir também os lançamentos dos outros meses que ainda não foram pagos?')) {
+      await cfSincronizarRecorrencias(baseCf, [], false);
+    }
+    await cfSalvarNoBanco(id, false, []);
+  }
   await sbFetch('lancamentos', 'DELETE', null, `?id=eq.${id}`);
-  if (cfEhCustoFixo(id)) await cfSalvarNoBanco(id, false, []);
   db.lancamentos = db.lancamentos.filter(x=>x.id!==id);
-  renderLancamentos(); renderCustosFixos();
+  renderLancamentos(); renderApagar(); renderCustosFixos();
 }
 
 // ══════════════════════════════════════════
@@ -6594,7 +6716,13 @@ function enhanceSearchableSelect(select, opts) {
     busca.addEventListener('input', () => renderLista(busca.value));
     busca.addEventListener('keydown', e => {
       if (e.key === 'Escape') { fecharPainel(); trigger.focus(); }
-      if (e.key === 'Enter') { const primeiro = lista.querySelector('.ef-combo-item'); if (primeiro) primeiro.click(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!busca.value.trim()) { fecharPainel(); focarProximoCampo(trigger); return; }
+        const primeiro = lista.querySelector('.ef-combo-item');
+        if (primeiro) primeiro.click();
+        if (!primeiro || !primeiro.classList.contains('ef-combo-item-novo')) setTimeout(() => focarProximoCampo(trigger), 0);
+      }
     });
 
     // O painel pode ser mais largo que o campo: os rótulos de categoria são
@@ -8997,6 +9125,9 @@ async function renderUsuariosAdmin() {
   await loadPerfis();
   const container = document.getElementById('users-list');
   if (!container) return;
+  const tdRows = await sbFetch('config', 'GET', null, '?key=like.tipodoc:*&limit=1000');
+  const tdMapa = {};
+  (tdRows || []).forEach(r => { tdMapa[String(r.key).slice(TIPODOC_PREFIX.length)] = String(r.value || '').replace(/"/g, ''); });
 
   container.innerHTML = USERS.map((u) => {
     const isAdmin = u.role === 'admin';
@@ -9046,7 +9177,16 @@ async function renderUsuariosAdmin() {
         <div class="user-info-login">${lastLoginStr}</div>
         <div class="user-info-login" id="last-activity-${u.user}" style="color:#a8a29e">🕓 Última atividade no sistema: carregando...</div>
       </div>
-      <div class="user-perms">${permsHtml}</div>
+      <div class="user-perms">${permsHtml}
+        <div style="width:100%;margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:10px;color:#a8a29e;font-weight:700;text-transform:uppercase;letter-spacing:.5px">👥 Clientes visíveis</span>
+          <select style="width:auto;padding:5px 9px;font-size:12px" onchange="salvarTipoDocUsuario('${u.user}', this.value)">
+            <option value="" ${!tdMapa[u.user] ? 'selected' : ''}>Livre (o usuário escolhe no menu)</option>
+            <option value="cpf" ${tdMapa[u.user]==='cpf' ? 'selected' : ''}>Somente CPF (Pessoa Física)</option>
+            <option value="cnpj" ${tdMapa[u.user]==='cnpj' ? 'selected' : ''}>Somente CNPJ (Pessoa Jurídica)</option>
+          </select>
+        </div>
+      </div>
     </div>`;
   }).join('');
 
@@ -9392,6 +9532,8 @@ async function saveLancReceber() {
   const recebido=document.getElementById('lr-recebido').value;
   const banco=document.getElementById('lr-banco').value;
   if (!validarBancoObrigatorio(recebido, banco)) return;
+  const dtrecNovo = campoValor('lr-dtrecebido');
+  if (!validarDataRecebimentoObrigatoria(recebido, dtrecNovo, 'lr-dtrecebido')) return;
   const empresa_id = empresaDoForm('lr-empresa');
   if (empresa_id === null) return;
   const parcelas=parseInt(document.getElementById('lr-parcelas').value)||1;
@@ -9402,12 +9544,16 @@ async function saveLancReceber() {
     valor, parcelas,
     financeiro:document.getElementById('lr-financeiro').value,
     recebido,
+    dtrecebido: recebido === 'sim' ? dtrecNovo : '',
     tipo_pag:document.getElementById('lr-tipo-pag').value,
     banco,
     cat_dre: document.getElementById('lr-catdre') ? document.getElementById('lr-catdre').value : '',
     juros:parseFloat(document.getElementById('lr-juros').value)||null,
     obs:document.getElementById('lr-obs').value,
     parcela_datas: parcelas > 1 ? buildParcelaDatasPayload('lr-parcela-dates', parcelas) : null };
+  if (parcelas > 1 && recebido === 'sim') {
+    lanc.parcela_datas = _marcarTodasParcelasPagas(lanc.parcela_datas, parcelas, dtrecNovo);
+  }
   const rLR = await sbFetch('lancreceber','POST',lanc);
   if(!rLR) { alert('❌ Erro ao salvar lançamento. Verifique sua conexão e tente novamente.'); return; }
   const pertence = pertenceEmpresaAtiva(lanc.empresa_id);
@@ -9425,6 +9571,8 @@ function clearLancReceber() {
   set('lr-parcelas','1');
   set('lr-financeiro','nao');
   set('lr-recebido','nao');
+  set('lr-dtrecebido','');
+  toggleDtRecebido('lr', false);
   set('lr-tipo-pag','');
   set('lr-banco','');
   try { set('lr-empresa', empresaAtual() || ''); } catch(e) { set('lr-empresa',''); }
@@ -9525,6 +9673,9 @@ function editLancReceber(id) {
   document.getElementById('elr-parcelas').value=l.parcelas;
   document.getElementById('elr-financeiro').value=l.financeiro;
   document.getElementById('elr-recebido').value=l.recebido;
+  const _edtr = document.getElementById('elr-dtrecebido');
+  if (_edtr) _edtr.value = l.dtrecebido || '';
+  toggleDtRecebido('elr', false);
   document.getElementById('elr-obs').value=l.obs||'';
   document.getElementById('elr-juros').value=l.juros||'';
   const elrBanco = document.getElementById('elr-banco');
@@ -9537,7 +9688,7 @@ function editLancReceber(id) {
   ep.value=l.prod||'';
   populateDreCatSelects();
   const ecd = document.getElementById('elr-catdre');
-  if (ecd) ecd.value = l.cat_dre || '';
+  if (ecd) { _garantirOpcaoCat(ecd, l.cat_dre); ecd.value = l.cat_dre || ''; }
   // Populate manual parcela dates if present
   if (l.parcelas > 1) {
     toggleParcelaDates('elr-parcelas', 'elr-parcela-dates');
@@ -9556,6 +9707,8 @@ async function updateLancReceber() {
   const recebido=document.getElementById('elr-recebido').value;
   const banco = document.getElementById('elr-banco') ? document.getElementById('elr-banco').value : (l.banco||'');
   if (!validarBancoObrigatorio(recebido, banco)) return;
+  const dtrecEdit = campoValor('elr-dtrecebido');
+  if (!validarDataRecebimentoObrigatoria(recebido, dtrecEdit, 'elr-dtrecebido')) return;
   const _empLR = empresaDoForm('elr-empresa');
   if (_empLR === null) return;
   l.empresa_id = _empLR;
@@ -9573,8 +9726,14 @@ async function updateLancReceber() {
   l.obs=document.getElementById('elr-obs').value;
   l.cat_dre = document.getElementById('elr-catdre') ? document.getElementById('elr-catdre').value : (l.cat_dre||'');
   const manualDates = l.parcelas > 1 ? getManualParcelaDates('elr-parcela-dates', l.parcelas) : null;
-  l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPayload('elr-parcela-dates', l.parcelas) : null;
-  const okU = await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
+  // Preserva o status de recebimento por parcela já gravado
+  const _rawRecAntigo = l.parcela_datas;
+  l.parcela_datas = l.parcelas > 1 ? buildParcelaDatasPreservando('elr-parcela-dates', l.parcelas, _rawRecAntigo) : null;
+  l.dtrecebido = recebido === 'sim' ? dtrecEdit : '';
+  if (l.parcelas > 1 && recebido === 'sim') {
+    l.parcela_datas = _marcarTodasParcelasPagas(l.parcela_datas, l.parcelas, dtrecEdit);
+  }
+  const okU = await sbFetch('lancreceber','PATCH',{empresa_id:l.empresa_id,dtvenda:l.dtvenda,dtprev:l.dtprev,nf:l.nf,cliente:l.cliente,prod:l.prod,valor:l.valor,parcelas:l.parcelas,financeiro:l.financeiro,recebido:l.recebido,dtrecebido:l.dtrecebido,banco:l.banco,obs:l.obs,cat_dre:l.cat_dre,parcela_datas:l.parcela_datas},`?id=eq.${id}`);
   if (!okU) { alert('❌ Não foi possível salvar a edição no banco de dados.' + sbErroMsg()); return; }
   // Se a empresa foi trocada para uma diferente da ativa no seletor, o
   // registro tem que sumir da lista atual (senão fica aparecendo na empresa errada).
@@ -10720,15 +10879,29 @@ function getDreCatGrupo(id) { const c = db.dfc_cats.find(x => x.id === id); retu
 
 // Popula o select "Categoria" nos lançamentos a pagar/receber com as
 // Categorias já cadastradas em DFC → Categorias (mesma lista, sem duplicidade)
+// Categoria é de receita quando o grupo do DRE é de Entrada
+// (ou, sem grupo válido, quando a própria categoria é de Entrada).
+function catEhReceita(cat) {
+  const g = db.dre_grupos.find(x => x.id === cat.grupo);
+  if (g) return g.tipo === 'entrada';
+  return cat.tipo === 'entrada';
+}
+function _garantirOpcaoCat(el, catId) {
+  if (!el || !catId || [...el.options].some(o => o.value === catId)) return;
+  const c = db.dfc_cats.find(x => x.id === catId);
+  el.insertAdjacentHTML('beforeend', `<option value="${catId}">${c ? c.nome + ' (' + getDreGrupoNome(c.grupo) + ')' : catId}</option>`);
+}
 function populateDreCatSelects() {
-  const opts = '<option value="">Nenhuma</option>' +
-    db.dfc_cats.map(cat => `<option value="${cat.id}">${cat.nome} (${getDreGrupoNome(cat.grupo)})</option>`).join('');
+  const optDe = lista => '<option value="">Nenhuma</option>' +
+    lista.map(cat => `<option value="${cat.id}">${cat.nome} (${getDreGrupoNome(cat.grupo)})</option>`).join('');
+  const optsTodas   = optDe(db.dfc_cats);
+  const optsReceita = optDe(db.dfc_cats.filter(catEhReceita));
   ['l-catdre','edit-catdre','lr-catdre','elr-catdre'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     const val = el.value;
-    el.innerHTML = opts;
-    if (val) el.value = val;
+    el.innerHTML = (id === 'lr-catdre' || id === 'elr-catdre') ? optsReceita : optsTodas;
+    if (val) { _garantirOpcaoCat(el, val); el.value = val; }
   });
   // Filtros de Grupo/Categoria em Lançamentos, Contas a Pagar e Contas Pagas
   popularFiltrosGrupoCategoriaTodos();
@@ -14616,17 +14789,121 @@ function vigTextoPeriodo(v) {
 }
 
 // ── Gravação (tabela `config`) ─────────────────────────────────────────
-async function cfSalvarNoBanco(lancId, ativo, vigencias) {
+async function cfSalvarNoBanco(lancId, ativo, vigencias, gerados) {
   const key = CF_CONFIG_PREFIX + lancId;
+  const anteriores = ((db.custosfixos[lancId] || {}).gerados) || [];
   const del = await sbFetch('config', 'DELETE', null, `?key=eq.${encodeURIComponent(key)}`);
   if (del === null) return false;
   if (!ativo) { delete db.custosfixos[lancId]; bumpDbVer(); return true; }
-  const payload = { ativo: true, vigencias: vigOrdenar(vigencias || []) };
+  const payload = { ativo: true, vigencias: vigOrdenar(vigencias || []), gerados: gerados || anteriores };
   const ok = await sbFetch('config', 'POST', { id: uid(), key, value: JSON.stringify(payload) });
   if (!ok) return false;
   db.custosfixos[lancId] = payload;
   bumpDbVer();
   return true;
+}
+
+// ── Recorrência mensal ─────────────────────────────────────────────────
+// O lançamento original cobre o mês dele. Para cada outro mês coberto pelas
+// vigências, o sistema cria um lançamento próprio (1x, em aberto), que
+// aparece normalmente em Contas a Pagar, DRE, DFC e fluxos. Os ids criados
+// ficam guardados junto das vigências ("gerados"), para que uma edição
+// posterior ajuste, crie ou remova os meses — sem nunca mexer em um mês
+// que já foi pago. Vigência sem fim gera os próximos 12 meses.
+function _ymAdd(ym, n) {
+  let [y, m] = ym.split('-').map(Number);
+  m += n; y += Math.floor((m - 1) / 12); m = ((m - 1) % 12 + 12) % 12 + 1;
+  return y + '-' + String(m).padStart(2, '0');
+}
+function _ymDiff(a, b) { // meses de a até b
+  const [ya, ma] = a.split('-').map(Number), [yb, mb] = b.split('-').map(Number);
+  return (yb - ya) * 12 + (mb - ma);
+}
+function _cfMesesDesejados(base, vigencias) {
+  const mapa = new Map(); // 'AAAA-MM' -> valor
+  const mesBase = (base.dtcompra || today()).slice(0, 7);
+  const hojeYM = today().slice(0, 7);
+  vigOrdenar(vigencias).forEach(v => {
+    if (!v.inicio) return;
+    const ini = v.inicio.slice(0, 7);
+    let fim;
+    if (v.fim) fim = v.fim.slice(0, 7);
+    else { const a = _ymAdd(ini, 11), b = _ymAdd(hojeYM, 11); fim = a > b ? a : b; }
+    const valor = (v.valor == null || v.valor === '') ? (base.valor || 0) : (parseFloat(v.valor) || 0);
+    let ym = ini, guarda = 0;
+    while (ym <= fim && guarda++ < 240) { mapa.set(ym, valor); ym = _ymAdd(ym, 1); }
+  });
+  mapa.delete(mesBase); // esse mês já é o próprio lançamento original
+  return mapa;
+}
+function _cfCamposMes(base, ym) {
+  const off = _ymDiff((base.dtcompra || today()).slice(0, 7), ym);
+  return {
+    dtcompra: _vencMensal(base.dtcompra || today(), off + 1),
+    dtprev:   base.dtprev ? _vencMensal(base.dtprev, off + 1) : _vencMensal(base.dtcompra || today(), off + 1)
+  };
+}
+// Ajusta os lançamentos dos outros meses. Devolve a nova lista "gerados".
+async function cfSincronizarRecorrencias(base, vigencias, ativo) {
+  const antigos = ((cfDadosDoLanc(base.id) || {}).gerados) || [];
+  const desejados = ativo ? _cfMesesDesejados(base, vigencias) : new Map();
+  const tratados = new Set();
+  const manter = [], apagar = [];
+  const obsRec = '🔁 Custo fixo recorrente' + (base.obs ? ' — ' + base.obs : '');
+
+  for (const g of antigos) {
+    const l = db.lancamentos.find(x => x.id === g.id);
+    if (!l) { manter.push(g); tratados.add(g.mes); continue; } // fora da empresa ativa: não mexe
+    const pago = l.pago === 'sim';
+    if (desejados.has(g.mes) && !tratados.has(g.mes)) {
+      tratados.add(g.mes);
+      manter.push(g);
+      if (!pago) {
+        const campos = Object.assign(_cfCamposMes(base, g.mes), {
+          valor: desejados.get(g.mes), forn: base.forn, prod: base.prod, cat_dre: base.cat_dre,
+          empresa_id: base.empresa_id, financeiro: base.financeiro, tipo_pag: base.tipo_pag, obs: obsRec
+        });
+        Object.assign(l, campos);
+        await sbFetch('lancamentos', 'PATCH', campos, `?id=eq.${l.id}`);
+      }
+    } else if (pago) {
+      manter.push(g); tratados.add(g.mes); // mês já pago nunca é apagado
+    } else {
+      apagar.push(l.id);
+    }
+  }
+  if (apagar.length) {
+    const r = await sbDeleteMany('lancamentos', apagar);
+    const ok = new Set(r.sucesso);
+    db.lancamentos = db.lancamentos.filter(x => !ok.has(x.id));
+    antigos.filter(g => r.falha.includes(g.id)).forEach(g => manter.push(g));
+  }
+
+  const novos = [];
+  desejados.forEach((valor, ym) => {
+    if (tratados.has(ym)) return;
+    novos.push(Object.assign({
+      id: uid(), empresa_id: base.empresa_id, nf: '', forn: base.forn, prod: base.prod,
+      valor, parcelas: 1, financeiro: base.financeiro || 'nao', pago: 'nao', tipo_pag: base.tipo_pag || '',
+      banco: '', cat_dre: base.cat_dre || '', obs: obsRec, dtpago: '', parcela_datas: null
+    }, _cfCamposMes(base, ym), { _mes: ym }));
+  });
+  if (novos.length) {
+    const corpo = novos.map(n => { const c = Object.assign({}, n); delete c._mes; return c; });
+    const res = await sbFetch('lancamentos', 'POST', corpo);
+    if (!res) {
+      alert('⚠ Não foi possível criar os lançamentos dos outros meses do custo fixo.' + sbErroMsg());
+    } else {
+      const pertence = pertenceEmpresaAtiva(base.empresa_id);
+      novos.forEach(n => {
+        manter.push({ id: n.id, mes: n._mes });
+        const c = Object.assign({}, n); delete c._mes;
+        if (pertence) db.lancamentos.push(c);
+      });
+    }
+  }
+  bumpDbVer();
+  return manter.sort((a, b) => a.mes.localeCompare(b.mes));
 }
 
 // ── Interface do formulário ────────────────────────────────────────────
@@ -14775,6 +15052,29 @@ function toggleDtPago(prefix, autoPreencher) {
   if (sim && inp && !inp.value && autoPreencher !== false) {
     inp.value = campoValor(prefix + '-dtprev') || today();
   }
+}
+
+function toggleDtRecebido(prefix, autoPreencher) {
+  const sel  = document.getElementById(prefix + '-recebido');
+  const wrap = document.getElementById(prefix + '-dtrecebido-wrap');
+  const inp  = document.getElementById(prefix + '-dtrecebido');
+  if (!sel || !wrap) return;
+  const sim = sel.value === 'sim';
+  wrap.style.display = sim ? '' : 'none';
+  if (!sim && inp) inp.value = '';
+  if (sim && inp && !inp.value && autoPreencher !== false) {
+    inp.value = campoValor(prefix + '-dtprev') || today();
+  }
+}
+
+function validarDataRecebimentoObrigatoria(recebido, dt, campoId) {
+  if (recebido === 'sim' && !dt) {
+    alert('Informe a Data do Recebimento.\n\nTodo lançamento marcado como RECEBIDO precisa da data em que o valor entrou — sem ela a conta não entra no fluxo de caixa nem no saldo do banco.');
+    const el = document.getElementById(campoId);
+    if (el) el.focus();
+    return false;
+  }
+  return true;
 }
 
 function validarDataPagamentoObrigatoria(pago, dtpago, campoId) {
@@ -14934,6 +15234,7 @@ function renderCustosFixos() {
       <td><span class="badge ${i.statusCls}">${i.status}</span></td>
       <td style="text-align:center">
         <button class="btn btn-secondary btn-sm" onclick="verVigenciasCustoFixo('${i.lancId}')" title="Ver o histórico de vigências">${i.qtd} ▾</button>
+        <div style="font-size:10px;color:#a8a29e;margin-top:3px">${(((cfDadosDoLanc(i.lancId)||{}).gerados)||[]).length + 1} mês(es)</div>
       </td>
       <td class="actions">
         <button class="btn btn-secondary btn-sm" onclick="editLancamento('${i.lancId}')">Editar / Vigências</button>
@@ -14979,8 +15280,10 @@ function verVigenciasCustoFixo(lancId) {
 async function removerCustoFixo(lancId) {
   const l = db.lancamentos.find(x => x.id === lancId);
   if (!l) return;
-  if (!confirm('Tirar a marcação de Custo Fixo de "' + getFornNome(l.forn) + '"?\n\nAs vigências cadastradas serão apagadas. O lançamento em si NÃO será excluído.')) return;
+  if (!confirm('Tirar a marcação de Custo Fixo de "' + getFornNome(l.forn) + '"?\n\nAs vigências serão apagadas e os lançamentos dos outros meses que ainda NÃO foram pagos serão excluídos. O lançamento original e os meses já pagos continuam.')) return;
+  await cfSincronizarRecorrencias(l, [], false);
   const ok = await cfSalvarNoBanco(lancId, false, []);
+  renderLancamentos(); renderApagar();
   if (!ok) { alert('❌ Não foi possível remover o custo fixo.' + sbErroMsg()); return; }
   const card = document.getElementById('cf-detalhe-card');
   if (card) card.style.display = 'none';
@@ -14996,7 +15299,7 @@ function clearCustosFixosFiltros() {
 
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-09-05 · custos-fixos-vigencias-dtpago';
+window.APP_BUILD = '2026-10-07 · cobranca-enter-cpf-custofixo';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
@@ -15074,94 +15377,53 @@ async function cobSalvar(lancId, parcIdx) {
   return !!ok;
 }
 
-// ── Seletor de semana ─────────────────────────────────────────────────
-function popularSemanasCobranca(forcar) {
-  const selAno = document.getElementById('cob-ano');
-  const selSem = document.getElementById('cob-semana');
-  if (!selAno || !selSem) return;
-
-  if (!selAno.options.length) {
-    const atual = new Date().getFullYear();
-    const anos = new Set();
-    for (let y = atual - 2; y <= atual + 1; y++) anos.add(y);
-    db.lancreceber.forEach(l => { if (l.dtprev) anos.add(parseInt(l.dtprev.split('-')[0])); });
-    selAno.innerHTML = [...anos].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('');
-    selAno.value = semanaISO(today()).ano;
-  }
-  if (!selSem.options.length || forcar) {
-    const ano = parseInt(selAno.value) || new Date().getFullYear();
-    const total = totalSemanasISO(ano);
-    let html = '';
-    for (let w = 1; w <= total; w++) {
-      const seg = segundaDaSemana(ano, w);
-      const dom = new Date(seg); dom.setDate(seg.getDate()+6);
-      const r = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
-      html += `<option value="${w}">Semana ${w} · ${r(seg)} a ${r(dom)}</option>`;
-    }
-    selSem.innerHTML = html;
-    const hj = semanaISO(today());
-    selSem.value = (hj.ano === ano) ? Math.min(hj.semana, total) : 1;
-  }
-}
-function semanaAtualCobranca() {
-  const hj = semanaISO(today());
-  const selAno = document.getElementById('cob-ano');
-  if (![...selAno.options].some(o => o.value == hj.ano)) {
-    selAno.insertAdjacentHTML('afterbegin', `<option value="${hj.ano}">${hj.ano}</option>`);
-  }
-  selAno.value = hj.ano;
-  popularSemanasCobranca(true);
-  document.getElementById('cob-semana').value = hj.semana;
-  document.getElementById('cob-escopo').value = 'semana';
-  renderCobranca();
-}
-function navSemanaCobranca(passo) {
-  const selAno = document.getElementById('cob-ano');
-  const selSem = document.getElementById('cob-semana');
-  let ano = parseInt(selAno.value), sem = parseInt(selSem.value) + passo;
-  if (sem < 1) { ano -= 1; if (![...selAno.options].some(o=>o.value==ano)) selAno.insertAdjacentHTML('beforeend', `<option value="${ano}">${ano}</option>`); selAno.value = ano; popularSemanasCobranca(true); sem = totalSemanasISO(ano); }
-  else if (sem > totalSemanasISO(ano)) { ano += 1; if (![...selAno.options].some(o=>o.value==ano)) selAno.insertAdjacentHTML('afterbegin', `<option value="${ano}">${ano}</option>`); selAno.value = ano; popularSemanasCobranca(true); sem = 1; }
-  selSem.value = sem;
-  document.getElementById('cob-escopo').value = 'semana';
-  renderCobranca();
+function popularAnosCobranca() {
+  const sel = document.getElementById('cob-ano');
+  if (!sel || sel.dataset.ok) return;
+  const atual = new Date().getFullYear();
+  const anos = new Set();
+  for (let y = atual - 2; y <= atual + 1; y++) anos.add(y);
+  db.lancreceber.forEach(l => { if (l.dtprev) anos.add(parseInt(l.dtprev.split('-')[0])); });
+  sel.innerHTML = '<option value="">Todos</option>' +
+    [...anos].filter(y => y > 1990).sort((x,y)=>y-x).map(y=>`<option value="${y}">${y}</option>`).join('');
+  sel.dataset.ok = '1';
 }
 function clearCobrancaFiltros() {
-  ['cob-cliente','cob-busca','cob-atraso-min','cob-tipodoc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['cob-mes','cob-ano','cob-dia','cob-cliente','cob-busca','cob-atraso-min','cob-tipodoc']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('cob-situacao').value = 'atraso';
-  document.getElementById('cob-escopo').value = 'semana';
   renderCobranca();
 }
 
-// ── Render da agenda semanal ──────────────────────────────────────────
+// ── Render da cobrança (lista corrida, sem divisão por dia da semana) ──
 function renderCobranca() {
   if (!paginaVisivel('cobranca')) return;
-  popularSemanasCobranca();
+  popularAnosCobranca();
   _sincronizarQuitadasCobranca();
 
-  const ano      = parseInt(document.getElementById('cob-ano').value) || new Date().getFullYear();
-  const sem      = parseInt(document.getElementById('cob-semana').value) || 1;
-  const escopo   = document.getElementById('cob-escopo').value || 'semana';
+  const fMes     = parseInt(document.getElementById('cob-mes').value) || 0;
+  const fAno     = parseInt(document.getElementById('cob-ano').value) || 0;
+  const fDia     = document.getElementById('cob-dia').value || '';
   const cliente  = document.getElementById('cob-cliente').value;
   const situacao = document.getElementById('cob-situacao').value || 'atraso';
   const busca    = (document.getElementById('cob-busca').value || '').trim().toLowerCase();
   const atrasoMin = parseInt(document.getElementById('cob-atraso-min').value);
   const tipoDocCob = document.getElementById('cob-tipodoc') ? document.getElementById('cob-tipodoc').value : '';
 
-  const seg = segundaDaSemana(ano, sem);
-  const dom = new Date(seg); dom.setDate(seg.getDate()+6);
-  const ini = _isoStr(seg), fim = _isoStr(dom);
-  document.getElementById('cob-periodo').textContent =
-    (escopo === 'semana') ? `${fmtDate(ini)} a ${fmtDate(fim)}` : 'Todas as pendências';
-
   const hoje = today();
   const list = getParcelasReceber(false).filter(p => {
     if (cliente && p.cliente !== cliente) return false;
     if (tipoDocCob && getClienteDocTipo(p.cliente) !== tipoDocCob) return false;
-    // Saldo zerado = parcela paga: nunca aparece na cobrança.
     if (p.valParc - cobTotalBaixas(p.lancId, p.parcIdx) <= 0.005) return false;
     if (situacao === 'atraso' && !(p.venc && p.venc < hoje)) return false;
     if (situacao === 'hoje'   && p.venc !== hoje) return false;
-    if (escopo === 'semana') { if (!p.venc || p.venc < ini || p.venc > fim) return false; }
+    if (fDia && p.venc !== fDia) return false;
+    if (fMes || fAno) {
+      if (!p.venc) return false;
+      const pt = p.venc.split('-');
+      if (fAno && parseInt(pt[0]) !== fAno) return false;
+      if (fMes && parseInt(pt[1]) !== fMes) return false;
+    }
     if (!isNaN(atrasoMin) && atrasoMin > 0) {
       const d = (p.venc && p.venc < hoje) ? diffDias(p.venc, hoje) : 0;
       if (d < atrasoMin) return false;
@@ -15173,7 +15435,6 @@ function renderCobranca() {
     return true;
   });
 
-  // KPIs
   const saldoDe = p => Math.max(0, p.valParc - cobTotalBaixas(p.lancId, p.parcIdx));
   const totalSaldo   = list.reduce((s,p) => s + saldoDe(p), 0);
   const totalParcial = list.reduce((s,p) => s + Math.min(p.valParc, cobTotalBaixas(p.lancId, p.parcIdx)), 0);
@@ -15186,53 +15447,17 @@ function renderCobranca() {
     <div class="card kpi"><div class="kpi-val" style="color:#16a34a">${fmtBRL(totalParcial)}</div><div class="kpi-lbl">Recebido parcial</div></div>
     <div class="card kpi"><div class="kpi-val" style="color:#d97706">${clientesSet.size} <small style="font-size:13px;color:#a8a29e">cli · ${maiorAtraso}d</small></div><div class="kpi-lbl">Clientes / maior atraso</div></div>`;
 
-  // Agrupar por dia da semana (segunda → domingo), na vertical
-  const grupos = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], sem:[] };
-  list.forEach(p => {
-    if (!p.venc) { grupos.sem.push(p); return; }
-    grupos[(_dataLocal(p.venc).getDay() + 6) % 7].push(p);
-  });
-  Object.keys(grupos).forEach(k => grupos[k].sort((a,b) =>
-    (a.venc||'').localeCompare(b.venc||'') || getClienteNome(a.cliente).localeCompare(getClienteNome(b.cliente))));
-
-  const ordem = [0,1,2,3,4];                       // segunda a sexta sempre aparecem
-  if (grupos[5].length) ordem.push(5);
-  if (grupos[6].length) ordem.push(6);
-
   const tb = document.getElementById('tb-cobranca');
+  window._pdfLists = window._pdfLists || {}; window._pdfLists.cobranca = list.slice();
   if (!list.length) {
-    tb.innerHTML = `<tr><td colspan="12" class="empty-state">Nenhuma cobrança ${escopo==='semana' ? 'nesta semana' : 'pendente'} com os filtros atuais. 🎉</td></tr>`;
-    window._pdfLists = window._pdfLists || {}; window._pdfLists.cobranca = [];
+    tb.innerHTML = '<tr><td colspan="13" class="empty-state">Nenhuma cobrança com os filtros atuais. 🎉</td></tr>';
     return;
   }
-
-  let html = '';
-  let desenhadas = 0;
-  ordem.forEach(i => {
-    const itens = grupos[i];
-    const dataDia = (escopo === 'semana') ? _addDias(ini, i) : null;
-    const somaDia = itens.reduce((s,p) => s + saldoDe(p), 0);
-    html += `<tr class="cob-dia"><td colspan="12">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="cob-dia-nome">${COB_DIAS[i]}${dataDia ? ' · ' + fmtDate(dataDia) : ''}</span>
-        <span class="cob-dia-meta">${itens.length ? itens.length + ' cobrança(s) · ' + fmtBRL(somaDia) : ''}</span>
-      </div></td></tr>`;
-    if (!itens.length) {
-      html += `<tr class="cob-dia-vazio"><td colspan="12">— sem cobranças neste dia —</td></tr>`;
-      return;
-    }
-    itens.forEach(p => { if (desenhadas++ < LIMITE_LINHAS) html += _linhaCobranca(p, hoje); });
-  });
-  if (grupos.sem.length) {
-    html += `<tr class="cob-dia"><td colspan="12"><span class="cob-dia-nome">Sem data prevista</span></td></tr>`;
-    grupos.sem.forEach(p => { if (desenhadas++ < LIMITE_LINHAS) html += _linhaCobranca(p, hoje); });
-  }
-  if (desenhadas > LIMITE_LINHAS) {
-    html += `<tr><td colspan="12" style="text-align:center;padding:14px;background:#fffbeb;color:#92400e;font-size:12px">
-      Mostrando as ${LIMITE_LINHAS} primeiras de <strong>${desenhadas}</strong> linhas. Use os filtros acima para refinar.</td></tr>`;
-  }
-  tb.innerHTML = html;
-  window._pdfLists = window._pdfLists || {}; window._pdfLists.cobranca = list.slice();
+  // Mais antigos primeiro; sem vencimento no fim
+  list.sort((a,b) => (a.venc||'9999').localeCompare(b.venc||'9999')
+    || getClienteNome(a.cliente).localeCompare(getClienteNome(b.cliente)));
+  const _c = _cortarLista(list, 13);
+  tb.innerHTML = _c.aviso + _c.itens.map(p => _linhaCobranca(p, hoje)).join('');
 }
 
 function _linhaCobranca(p, hoje) {
@@ -15254,6 +15479,7 @@ function _linhaCobranca(p, hoje) {
     <td style="font-family:DM Mono,monospace;color:${pago>0?'#16a34a':'#a8a29e'}">${pago>0?fmtBRL(pago):'—'}</td>
     <td style="font-family:DM Mono,monospace;font-weight:700;color:#dc2626">${fmtBRL(saldo)}</td>
     <td style="font-family:DM Mono,monospace;font-size:12px;color:${juros>0?'#c2410c':'#a8a29e'}">${juros>0?'+'+fmtBRL(juros):'—'}</td>
+    <td style="font-family:DM Mono,monospace;font-size:12px;color:#57534e">${fmtDate(p.dtvenda)}</td>
     <td style="white-space:nowrap">
       <span style="font-family:DM Mono,monospace">${fmtDate(p.venc)}</span>
       <button class="btn btn-secondary btn-sm" style="padding:2px 7px;margin-left:5px" title="Editar previsão de recebimento"
@@ -15638,7 +15864,8 @@ function clientesEmAtraso() {
   return [...mapa.values()].sort((a,b) => b.total - a.total);
 }
 
-function avisoAtrasoAoEntrar() { setTimeout(() => abrirAvisoAtraso(false), 350); }
+// Aviso de cliente em débito desativado a pedido: a janela não abre mais.
+function avisoAtrasoAoEntrar() { /* desativado */ }
 
 function abrirAvisoAtraso(forcar) {
   const lista = clientesEmAtraso();
