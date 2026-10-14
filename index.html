@@ -412,6 +412,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
 .dre-det-nota { font-size:11px; color:#a8a29e; margin-top:8px; min-height:0; }
 .dre-det-nota:empty { display:none; }
 .dre-det-foot { display:flex; justify-content:flex-end; margin-top:12px; }
+body.sem-editar button[onclick^="editLancamento("], body.sem-editar button[onclick^="editLancReceber("],
+body.sem-editar button[onclick^="editarDoDetalhe("], body.sem-editar button[onclick^="editarDoDetalheDre("],
+body.sem-estornar button[onclick^="estornarPago("], body.sem-estornar button[onclick^="estornarRecebido("] { display:none !important; }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 @media (max-width:760px) {
   .dre-det-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -6110,6 +6113,7 @@ function clearLancamentoFiltros() {
 }
 
 function editLancamento(id) {
+  if (!exigirAcao('acao:editar')) return;
   const l = db.lancamentos.find(x=>x.id===id);
   if(!l) return;
   document.getElementById('edit-lanc-id').value = id;
@@ -6157,6 +6161,7 @@ function editLancamento(id) {
 }
 
 async function updateLancamento() {
+  if (!exigirAcao('acao:editar')) return;
   const id = document.getElementById('edit-lanc-id').value;
   const l = db.lancamentos.find(x=>x.id===id);
   if(!l) return;
@@ -7315,6 +7320,7 @@ async function verificarBackupAutomatico() {
 }
 
 async function estornarPago(id, parcIdx) {
+  if (!exigirAcao('acao:estornar')) return;
   if(!confirm('Deseja desfazer o pagamento e mover esta parcela de volta para "A Pagar"?')) return;
   const l = db.lancamentos.find(x=>x.id===id);
   if(!l) return;
@@ -9090,8 +9096,30 @@ function restoreParcelaFields(containerid, raw) {
 // ══════════════════════════════════════════
 // GESTÃO DE USUÁRIOS (ADMIN)
 // ══════════════════════════════════════════
+// ── Ações sensíveis por login (Editar / Estornar lançamentos) ──
+// Admin sempre pode. Demais logins só se o admin liberar na Gestão de Usuários.
+// Ficam salvas no mesmo campo "pages" do perfil, com prefixo "acao:".
+const ACOES_CONFIG = [
+  { id:'acao:editar',   label:'Editar lançamentos (Pagar e Receber)' },
+  { id:'acao:estornar', label:'Estornar pagamentos e recebimentos' }
+];
+function podeAcao(id) {
+  return !!currentUser && (currentUser.role === 'admin' || (currentUser.pages || []).includes(id));
+}
+function exigirAcao(id) {
+  if (podeAcao(id)) return true;
+  const a = ACOES_CONFIG.find(x => x.id === id);
+  alert('Seu login não tem permissão para: ' + (a ? a.label : id) + '.\nPeça ao administrador para liberar em Gestão de Usuários.');
+  return false;
+}
+function aplicarPermissoesAcoes() {
+  document.body.classList.toggle('sem-editar', !podeAcao('acao:editar'));
+  document.body.classList.toggle('sem-estornar', !podeAcao('acao:estornar'));
+}
+
 function applyNavPermissions() {
   if (!currentUser) return;
+  aplicarPermissoesAcoes();
   const isAdmin = currentUser.role === 'admin';
   const allowed = isAdmin ? null : (currentUser.pages || []);
   // Controla visibilidade de cada nav-item
@@ -9142,7 +9170,7 @@ async function renderUsuariosAdmin() {
       const checked = (u.pages || []).includes(pg.id);
       const disabled = isAdmin ? ' disabled-perm' : '';
       const active   = (isAdmin || checked) ? ' active' : '';
-      const labelId  = 'perm-' + u.user + '-' + pg.id.replace(/-/g,'_');
+      const labelId  = 'perm-' + u.user + '-' + pg.id.replace(/[-:]/g,'_');
       const dataAttr = isAdmin ? '' : `data-uname="${u.user}" data-page="${pg.id}" data-lid="${labelId}"`;
       return `<label id="${labelId}" class="perm-toggle${active}${disabled}" ${dataAttr} title="${pg.label}">
         <input type="checkbox" ${checked || isAdmin ? 'checked' : ''} ${isAdmin ? 'disabled' : ''}>
@@ -9159,7 +9187,9 @@ async function renderUsuariosAdmin() {
       <div style="font-size:10px;color:#a8a29e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📊 DFC</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${buildPerms(pagDfc)}</div>
       <div style="font-size:10px;color:#a8a29e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📈 DRE</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${buildPerms(pagDre)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${buildPerms(pagDre)}</div>
+      <div style="font-size:10px;color:#a8a29e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔐 Ações em lançamentos</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${buildPerms(ACOES_CONFIG)}</div>
     </div>`;
 
     // Último login deste usuário
@@ -9664,6 +9694,7 @@ function clearLancReceberFiltros() {
   renderLancReceber();
 }
 function editLancReceber(id) {
+  if (!exigirAcao('acao:editar')) return;
   const l=db.lancreceber.find(x=>x.id===id); if(!l) return;
   document.getElementById('edit-lr-id').value=id;
   document.getElementById('elr-dtvenda').value=l.dtvenda||l.dtcompra||'';
@@ -9702,6 +9733,7 @@ function editLancReceber(id) {
   openModal('modal-lancreceber');
 }
 async function updateLancReceber() {
+  if (!exigirAcao('acao:editar')) return;
   const id=document.getElementById('edit-lr-id').value;
   const l=db.lancreceber.find(x=>x.id===id); if(!l) return;
   const recebido=document.getElementById('elr-recebido').value;
@@ -10003,6 +10035,7 @@ async function confirmarRecebido() {
   closeModal('modal-recebido'); renderAReceber(); renderCobranca(); renderRecebido(); renderDashboard();
 }
 async function estornarRecebido(id, parcIdx) {
+  if (!exigirAcao('acao:estornar')) return;
   if(!confirm('Desfazer o recebimento desta parcela?')) return;
   const l=db.lancreceber.find(x=>x.id===id); if(!l) return;
   const n = l.parcelas || 1;
@@ -15299,7 +15332,7 @@ function clearCustosFixosFiltros() {
 
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-10-07 · cobranca-enter-cpf-custofixo';
+window.APP_BUILD = '2026-10-14 · permissao-editar-estornar';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
