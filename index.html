@@ -415,6 +415,9 @@ th.ef-th { padding:8px 8px 8px 12px; }
 body.sem-editar button[onclick^="editLancamento("], body.sem-editar button[onclick^="editLancReceber("],
 body.sem-editar button[onclick^="editarDoDetalhe("], body.sem-editar button[onclick^="editarDoDetalheDre("],
 body.sem-estornar button[onclick^="estornarPago("], body.sem-estornar button[onclick^="estornarRecebido("] { display:none !important; }
+body.sem-excluir button[onclick^="deleteLancamento("], body.sem-excluir button[onclick^="deleteLancReceber("],
+body.sem-excluir button[onclick^="deleteDfcLancamento("], body.sem-excluir button[onclick^="excluirDoDetalhe("],
+body.sem-excluir button[onclick^="excluirDoDetalheDre("], body.sem-excluir #btn-excluir-conciliacao-receber { display:none !important; }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 @media (max-width:760px) {
   .dre-det-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -1450,14 +1453,17 @@ tr.cob-dia-vazio > td {
           <div class="form-group"><label>Forma de Pagamento</label>
             <select id="pgf-tipo-pag" onchange="renderPagas()"><option value="">Todas</option></select>
           </div>
+          <div class="form-group"><label>Banco / Conta</label>
+            <select id="pgf-banco" onchange="renderPagas()"><option value="">Todas</option></select>
+          </div>
           <div class="form-group"><label>NF</label>
             <input type="text" id="pgf-nf" oninput="renderPagas()" placeholder="Nº da NF" style="width:120px" />
           </div>
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearPagasFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-pagas-row">
-          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Competência</th><th>Data Pgto</th><th>Forma Pgto</th><th>NF</th><th>Financeiro</th><th>Ações</th>
-        </tr></thead><tbody id="tb-pagas"><tr><td colspan="12" class="empty-state">Nenhuma parcela paga.</td></tr></tbody></table></div>
+          <th>Despesas/Fornecedor</th><th>Item</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Data Competência</th><th>Data Pgto</th><th>Forma Pgto</th><th>Banco / Conta</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+        </tr></thead><tbody id="tb-pagas"><tr><td colspan="13" class="empty-state">Nenhuma parcela paga.</td></tr></tbody></table></div>
       </div>
     </div>
 
@@ -2035,14 +2041,17 @@ tr.cob-dia-vazio > td {
           <div class="form-group"><label>Forma de Recebimento</label>
             <select id="recf-tipo-pag" onchange="renderRecebido()"><option value="">Todas</option></select>
           </div>
+          <div class="form-group"><label>Banco / Conta</label>
+            <select id="recf-banco" onchange="renderRecebido()"><option value="">Todas</option></select>
+          </div>
           <div class="form-group"><label>NF</label>
             <input type="text" id="recf-nf" oninput="renderRecebido()" placeholder="Nº da NF" style="width:120px" />
           </div>
           <div style="align-self:flex-end"><button class="btn btn-secondary" onclick="clearRecebidoFiltros()">Limpar</button></div>
         </div>
         <div class="table-scroll"><table><thead><tr id="th-recebido-row">
-          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Dt. Competência</th><th>Dt. Recebimento</th><th>Forma Receb.</th><th>NF</th><th>Financeiro</th><th>Ações</th>
-        </tr></thead><tbody id="tb-recebido"><tr><td colspan="12" class="empty-state">Nenhum recebimento registrado.</td></tr></tbody></table></div>
+          <th>Cliente</th><th>Produto</th><th>Categoria</th><th>Parcela</th><th>Valor Parcela</th><th>Vencimento</th><th>Dt. Competência</th><th>Dt. Recebimento</th><th>Forma Receb.</th><th>Banco / Conta</th><th>NF</th><th>Financeiro</th><th>Ações</th>
+        </tr></thead><tbody id="tb-recebido"><tr><td colspan="13" class="empty-state">Nenhum recebimento registrado.</td></tr></tbody></table></div>
       </div>
     </div>
 
@@ -2489,9 +2498,12 @@ tr.cob-dia-vazio > td {
     <div class="page" id="page-bancos">
       <div class="page-header">
         <div><div class="page-title">Bancos / Caixas</div><div class="page-sub" style="margin-bottom:0">Cadastro de contas bancárias e caixas</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary" id="btn-corrigir-orfaos" onclick="abrirCorrigirContasExcluidas()" title="Coloca uma conta em todos os lançamentos cuja conta foi excluída">🔧 Corrigir lançamentos com conta excluída</button>
         <button class="btn-novo" id="btn-novo-bnk" onclick="toggleFormPanel('form-bnk',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo
         </button>
+        </div>
       </div>
       <div class="form-panel" id="form-bnk" style="margin-bottom:0">
       <div class="card">
@@ -3542,6 +3554,24 @@ tr.cob-dia-vazio > td {
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-novo-motivo-repo')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarNovoMotivoRepo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL: CORRIGIR LANÇAMENTOS COM CONTA EXCLUÍDA ══ -->
+<div class="modal-overlay" id="modal-orfaos">
+  <div class="modal" style="width:820px;">
+    <div class="modal-title">🔧 Lançamentos com conta excluída</div>
+    <p style="font-size:13px;color:#57534e;margin-bottom:14px;">
+      Abaixo estão as contas que foram excluídas do cadastro mas ainda aparecem em lançamentos (de todas as empresas).
+      Para cada uma, escolha o que fazer:
+      <b>Recriar a conta</b> devolve a conta com o <b>mesmo código</b> (é a forma mais segura: nada nos lançamentos é alterado),
+      ou <b>mover para uma conta existente</b> troca a conta em todos esses lançamentos.
+    </p>
+    <div id="orfaos-lista"><div class="empty-state" style="padding:24px">Procurando...</div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-orfaos')">Fechar</button>
     </div>
   </div>
 </div>
@@ -5033,9 +5063,11 @@ document.addEventListener('keydown', function (e) {
   focarProximoCampo(t);
 });
 
-// Esc fecha o modal aberto (passando pela limpeza acima)
+// Esc NÃO fecha mais as janelas (a pedido: só fecham pelo botão Fechar).
+// Para voltar a fechar com Esc, troque FECHAR_COM_ESC para true.
+const FECHAR_COM_ESC = false;
 document.addEventListener('keydown', function (e) {
-  if (e.key !== 'Escape') return;
+  if (e.key !== 'Escape' || !FECHAR_COM_ESC) return;
   const abertos = document.querySelectorAll('.modal-overlay.open');
   if (!abertos.length) return;
   const ultimo = abertos[abertos.length - 1];
@@ -6229,6 +6261,7 @@ async function updateLancamento() {
 }
 
 async function deleteLancamento(id) {
+  if (!exigirAcao('acao:excluir')) return;
   if(!confirm('Excluir este lançamento?')) return;
   const baseCf = db.lancamentos.find(x => x.id === id);
   if (baseCf && cfEhCustoFixo(id)) {
@@ -7486,6 +7519,7 @@ function renderPagas() {
   const dataPago = document.getElementById('pgf-data-pago').value;
   const dataCompra = document.getElementById('pgf-data-compra').value;
   const tipoPagF = document.getElementById('pgf-tipo-pag') ? document.getElementById('pgf-tipo-pag').value : '';
+  const bancoPF = document.getElementById('pgf-banco') ? document.getElementById('pgf-banco').value : '';
   const nfPG = document.getElementById('pgf-nf') ? document.getElementById('pgf-nf').value.trim().toLowerCase() : '';
   const tb = document.getElementById('tb-pagas');
   let list = getParcelas(true);
@@ -7506,6 +7540,7 @@ function renderPagas() {
       if (tipoPagF === '__sem_forma__') { if (p.tipoPag) return false; }
       else if (p.tipoPag !== tipoPagF) return false;
     }
+    if(bancoPF && !_filtroBancoOk(p.banco, bancoPF)) return false;
     if(!dataVenc && !dataPago && !dataCompra) {
       const dateRef = p.venc || p.dtcompra;
       if(dateRef) {
@@ -7529,6 +7564,7 @@ function renderPagas() {
     { key:'dtcompra', label:'Data Competência', get:p=>p.dtcompra, display:p=>fmtDate(p.dtcompra) },
     { key:'dtpago', label:'Data Pgto', get:p=>p.dtpago, display:p=>fmtDate(p.dtpago) },
     { key:'tipopag', label:'Forma Pgto', get:p=>p.tipoPag||null },
+    { key:'banco', label:'Banco / Conta', get:p=>_bancoTexto(p.banco) },
     { key:'nf', label:'NF', get:p=>p.nf||null },
     { key:'financeiro', label:'Financeiro', get:p=>p.financeiro==='sim'?'Sim':'Não' },
     { key:'acoes', label:'Ações', get:()=>'', noFilter:true }
@@ -7547,10 +7583,10 @@ function renderPagas() {
     <div class="card kpi"><div class="kpi-val">${totalQuitados}</div><div class="kpi-lbl">Lançamentos quitados</div></div>
     <div class="card kpi"><div class="kpi-val">${totalEmAberto}</div><div class="kpi-lbl">Lançamentos em aberto</div></div>`;
 
-  if(!list.length) { tb.innerHTML='<tr><td colspan="12" class="empty-state">Nenhuma parcela paga.</td></tr>'; return; }
+  if(!list.length) { tb.innerHTML='<tr><td colspan="13" class="empty-state">Nenhuma parcela paga.</td></tr>'; return; }
   if(!_efState('pagas').sortKey) list.sort((a,b)=>(b.venc||'').localeCompare(a.venc||''));
   window._pdfLists = window._pdfLists || {}; window._pdfLists.pagas = list.slice();
-  const _c = _cortarLista(list, 12);
+  const _c = _cortarLista(list, 13);
   tb.innerHTML = _c.aviso + _c.itens.map(p=>{
     const finBadge = p.financeiro==='sim' ? '<span class="badge badge-green">Sim</span>' : '<span class="badge badge-red">Não</span>';
     const dtpagoCell = p.dtpago
@@ -7570,6 +7606,7 @@ function renderPagas() {
       <td>${fmtDate(p.dtcompra)}</td>
       <td>${dtpagoCell}</td>
       <td>${p.tipoPag ? `<span class="badge badge-blue">${p.tipoPag}</span>` : '<span style="color:#a8a29e;font-size:12px">—</span>'}</td>
+      <td>${_bancoCelula(p.banco)}</td>
       <td style="font-family:DM Mono,monospace;font-size:12px">${p.nf||'—'}</td>
       <td>${finBadge}</td>
       <td><button class="btn btn-danger btn-sm" onclick="estornarPago('${p.lancId}', ${p.parcIdx})" title="Desfazer pagamento">↩ Estornar</button></td>
@@ -7578,7 +7615,7 @@ function renderPagas() {
 }
 
 function clearPagasFiltros() {
-  ['pgf-mes','pgf-ano','pgf-forn','pgf-prod','pgf-grupo','pgf-categoria','pgf-data-venc','pgf-data-pago','pgf-data-compra','pgf-tipo-pag','pgf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['pgf-mes','pgf-ano','pgf-forn','pgf-prod','pgf-grupo','pgf-categoria','pgf-data-venc','pgf-data-pago','pgf-data-compra','pgf-tipo-pag','pgf-banco','pgf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderPagas();
 }
 
@@ -7866,7 +7903,7 @@ function abrirRelatorioKPI(key) {
     ov.id = 'modal-rel-kpi';
     ov.innerHTML = '<div class="modal" id="modal-rel-kpi-inner" style="width:1000px;"></div>';
     document.body.appendChild(ov);
-    ov.addEventListener('click', e => { if (e.target === ov) closeModal('modal-rel-kpi'); });
+
   }
   document.getElementById('modal-rel-kpi-inner').innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -8818,7 +8855,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ativarSelectsPesquisaveis();
 
   const ov = document.getElementById('cal-detail-overlay');
-  if (ov) ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+
 
   // Event delegation para permissões de usuário
   document.addEventListener('click', e => {
@@ -9108,7 +9145,8 @@ function restoreParcelaFields(containerid, raw) {
 // Ficam salvas no mesmo campo "pages" do perfil, com prefixo "acao:".
 const ACOES_CONFIG = [
   { id:'acao:editar',   label:'Editar lançamentos (Pagar e Receber)' },
-  { id:'acao:estornar', label:'Estornar pagamentos e recebimentos' }
+  { id:'acao:estornar', label:'Estornar pagamentos e recebimentos' },
+  { id:'acao:excluir',  label:'Excluir lançamentos (Pagar, Receber e DFC)' }
 ];
 function podeAcao(id) {
   return !!currentUser && (currentUser.role === 'admin' || (currentUser.pages || []).includes(id));
@@ -9122,6 +9160,7 @@ function exigirAcao(id) {
 function aplicarPermissoesAcoes() {
   document.body.classList.toggle('sem-editar', !podeAcao('acao:editar'));
   document.body.classList.toggle('sem-estornar', !podeAcao('acao:estornar'));
+  document.body.classList.toggle('sem-excluir', !podeAcao('acao:excluir'));
 }
 
 function applyNavPermissions() {
@@ -9780,6 +9819,7 @@ async function updateLancReceber() {
   closeModal('modal-lancreceber'); renderLancReceber();
 }
 async function deleteLancReceber(id) {
+  if (!exigirAcao('acao:excluir')) return;
   if(!confirm('Excluir este lançamento?')) return;
   await sbFetch('lancreceber','DELETE',null,`?id=eq.${id}`);
   db.lancreceber=db.lancreceber.filter(x=>x.id!==id);
@@ -9808,6 +9848,7 @@ async function sbDeleteMany(table, ids) {
 // Também exclui os clientes que foram criados automaticamente por essa mesma
 // importação, desde que não restem outros lançamentos vinculados a eles.
 async function excluirTodosImportadosConciliacaoReceber() {
+  if (!exigirAcao('acao:excluir')) return;
   const MARCADOR = 'importado via conciliacao bancaria';
   const alvos = db.lancreceber.filter(l => normText(l.obs).includes(MARCADOR));
   if(!alvos.length) { alert('Nenhum lançamento importado via conciliação bancária foi encontrado.'); return; }
@@ -10081,6 +10122,7 @@ function renderRecebido() {
   const dataRec=document.getElementById('recf-data-rec').value;
   const dataVenda=document.getElementById('recf-data-venda').value;
   const tipoRecFR=document.getElementById('recf-tipo-pag') ? document.getElementById('recf-tipo-pag').value : '';
+  const bancoRF=document.getElementById('recf-banco') ? document.getElementById('recf-banco').value : '';
   const nfREC=document.getElementById('recf-nf') ? document.getElementById('recf-nf').value.trim().toLowerCase() : '';
   const tb=document.getElementById('tb-recebido');
   let list=getParcelasReceber(true);
@@ -10094,6 +10136,7 @@ function renderRecebido() {
       if (tipoRecFR === '__sem_forma__') { if (p.tipoPag) return false; }
       else if (p.tipoPag !== tipoRecFR) return false;
     }
+    if(bancoRF && !_filtroBancoOk(p.banco, bancoRF)) return false;
     if(nfREC && !String(p.nf||'').toLowerCase().includes(nfREC)) return false;
     if(!dataVenc && !dataRec && !dataVenda) {
       const dateRef=p.venc||p.dtvenda;
@@ -10123,15 +10166,16 @@ function renderRecebido() {
     { key:'dtvenda', label:'Dt. Competência', get:p=>p.dtvenda, display:p=>fmtDate(p.dtvenda) },
     { key:'dtrecebido', label:'Dt. Recebimento', get:p=>p.dtrecebido, display:p=>fmtDate(p.dtrecebido) },
     { key:'tipopag', label:'Forma Receb.', get:p=>p.tipoPag||null },
+    { key:'banco', label:'Banco / Conta', get:p=>_bancoTexto(p.banco) },
     { key:'nf', label:'NF', get:p=>p.nf||null },
     { key:'financeiro', label:'Financeiro', get:p=>p.financeiro==='sim'?'Sim':'Não' },
     { key:'acoes', label:'Ações', get:()=>'', noFilter:true }
   ];
   list = efMount('recebido','th-recebido-row',colsRec,list,renderRecebido);
-  if(!list.length){ tb.innerHTML='<tr><td colspan="12" class="empty-state">Nenhum recebimento registrado.</td></tr>'; return; }
+  if(!list.length){ tb.innerHTML='<tr><td colspan="13" class="empty-state">Nenhum recebimento registrado.</td></tr>'; return; }
   if(!_efState('recebido').sortKey) list.sort((a,b)=>(b.venc||'').localeCompare(a.venc||''));
   window._pdfLists = window._pdfLists || {}; window._pdfLists.recebido = list.slice();
-  const _c = _cortarLista(list, 12);
+  const _c = _cortarLista(list, 13);
   tb.innerHTML = _c.aviso + _c.itens.map(p=>{
     const finBadge=p.financeiro==='sim'?'<span class="badge badge-green">Sim</span>':'<span class="badge badge-red">Não</span>';
     const dtrecCell=p.dtrecebido
@@ -10147,6 +10191,7 @@ function renderRecebido() {
       <td>${fmtDate(p.dtvenda)}</td>
       <td>${dtrecCell}</td>
       <td>${p.tipoPag ? `<span class="badge badge-blue">${p.tipoPag}</span>` : '<span style="color:#a8a29e;font-size:12px">—</span>'}</td>
+      <td>${_bancoCelula(p.banco)}</td>
       <td style="font-size:12px">${p.nf||'—'}</td>
       <td>${finBadge}</td>
       <td><button class="btn btn-danger btn-sm" onclick="estornarRecebido('${p.lancId}', ${p.parcIdx})" title="Desfazer recebimento">↩ Estornar</button></td>
@@ -10154,7 +10199,7 @@ function renderRecebido() {
   }).join('');
 }
 function clearRecebidoFiltros() {
-  ['recf-mes','recf-ano','recf-cliente','recf-categoria','recf-data-venc','recf-data-rec','recf-data-venda','recf-tipo-pag','recf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['recf-mes','recf-ano','recf-cliente','recf-categoria','recf-data-venc','recf-data-rec','recf-data-venda','recf-tipo-pag','recf-banco','recf-nf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderRecebido();
 }
 
@@ -10466,6 +10511,7 @@ function renderDfcLancamentos() {
   }).join('');
 }
 async function deleteDfcLancamento(id) {
+  if (!exigirAcao('acao:excluir')) return;
   if (!confirm('Excluir este lançamento?')) return;
   await sbFetch('dfc_lancamentos','DELETE',null,`?id=eq.${id}`);
   db.dfc_lans = db.dfc_lans.filter(x => x.id !== id);
@@ -12167,6 +12213,7 @@ function _dreDetAposEditar(modalId) {
 }
 
 async function excluirDoDetalheDre(tipo, id) {
+  if (!exigirAcao('acao:excluir')) return;
   const reg = tipo === 'receber' ? db.lancreceber.find(x => x.id === id) : db.lancamentos.find(x => x.id === id);
   if (!reg) { alert('Lançamento não encontrado. Ele pode ter sido excluído.'); return; }
   const quem = tipo === 'receber' ? getClienteNome(reg.cliente) : getFornNome(reg.forn);
@@ -12241,6 +12288,17 @@ function populateBancoSelects() {
   ['l-banco','lr-banco','edit-banco','elr-banco','modal-recebido-banco','modal-pago-banco','mp-banco','mr-banco','cob-bx-banco'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { const val=el.value; el.innerHTML=opts; if(val) el.value=val; }
+  });
+  // Filtros de banco das telas Contas Pagas / Contas Recebidas
+  ['pgf-banco','recf-banco'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = el.value;
+    el.innerHTML = '<option value="">Todas</option>' +
+      db.bancos.map(b => `<option value="${esc(b.id)}">${esc(b.nome)}</option>`).join('') +
+      '<option value="__sem_banco__">(Sem banco informado)</option>' +
+      '<option value="__excluida__">⚠ Conta excluída</option>';
+    if (val) el.value = val;
   });
   // Filtros de conta (rótulo "Todas", e não "Não informado")
   ['fb-banco','fd-banco'].forEach(id => {
@@ -12379,6 +12437,147 @@ async function salvarNovaFormaReceb() {
     _formaSelectOrigem = null;
   }
   closeModal('modal-nova-forma-receb');
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// CORRIGIR LANÇAMENTOS COM CONTA EXCLUÍDA
+// Procura direto no banco de dados (todas as empresas) os lançamentos a
+// pagar, a receber e as transferências que apontam para uma conta que não
+// existe mais no cadastro. Para cada conta excluída permite:
+//   - recriar a conta com o MESMO código (nada nos lançamentos muda), ou
+//   - mover todos esses lançamentos para uma conta existente.
+// ══════════════════════════════════════════════════════════════════════
+var _orfaos = [];
+
+async function _buscarContasExcluidas() {
+  const bancos = await sbFetch('bancos', 'GET', null, '?select=id&limit=10000');
+  if (bancos === null) return null;
+  const existentes = bancos.map(b => b.id);
+  const notIn = existentes.length ? `not.in.(${existentes.map(encodeURIComponent).join(',')})` : 'not.is.null';
+  const [pag, rec, trO, trD] = await Promise.all([
+    sbFetch('lancamentos', 'GET', null, `?banco=${notIn}&banco=neq.&select=id,banco&limit=100000`),
+    sbFetch('lancreceber', 'GET', null, `?banco=${notIn}&banco=neq.&select=id,banco&limit=100000`),
+    sbFetch('transferencias', 'GET', null, `?origem=${notIn}&origem=neq.&select=id,origem&limit=100000`),
+    sbFetch('transferencias', 'GET', null, `?destino=${notIn}&destino=neq.&select=id,destino&limit=100000`)
+  ]);
+  if ([pag, rec, trO, trD].some(r => r === null)) return null;
+  const mapa = {};
+  const conta = (id, campo) => { if (!id) return; (mapa[id] = mapa[id] || { id, pagar:0, receber:0, transf:0 })[campo]++; };
+  pag.forEach(r => conta(r.banco, 'pagar'));
+  rec.forEach(r => conta(r.banco, 'receber'));
+  trO.forEach(r => conta(r.origem, 'transf'));
+  trD.forEach(r => conta(r.destino, 'transf'));
+  return Object.values(mapa).map(o => {
+    const aud = (auditLog || []).find(r => r.tabela === 'bancos' && r.acao === 'DELETE' && r.alvoId === o.id);
+    o.nomeProvavel = aud ? (aud.alvo || '') : '';
+    o.antes = aud && aud.antes ? aud.antes : null;   // cópia completa, se a exclusão já for da versão nova
+    return o;
+  });
+}
+
+async function abrirCorrigirContasExcluidas() {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode usar esta correção.'); return; }
+  openModal('modal-orfaos');
+  const el = document.getElementById('orfaos-lista');
+  el.innerHTML = '<div class="empty-state" style="padding:24px">Procurando lançamentos em todas as empresas...</div>';
+  const lista = await _buscarContasExcluidas();
+  if (lista === null) { el.innerHTML = '<div class="empty-state" style="padding:24px;color:#b91c1c">Não foi possível consultar o banco de dados. Verifique a conexão e tente de novo.</div>'; return; }
+  _orfaos = lista;
+  if (!lista.length) { el.innerHTML = '<div class="empty-state" style="padding:24px">🎉 Nenhum lançamento com conta excluída.</div>'; return; }
+  const optsBancos = db.bancos.map(b => `<option value="${esc(b.id)}">${esc(b.nome)}</option>`).join('');
+  el.innerHTML = lista.map((o, i) => `
+    <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${o.nomeProvavel ? esc(o.nomeProvavel) : 'Conta sem nome registrado'}</div>
+          <div style="font-size:11px;color:#a8a29e;font-family:DM Mono,monospace">código ${esc(o.id)}</div>
+        </div>
+        <div style="font-size:12px;color:#57534e;text-align:right">
+          ${o.pagar} lançamento(s) a pagar · ${o.receber} a receber · ${o.transf} transferência(s)
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:10px;align-items:end">
+        <div class="form-group" style="margin:0"><label>O que fazer</label>
+          <select id="orf-acao-${i}" onchange="_orfAtualizarLinha(${i})">
+            <option value="__recriar__">Recriar a conta (mesmo código)</option>
+            ${optsBancos ? '<optgroup label="Mover para conta existente">' + optsBancos + '</optgroup>' : ''}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0" id="orf-nome-wrap-${i}"><label>Nome da conta</label>
+          <input id="orf-nome-${i}" type="text" value="${esc(o.antes ? o.antes.nome : (o.nomeProvavel || ''))}" placeholder="Ex.: Viacredi" />
+        </div>
+        <div class="form-group" style="margin:0" id="orf-saldo-wrap-${i}"><label>Saldo inicial (R$)</label>
+          <input id="orf-saldo-${i}" type="number" step="0.01" value="${o.antes ? (o.antes.saldo_inicial || 0) : ''}" placeholder="0,00" />
+        </div>
+        <button class="btn btn-primary" onclick="aplicarCorrecaoOrfao(${i})">Aplicar</button>
+      </div>
+      ${o.antes ? '<div style="font-size:11px;color:#166534;margin-top:8px">✓ Os dados completos da conta foram encontrados na auditoria (tipo, agência, conta e saldo inicial serão restaurados).</div>'
+               : '<div style="font-size:11px;color:#92400e;margin-top:8px">⚠ A auditoria não guardou os dados completos desta conta. Confira o <b>saldo inicial</b> antes de aplicar — ele afeta o saldo da conta.</div>'}
+    </div>`).join('');
+}
+
+function _orfAtualizarLinha(i) {
+  const recriar = document.getElementById('orf-acao-' + i).value === '__recriar__';
+  document.getElementById('orf-nome-wrap-' + i).style.visibility = recriar ? '' : 'hidden';
+  document.getElementById('orf-saldo-wrap-' + i).style.visibility = recriar ? '' : 'hidden';
+}
+
+async function aplicarCorrecaoOrfao(i) {
+  const o = _orfaos[i]; if (!o) return;
+  const acao = document.getElementById('orf-acao-' + i).value;
+  const total = o.pagar + o.receber + o.transf;
+  const enc = encodeURIComponent(o.id);
+
+  if (acao === '__recriar__') {
+    const nome = document.getElementById('orf-nome-' + i).value.trim();
+    const saldoTxt = document.getElementById('orf-saldo-' + i).value;
+    if (!nome) { alert('Informe o nome da conta.'); return; }
+    if (saldoTxt === '' && !confirm('O saldo inicial está em branco e será gravado como R$ 0,00. Continuar?')) return;
+    const rec = Object.assign(
+      { tipo:'Conta Corrente', banco:'', agencia:'', conta:'', obs:'' },
+      o.antes || {},
+      { id: o.id, nome, saldo_inicial: parseFloat(saldoTxt) || 0 }
+    );
+    if (!confirm(`Recriar a conta "${nome}" com o código original?\n\nOs ${total} lançamento(s) vinculados voltam a aparecer nela.`)) return;
+    const ok = await sbFetch('bancos', 'POST', rec);
+    if (!ok) { alert('❌ Não foi possível recriar a conta.' + sbErroMsg()); return; }
+  } else {
+    const destino = db.bancos.find(b => b.id === acao);
+    if (!confirm(`Mover ${total} registro(s) para a conta "${destino ? destino.nome : acao}"?\n\nO banco de todos esses lançamentos e transferências será trocado.`)) return;
+    const novo = acao;
+    const r = await Promise.all([
+      o.pagar   ? sbFetch('lancamentos',    'PATCH', { banco: novo },   `?banco=eq.${enc}`)   : true,
+      o.receber ? sbFetch('lancreceber',    'PATCH', { banco: novo },   `?banco=eq.${enc}`)   : true,
+      o.transf  ? sbFetch('transferencias', 'PATCH', { origem: novo },  `?origem=eq.${enc}`)  : true,
+      o.transf  ? sbFetch('transferencias', 'PATCH', { destino: novo }, `?destino=eq.${enc}`) : true
+    ]);
+    if (r.some(x => !x)) { alert('❌ Parte da correção falhou. Abra esta tela de novo para ver o que ainda falta.' + sbErroMsg()); }
+  }
+  await loadAllData();
+  renderPaginaAtual();
+  await abrirCorrigirContasExcluidas();
+  alert('✅ Correção aplicada.');
+}
+
+// Regra do filtro "Banco / Conta" (aceita as opções especiais)
+function _filtroBancoOk(bancoId, filtro) {
+  if (filtro === '__sem_banco__') return !bancoId;
+  if (filtro === '__excluida__') return !!bancoId && !_lookup('banco', db.bancos).get(bancoId);
+  return bancoId === filtro;
+}
+
+// Célula com o banco/conta da parcela (pagamento ou recebimento)
+function _bancoCelula(id) {
+  if (!id) return '<span style="color:#a8a29e;font-size:12px">—</span>';
+  const b = _lookup('banco', db.bancos).get(id);
+  if (!b) return '<span class="badge badge-red" title="A conta usada neste lançamento foi excluída do cadastro de bancos">⚠ Conta excluída</span>';
+  return `<span class="badge badge-gray">${esc(b.nome)}</span>`;
+}
+function _bancoTexto(id) {
+  if (!id) return null;
+  const b = _lookup('banco', db.bancos).get(id);
+  return b ? b.nome : '(conta excluída)';
 }
 
 function getBancoSaldo(banco) {
@@ -14067,6 +14266,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'dtcompra',  label:'Dt. Competência', get:p=>fmtDate(p.dtcompra) },
       { key:'dtpago',    label:'Dt. Pgto',       get:p=>fmtDate(p.dtpago) },
       { key:'forma',     label:'Forma Pgto',     get:p=>p.tipoPag||'—' },
+      { key:'banco',     label:'Banco / Conta',  get:p=>_bancoTexto(p.banco)||'—' },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
       { key:'financeiro',label:'Financeiro',     get:p=>p.financeiro==='sim'?'Sim':'Não' }
     ],
@@ -14093,6 +14293,7 @@ function _pdfDiaColsDef(pagina) {
       { key:'dtvenda',   label:'Dt. Competência', get:p=>fmtDate(p.dtvenda) },
       { key:'dtrecebido',label:'Dt. Recebimento',get:p=>fmtDate(p.dtrecebido) },
       { key:'forma',     label:'Forma Receb.',   get:p=>p.tipoPag||'—' },
+      { key:'banco',     label:'Banco / Conta',  get:p=>_bancoTexto(p.banco)||'—' },
       { key:'nf',        label:'NF',             get:p=>p.nf||'—' },
       { key:'financeiro',label:'Financeiro',     get:p=>p.financeiro==='sim'?'Sim':'Não' }
     ],
@@ -15378,7 +15579,7 @@ function clearCustosFixosFiltros() {
 
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-10-20 · auditoria-desfazer';
+window.APP_BUILD = '2026-10-20 · filtro-banco-orfaos';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
@@ -16924,6 +17125,7 @@ function editarDoDetalhe(tabela, id) {
 }
 
 async function excluirDoDetalhe(tabela, id) {
+  if (!exigirAcao('acao:excluir')) return;
   if (tabela === 'dfc') {
     const l = db.dfc_lans.find(x => x.id === id);
     if (!l) { alert('Lançamento não encontrado.'); return; }
@@ -17101,10 +17303,8 @@ function imprimirFluxoDiario() {
 }
 
 
-document.querySelectorAll('.modal-overlay').forEach(ov => {
-  if (ov.dataset && ov.dataset.naoFechar) return;   // aviso bloqueante
-  ov.addEventListener('click', e => { if(e.target === ov) { if (ov.id) closeModal(ov.id); else ov.classList.remove('open'); } });
-});
+// As janelas suspensas NÃO fecham ao clicar fora delas nem com a tecla Esc:
+// só pelo botão Fechar/Cancelar/✕, para não perder o que foi digitado.
 </script>
 </body>
 </html>
