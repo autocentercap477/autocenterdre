@@ -1914,9 +1914,9 @@ tr.cob-dia-vazio > td {
 
         <div class="table-scroll" style="max-height:none">
           <table><thead><tr>
-            <th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Detalhe</th>
+            <th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Tabela</th><th>Registro</th><th>Detalhe</th><th>Desfazer</th>
           </tr></thead><tbody id="tb-auditoria">
-            <tr><td colspan="6" class="empty-state">Nenhum registro.</td></tr>
+            <tr><td colspan="7" class="empty-state">Nenhum registro.</td></tr>
           </tbody></table>
         </div>
         <p style="font-size:11px;color:#a8a29e;margin-top:12px;">
@@ -4309,6 +4309,13 @@ async function sbFetch(table, method='GET', body=null, params='') {
   // depois não haveria mais como saber o que foi apagado.
   const alvoAntes = (method === 'DELETE' || method === 'PATCH')
     ? _auditAlvo(table, params) : null;
+  // Cópia completa do registro como está no banco, ANTES da gravação.
+  // É o que permite "Desfazer" a ação depois, pela tela de Auditoria.
+  // Busca no servidor (e não na memória) porque várias telas alteram o
+  // objeto em memória antes de mandar a gravação.
+  if (alvoAntes && alvoAntes.id && table !== 'config' && AUDIT_TABELAS[table]) {
+    alvoAntes.snap = await _auditSnapshot(table, alvoAntes.id);
+  }
 
   // [OTIMIZADO] Qualquer gravação invalida os índices e o cache de parcelas.
   if (gravacao && typeof bumpDbVer === 'function') bumpDbVer();
@@ -12630,9 +12637,48 @@ async function updateBanco() {
   await sbFetch('bancos','PATCH',{nome:b.nome,tipo:b.tipo,banco:b.banco,agencia:b.agencia,conta:b.conta,saldo_inicial:b.saldo_inicial,obs:b.obs},`?id=eq.${id}`);
   closeModal('modal-banco'); renderBancos(); populateBancoSelects(); renderFluxoBancoDiario(); renderDashboard();
 }
+// [PROTEÇÃO] Uma conta só pode ser excluída se nenhum lançamento, transferência,
+// pedido cancelado ou reposição apontar para ela. A verificação é feita direto
+// no banco de dados (e não só na memória), porque fora do modo "Consolidado" a
+// memória só tem os lançamentos da empresa ativa — e a conta é compartilhada
+// entre todas as empresas.
 async function deleteBanco(id) {
-  if(!confirm('Excluir esta conta?')) return;
-  await sbFetch('bancos','DELETE',null,`?id=eq.${id}`);
+  const b = db.bancos.find(x => x.id === id);
+  const nomeConta = b ? b.nome : 'esta conta';
+  const enc = encodeURIComponent(id);
+  const consultas = [
+    { nome:'Lançamentos a pagar',   tabela:'lancamentos',        filtro:`banco=eq.${enc}` },
+    { nome:'Lançamentos a receber', tabela:'lancreceber',        filtro:`banco=eq.${enc}` },
+    { nome:'Transferências',        tabela:'transferencias',     filtro:`or=(origem.eq.${enc},destino.eq.${enc})` },
+    { nome:'Pedidos cancelados',    tabela:'pedidos_cancelados', filtro:`banco=eq.${enc}` },
+    { nome:'Reposições',            tabela:'reposicoes',         filtro:`banco=eq.${enc}` }
+  ];
+  const resultados = await Promise.all(consultas.map(c =>
+    sbFetch(c.tabela, 'GET', null, `?${c.filtro}&select=id&limit=100000`)));
+
+  // Se alguma consulta falhou, não dá para garantir que a conta está livre: não exclui.
+  if (resultados.some(r => r === null)) {
+    alert(`Não foi possível verificar se a conta "${nomeConta}" está em uso, por isso ela NÃO foi excluída.` + sbErroMsg());
+    return;
+  }
+
+  const usos = consultas
+    .map((c, i) => ({ nome: c.nome, qtd: resultados[i].length }))
+    .filter(u => u.qtd > 0);
+  if (usos.length) {
+    const total = usos.reduce((a, u) => a + u.qtd, 0);
+    alert(
+      `Não é possível excluir a conta "${nomeConta}": existem ${total} registro(s) vinculados a ela.\n\n` +
+      usos.map(u => `  - ${u.qtd} em ${u.nome}`).join('\n') +
+      `\n\nExcluir a conta deixaria esses registros sem conta e o saldo e o fluxo de caixa ficariam errados.` +
+      `\nSe a conta não é mais usada, renomeie-a (ex.: "${nomeConta} - INATIVA") em vez de excluir.`
+    );
+    return;
+  }
+
+  if (!confirm(`Excluir a conta "${nomeConta}"?\n\nEla não tem nenhum lançamento vinculado.`)) return;
+  const ok = await sbFetch('bancos','DELETE',null,`?id=eq.${enc}`);
+  if (!ok) { alert('❌ Não foi possível excluir a conta.' + sbErroMsg()); return; }
   db.bancos=db.bancos.filter(x=>x.id!==id);
   renderBancos(); populateBancoSelects(); renderFluxoBancoDiario(); renderDashboard();
 }
@@ -15332,7 +15378,7 @@ function clearCustosFixosFiltros() {
 
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-10-14 · permissao-editar-estornar';
+window.APP_BUILD = '2026-10-20 · auditoria-desfazer';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
@@ -16229,6 +16275,7 @@ async function restaurarModelosPadrao() {
 // ══════════════════════════════════════════════════════════════════════
 const AUDIT_PREFIX = 'audit:';
 var auditLog = [];
+var _desfazendoAudit = null;   // id do registro de auditoria que está sendo desfeito
 var _auditEmCurso = false;
 
 // Nome amigável de cada tabela, e onde ela mora em memória
@@ -16285,6 +16332,21 @@ function _auditAlvo(tabela, params) {
   return { id, desc };
 }
 
+// Lê o registro direto do servidor para guardar a versão anterior à gravação.
+async function _auditSnapshot(tabela, id) {
+  try {
+    const rows = await sbFetch(tabela, 'GET', null, `?id=eq.${encodeURIComponent(id)}&limit=1`);
+    if (rows && rows[0]) return rows[0];
+  } catch (e) {}
+  // Sem resposta do servidor: usa a cópia em memória, se houver
+  const cfg = AUDIT_TABELAS[tabela];
+  if (cfg && cfg.db && Array.isArray(db[cfg.db])) {
+    const reg = db[cfg.db].find(x => x && x.id === id);
+    if (reg) return JSON.parse(JSON.stringify(reg));
+  }
+  return null;
+}
+
 // Resume o que foi enviado ao banco
 function _auditResumo(tabela, metodo, body) {
   const o = Array.isArray(body) ? body[0] : body;
@@ -16328,10 +16390,20 @@ async function registrarAuditoria(tabela, metodo, params, body, alvoAntes) {
       resumo: (metodo === 'DELETE') ? (alvo.desc || '') : _auditResumo(tabela, metodo, body),
       empresa: (typeof empresaAtual === 'function' && empresaAtual()) ? empresaNome(empresaAtual()) : ''
     };
+    // Dados para o "Desfazer"
+    if ((metodo === 'DELETE' || metodo === 'PATCH') && alvo.snap) reg.antes = alvo.snap;
+    if (metodo === 'PATCH' && body && !Array.isArray(body)) reg.campos = Object.keys(body);
+    if (metodo === 'POST') {
+      const lista = Array.isArray(body) ? body : [body];
+      const ids = lista.map(o => o && o.id).filter(Boolean);
+      if (ids.length) reg.criados = ids;
+    }
+    if (_desfazendoAudit) reg.desfazendo = _desfazendoAudit;
+    reg.key = AUDIT_PREFIX + reg.ts + ':' + reg.id;
     auditLog.unshift(reg);
     await sbFetch('config', 'POST', {
       id: uid(),
-      key: AUDIT_PREFIX + reg.ts + ':' + reg.id,
+      key: reg.key,
       value: JSON.stringify(reg)
     });
     if (paginaVisivel('auditoria')) renderAuditoria();
@@ -16398,26 +16470,115 @@ function renderAuditoria(repopular) {
 
   const tb = document.getElementById('tb-auditoria');
   if (!lista.length) {
-    tb.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum registro com os filtros atuais.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum registro com os filtros atuais.</td></tr>';
     return;
   }
   const rotulo = { POST: 'CRIOU', PATCH: 'ALTEROU', DELETE: 'EXCLUIU' };
+  const ehAdmin = currentUser && currentUser.role === 'admin';
   tb.innerHTML = lista.slice(0, LIMITE_LINHAS).map(r => {
     const d = new Date(r.ts);
     const quando = isNaN(d) ? esc(r.ts)
       : `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    return `<tr>
+    return `<tr${r.desfeito ? ' style="opacity:.55"' : ''}>
       <td style="font-family:DM Mono,monospace;font-size:12px;white-space:nowrap">${quando}</td>
       <td><b>${esc(r.usuario)}</b>${r.empresa ? `<br><span style="font-size:11px;color:#a8a29e">${esc(r.empresa)}</span>` : ''}</td>
-      <td><span class="aud-acao aud-${esc(r.acao)}">${rotulo[r.acao] || esc(r.acao)}</span></td>
+      <td><span class="aud-acao aud-${esc(r.acao)}">${rotulo[r.acao] || esc(r.acao)}</span>${r.desfazendo ? '<br><span style="font-size:10px;color:#7c3aed;font-weight:700">↩ desfazendo</span>' : ''}</td>
       <td><span class="aud-tabela">${esc(_auditNomeTabela(r.tabela))}</span></td>
       <td style="font-size:12px">${esc(r.alvo) || '<span style="color:#a8a29e">—</span>'}</td>
       <td style="font-size:12px;color:#57534e">${esc(r.resumo) || '<span style="color:#a8a29e">—</span>'}</td>
+      <td style="white-space:nowrap">${_auditBotaoDesfazer(r, ehAdmin)}</td>
     </tr>`;
   }).join('') + (lista.length > LIMITE_LINHAS
-    ? `<tr><td colspan="6" style="text-align:center;padding:14px;background:#fffbeb;color:#92400e;font-size:12px">
+    ? `<tr><td colspan="7" style="text-align:center;padding:14px;background:#fffbeb;color:#92400e;font-size:12px">
          Mostrando os ${LIMITE_LINHAS} mais recentes de <strong>${lista.length}</strong>. Use os filtros para refinar.</td></tr>`
     : '');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DESFAZER UMA AÇÃO DA AUDITORIA (somente administrador)
+//   Excluiu → recria o registro exatamente como era, com o mesmo ID
+//             (assim os lançamentos ligados a ele voltam a funcionar).
+//   Alterou → devolve os campos alterados ao valor anterior.
+//   Criou   → exclui o que foi criado.
+// Só funciona para ações registradas depois desta atualização, porque
+// as antigas não guardaram a cópia do registro.
+// ══════════════════════════════════════════════════════════════════════
+function _auditPodeDesfazer(r) {
+  const cfg = AUDIT_TABELAS[r.tabela];
+  if (!cfg || !cfg.db) return false;
+  if (r.acao === 'DELETE') return !!r.antes;
+  if (r.acao === 'PATCH')  return !!(r.antes && r.campos && r.campos.length);
+  if (r.acao === 'POST')   return !!(r.criados && r.criados.length);
+  return false;
+}
+
+function _auditBotaoDesfazer(r, ehAdmin) {
+  if (r.desfeito) {
+    return `<span style="font-size:11px;color:#7c3aed;font-weight:700" title="Desfeito por ${esc(r.desfeito.usuario || '')}">↩ Desfeito<br><span style="font-weight:400;color:#a8a29e">${r.desfeito.ts ? fmtTs(r.desfeito.ts) : ''}</span></span>`;
+  }
+  if (!ehAdmin) return '<span style="color:#d6d3d1">—</span>';
+  if (!_auditPodeDesfazer(r)) {
+    return '<span style="color:#d6d3d1;font-size:11px" title="Esta ação foi registrada antes da função Desfazer existir (ou não guarda a cópia do registro), por isso não pode ser desfeita por aqui.">—</span>';
+  }
+  const txt = { DELETE: '↩ Restaurar', PATCH: '↩ Desfazer', POST: '↩ Desfazer' }[r.acao];
+  return `<button class="btn btn-secondary btn-sm" style="color:#7c3aed;border-color:#ddd6fe" onclick="desfazerAuditoria('${esc(r.id)}')">${txt}</button>`;
+}
+
+async function desfazerAuditoria(auditId) {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode desfazer ações.'); return; }
+  const r = auditLog.find(x => x.id === auditId);
+  if (!r || r.desfeito || !_auditPodeDesfazer(r)) return;
+
+  const nomeTab = _auditNomeTabela(r.tabela);
+  const quem = r.alvo || (r.antes ? _auditDescrever(r.tabela, r.antes) : '') || r.resumo || 'registro';
+
+  // Avisa se o mesmo registro foi mexido depois desta ação
+  const idsAlvo = r.acao === 'POST' ? r.criados : [r.alvoId];
+  const depois = auditLog.filter(x => x.ts > r.ts && x.tabela === r.tabela && !x.desfeito &&
+    (idsAlvo.includes(x.alvoId) || (x.criados || []).some(i => idsAlvo.includes(i))));
+  const avisoDepois = depois.length
+    ? `\n\nATENÇÃO: este registro teve ${depois.length} outra(s) ação(ões) depois desta. Desfazer agora pode sobrescrever o que foi feito depois.`
+    : '';
+
+  let pergunta;
+  if (r.acao === 'DELETE') pergunta = `Restaurar o registro excluído em ${nomeTab}?\n\n${quem}\n\nEle volta exatamente como estava, com o mesmo código, e os lançamentos ligados a ele voltam a funcionar.`;
+  else if (r.acao === 'PATCH') pergunta = `Desfazer a alteração em ${nomeTab}?\n\n${quem}\n\nOs campos alterados (${r.campos.join(', ')}) voltam ao valor anterior.`;
+  else pergunta = `Desfazer a criação em ${nomeTab}?\n\n${quem}\n\nO(s) ${r.criados.length} registro(s) criado(s) nesta ação será(ão) EXCLUÍDO(S).`;
+  if (!confirm(pergunta + avisoDepois)) return;
+
+  let ok = false;
+  _desfazendoAudit = r.id;
+  try {
+    if (r.acao === 'DELETE') {
+      const existe = await sbFetch(r.tabela, 'GET', null, `?id=eq.${encodeURIComponent(r.antes.id)}&select=id&limit=1`);
+      if (existe && existe.length) {
+        alert('Este registro já existe novamente no banco de dados (talvez já tenha sido restaurado). Nada foi feito.');
+        return;
+      }
+      ok = !!(await sbFetch(r.tabela, 'POST', r.antes));
+    } else if (r.acao === 'PATCH') {
+      const volta = {};
+      r.campos.forEach(k => { if (k !== 'id') volta[k] = Object.prototype.hasOwnProperty.call(r.antes, k) ? r.antes[k] : null; });
+      ok = !!(await sbFetch(r.tabela, 'PATCH', volta, `?id=eq.${encodeURIComponent(r.alvoId)}`));
+    } else {
+      const ids = r.criados.map(encodeURIComponent).join(',');
+      ok = !!(await sbFetch(r.tabela, 'DELETE', null, `?id=in.(${ids})`));
+    }
+  } finally {
+    _desfazendoAudit = null;
+  }
+  if (!ok) { alert('❌ Não foi possível desfazer a ação.' + sbErroMsg()); return; }
+
+  // Marca a ação como desfeita, para não ser desfeita duas vezes
+  r.desfeito = { ts: new Date().toISOString(), usuario: currentUser.nome || currentUser.user || '' };
+  if (r.key) {
+    await sbFetch('config', 'PATCH', { value: JSON.stringify(r) }, `?key=eq.${encodeURIComponent(r.key)}`);
+  }
+
+  // Recarrega tudo para todas as telas refletirem a restauração
+  await loadAllData();
+  renderPaginaAtual();
+  alert('✅ Ação desfeita com sucesso.');
 }
 
 async function limparAuditoriaAntiga() {
