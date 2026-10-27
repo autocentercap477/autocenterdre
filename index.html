@@ -4914,6 +4914,7 @@ function showPage(p) {
 // quando todos os dados em memória foram recarregados.
 function renderPaginaAtual() {
   const p = _paginaAtual || 'dashboard';
+  if (currentUser && currentUser.role !== 'admin' && !(currentUser.pages || []).includes(p)) { applyNavPermissions(); return; }
   const nav = document.getElementById('nav-' + p) || document.getElementById('nav-item-' + p);
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
   const pg = document.getElementById('page-' + p);
@@ -9187,10 +9188,29 @@ function applyNavPermissions() {
     const header = grp.previousElementSibling;
     if(header) header.style.display = visivel ? '' : 'none';
   });
-  // Se dashboard não permitido, mostrar primeira página permitida
+  // Se o Dashboard não está liberado, abre a primeira tela permitida
+  // (na ordem do menu) e nunca deixa o Dashboard visível.
   if (!isAdmin && allowed && !allowed.includes('dashboard')) {
-    const first = document.querySelector('.nav-item[style=""]');
-    if (first) first.click();
+    const dash = document.getElementById('page-dashboard');
+    if (dash) dash.classList.remove('active');
+    const navDash = document.getElementById('nav-dashboard');
+    if (navDash) navDash.classList.remove('active');
+    let primeira = null;
+    document.querySelectorAll('.nav-item, .nav-sub-item').forEach(item => {
+      if (primeira) return;
+      const m = (item.getAttribute('onclick') || '').match(/showPage\('([\w-]+)'\)/);
+      if (m && allowed.includes(m[1]) && !paginaOculta(m[1])) primeira = { pg: m[1], el: item };
+    });
+    if (primeira) {
+      showPage(primeira.pg);
+      primeira.el.classList.add('active');
+    } else {
+      _paginaAtual = '';
+      const main = document.querySelector('.main');
+      if (main && !document.getElementById('sem-permissao-msg')) {
+        main.insertAdjacentHTML('afterbegin', '<div id="sem-permissao-msg" class="empty-state" style="padding:48px">Seu usuário ainda não tem nenhuma tela liberada. Peça ao administrador para liberar o acesso em Gestão de Usuários.</div>');
+      }
+    }
   }
 }
 
