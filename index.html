@@ -6,7 +6,7 @@
 <title>C@P Consultoria — Sistema de Gestão de Compras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <!-- [OTIMIZADO] pdf.js agora carrega sob demanda (ver ensurePdfJs) -->
@@ -957,6 +957,88 @@ tr.cob-dia-vazio > td {
   color:#a8a29e; margin:16px 0 9px;
 }
 .fd-det-meta { font-size:11px; color:#a8a29e; margin-top:3px; }
+/* ══════════════════════════════════════════════════════════
+   FONTE DOS NÚMEROS — Inter com algarismos tabulares
+   (todos os dígitos com a mesma largura: as colunas alinham
+   e os valores ficam muito mais legíveis que em fonte mono)
+   ══════════════════════════════════════════════════════════ */
+:root { --num-font: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif; }
+#dre-tabela-wrap .dfc-table td,
+#dfc-tabela-wrap .dfc-table td,
+#ac-tabela-wrap .dfc-table td,
+.fd-tabela td,
+#fluxo-diario-kpis .kpi-val,
+#fluxo-banco-wrap .dfc-table td,
+#fluxo-banco-wrap .kpi-val,
+.banco-saldo-val,
+.estq-tabela td, .estq-tabela input {
+  font-family: var(--num-font) !important;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'cv11' 1 !important;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em !important;
+}
+#dre-tabela-wrap .dfc-table td { font-size: 12px; font-weight: 500; padding-top: 4px; padding-bottom: 4px; }
+#dre-tabela-wrap .dfc-table td:first-child { font-family: 'Sora', sans-serif !important; font-feature-settings: normal !important; letter-spacing: .1px !important; }
+#dre-tabela-wrap .dre-cat-row td { font-size: 11px; font-weight: 400; }
+#dre-tabela-wrap td.dre-pct { font-size: 10.5px !important; }
+#dre-tabela-wrap .dre-row-subtotal td, #dre-tabela-wrap .dre-row-final td { font-weight: 700; }
+#dfc-tabela-wrap .dfc-table td { font-size: 12.5px; font-weight: 500; }
+#dfc-tabela-wrap .dfc-table td:first-child { font-family: 'Plus Jakarta Sans', sans-serif !important; font-feature-settings: normal !important; }
+.fd-tabela td { font-size: 12.5px; font-weight: 500; }
+.fd-tabela td.fd-res { font-weight: 700; }
+.fd-tabela td.fd-dia { font-weight: 700; }
+#fluxo-banco-wrap .dfc-table td { font-size: 12.5px; font-weight: 500; }
+#fluxo-banco-wrap .dfc-table td:first-child { font-weight: 700; }
+.banco-saldo-val { font-size: 17px; font-weight: 700; }
+
+/* ── Saldos de estoque (modal da Variação do Estoque) ── */
+.estq-tabela { width: 100%; border-collapse: collapse; }
+.estq-tabela th { background:#faf9f7; font-size:11px; font-weight:700; color:#57534e; text-transform:uppercase; padding:7px 6px; text-align:right; border-bottom:2px solid #e7e5e4; white-space:nowrap; }
+.estq-tabela th:first-child, .estq-tabela td:first-child { text-align:left; font-family:'Plus Jakarta Sans',sans-serif !important; font-feature-settings:normal !important; white-space:nowrap; font-weight:700; font-size:12px; color:#44403c; }
+.estq-tabela td { padding:5px 4px; text-align:right; font-size:12.5px; border-bottom:1px solid #f5f4f2; }
+.estq-tabela input { width:100%; min-width:92px; text-align:right; padding:6px 7px; font-size:12.5px; border:1px solid #e7e5e4; border-radius:6px; background:#fff; }
+.estq-tabela input:focus { border-color:#ea580c; outline:none; }
+.estq-tabela tr.estq-var td { font-weight:700; background:#fff8f3; }
+.estq-auto { color:#78716c; }
+.dre-estq-btn { margin-left:8px; font-size:11px; padding:2px 8px; border-radius:6px; border:1px solid #fed7aa; background:#fff1e6; color:#c2410c; cursor:pointer; font-family:inherit; font-weight:600; }
+.dre-estq-btn:hover { background:#ea580c; color:#fff; }
+
+/* ══════════════════════════════════════════════════════════
+   PAINEL EXECUTIVO (Dashboard)
+   ══════════════════════════════════════════════════════════ */
+.exec-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:4px 0 12px; }
+.exec-head h2 { font-family:'Sora',sans-serif; font-size:17px; font-weight:700; color:#1f2937; }
+.exec-head .exec-periodo { font-size:12px; color:#78716c; }
+.exec-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+@media (max-width:1100px) { .exec-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.exec-kpi { background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px 16px; min-width:0; }
+.exec-kpi-lbl { font-size:11px; font-weight:600; color:#78716c; text-transform:uppercase; letter-spacing:.4px; display:flex; align-items:center; gap:6px; }
+.exec-kpi-val { font-family:var(--num-font); font-feature-settings:'tnum' 1; font-size:23px; font-weight:700; color:#1f2937; margin-top:6px; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.exec-kpi-sub { font-size:11.5px; color:#78716c; margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.exec-delta { font-family:var(--num-font); font-feature-settings:'tnum' 1; font-weight:700; font-size:11px; padding:1px 7px; border-radius:20px; }
+.exec-delta.bom { background:#dcfce7; color:#166534; }
+.exec-delta.ruim { background:#fee2e2; color:#991b1b; }
+.exec-delta.neutro { background:#f5f5f4; color:#57534e; }
+.exec-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; margin-bottom:16px; }
+.exec-grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:16px; }
+@media (max-width:1100px) { .exec-grid, .exec-grid3 { grid-template-columns:1fr; } }
+.exec-card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px 18px; min-width:0; }
+.exec-card-title { font-size:12px; font-weight:700; color:#44403c; margin-bottom:12px; display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.exec-card-title span { font-weight:500; color:#a8a29e; font-size:11px; }
+.exec-bar-row { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) auto; align-items:center; gap:10px; padding:5px 0; font-size:12px; }
+.exec-bar-nome { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#44403c; }
+.exec-bar-trilho { height:8px; background:#f5f4f2; border-radius:4px; overflow:hidden; }
+.exec-bar-fill { height:100%; border-radius:4px; }
+.exec-bar-val { font-family:var(--num-font); font-feature-settings:'tnum' 1; font-weight:600; color:#1f2937; white-space:nowrap; text-align:right; min-width:88px; }
+.exec-proj-linha { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid #f5f4f2; font-size:13px; color:#44403c; }
+.exec-proj-linha b { font-family:var(--num-font); font-feature-settings:'tnum' 1; }
+.exec-proj-total { display:flex; justify-content:space-between; padding:10px 0 2px; font-size:14px; font-weight:700; }
+.exec-alerta { display:flex; gap:10px; align-items:flex-start; padding:9px 11px; border-radius:9px; margin-bottom:8px; font-size:12.5px; line-height:1.45; }
+.exec-alerta.critico { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+.exec-alerta.atencao { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+.exec-alerta.ok { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+.exec-alerta-ico { font-size:15px; line-height:1.2; }
+
 </style>
 </head>
 <body>
@@ -2732,6 +2814,31 @@ tr.cob-dia-vazio > td {
         </div>
       </div>
 
+      <!-- ══ PAINEL EXECUTIVO ══ -->
+      <div id="exec-painel">
+        <div class="exec-head"><h2>📊 Visão executiva</h2><div class="exec-periodo" id="exec-periodo"></div></div>
+        <div class="exec-kpis" id="exec-kpis"></div>
+        <div class="exec-grid">
+          <div class="exec-card">
+            <div class="exec-card-title">Evolução dos últimos 12 meses <span>pela data da venda/compra</span></div>
+            <div style="position:relative;height:280px"><canvas id="chart-exec-evolucao" aria-label="Faturamento, compras e despesas e resultado nos últimos 12 meses"></canvas></div>
+          </div>
+          <div class="exec-card">
+            <div class="exec-card-title">Pontos de atenção</div>
+            <div id="exec-alertas"></div>
+          </div>
+        </div>
+        <div class="exec-grid3">
+          <div class="exec-card"><div class="exec-card-title">Caixa projetado — próximos 30 dias</div><div id="exec-projecao"></div></div>
+          <div class="exec-card"><div class="exec-card-title">Contas a receber por atraso <span>saldo em aberto</span></div><div id="exec-aging"></div></div>
+          <div class="exec-card"><div class="exec-card-title">Maiores clientes <span>faturamento do período</span></div><div id="exec-top-clientes"></div></div>
+        </div>
+        <div class="exec-grid">
+          <div class="exec-card"><div class="exec-card-title">Para onde vai o dinheiro <span>compras e despesas por categoria</span></div><div id="exec-top-despesas"></div></div>
+          <div class="exec-card"><div class="exec-card-title">A pagar nos próximos 7 dias <span id="exec-proximos-total"></span></div><div id="exec-proximos"></div></div>
+        </div>
+      </div>
+
       <!-- Medidores de Metas do DRE (Venda, CPV, Margem, Lucro) -->
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
@@ -3117,6 +3224,31 @@ tr.cob-dia-vazio > td {
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-cliente')">Cancelar</button>
       <button class="btn btn-primary" onclick="updateCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SALDOS DE ESTOQUE ══ -->
+<div class="modal-overlay" id="modal-estoque">
+  <div class="modal" style="width:1240px;max-width:97vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="modal-title" style="margin-bottom:0;">📦 Saldos de estoque — <span id="estq-ano"></span></div>
+      <button onclick="closeModal('modal-estoque')" style="background:none;border:none;cursor:pointer;color:#a8a29e;font-size:22px;line-height:1;padding:4px;" title="Fechar">✕</button>
+    </div>
+    <p style="font-size:12.5px;color:#57534e;margin-bottom:14px;">
+      Informe o <b>saldo inicial</b> de janeiro e o <b>saldo final</b> de cada mês. O saldo inicial dos outros meses é o saldo final do mês anterior,
+      e a <b>variação</b> é Saldo final − Saldo inicial. No DRE, estoque que <b>aumentou reduz o CPV</b> e estoque que <b>diminuiu aumenta o CPV</b>
+      (CPV = Estoque inicial + Compras − Estoque final).
+    </p>
+    <div style="overflow-x:auto;">
+      <table class="estq-tabela">
+        <thead><tr><th></th><th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Set</th><th>Out</th><th>Nov</th><th>Dez</th></tr></thead>
+        <tbody id="estq-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-estoque')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarSaldosEstoque()">Salvar saldos</button>
     </div>
   </div>
 </div>
@@ -8506,6 +8638,7 @@ function renderDashboard() {
 
   renderDashCharts();
   renderMetasGauges();
+  renderPainelExecutivo();
 }
 
 // ══════════════════════════════════════════
@@ -8629,7 +8762,7 @@ function calcularDreParaMetas(ano) {
   if (varEstId) {
     const mapaAno = dreVarEstoque[ano] || {};
     for (let m=1;m<=12;m++){
-      const variacao = parseFloat(mapaAno[m]) || 0;
+      const variacao = ajusteCpvEstoque(ano, m);
       if (valoresMes[m][varEstId] !== undefined) valoresMes[m][varEstId] = 0;
       if (cpvId && valoresMes[m][cpvId] !== undefined) valoresMes[m][cpvId] += variacao;
     }
@@ -11732,6 +11865,7 @@ async function carregarVarEstoque() {
       try { dreVarEstoque[ano] = JSON.parse(c.value) || {}; } catch(e) { dreVarEstoque[ano] = {}; }
     });
   } catch(e) { console.error('Erro ao carregar variação de estoque:', e); }
+  try { await carregarSaldosEstoque(); } catch(e) { console.error('Erro ao carregar saldos de estoque:', e); }
 }
 
 async function salvarVarEstoque(ano) {
@@ -11885,7 +12019,7 @@ function renderDre() {
   if (varEstGrupoId && valoresMes[1][varEstGrupoId] !== undefined) {
     const mapaAno = dreVarEstoque[ano] || {};
     for (let m = 1; m <= 12; m++) {
-      const variacao = parseFloat(mapaAno[m]) || 0;
+      const variacao = ajusteCpvEstoque(ano, m);
       // zera a contribuição própria da linha de variação
       valoresMes[m][varEstGrupoId] = 0;
       // soma no CPV, se o grupo do CPV foi identificado
@@ -12046,16 +12180,13 @@ function renderDre() {
   // Linha da Variação de Estoque: células editáveis em formato contábil (digite
   // + ou −). O valor é gravado e somado ao CPV automaticamente.
   const linhaVarEstoque = (g) => {
-    const mapaAno = dreVarEstoque[ano] || {};
     const cells = mesesVisiveis.map(mes => {
-      const val = parseFloat(mapaAno[mes]) || 0;
-      const disp = fmtContabil(val);
-      const cor = val < 0 ? '#dc2626' : '#1f2937';
-      return `<td style="padding:2px 4px"><input type="text" inputmode="decimal" value="${disp}" onchange="setVarEstoque(${mes}, this.value)" onfocus="this.select()" title="Variação de estoque do mês (+ soma ao CPV, − reduz o CPV)" placeholder="0,00" style="width:100%;min-width:88px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;padding:5px 7px;border:1px solid #e7e5e4;border-radius:6px;background:#fff;color:${cor}" /></td>` + pctVazio();
+      const v = variacaoEstoqueExibida(ano, mes);
+      return `<td class="dre-cell-click" onclick="abrirModalEstoque()" title="Saldo final − saldo inicial. Clique para informar os saldos de estoque">${fmtDreVal(v)}</td>` + pctVazio();
     }).join('');
-    let soma = 0; mesesVisiveis.forEach(mes => { soma += parseFloat(mapaAno[mes]) || 0; });
-    const totalCell = `<td class="dfc-col-total">${Math.abs(soma) < 0.005 ? '<span class="dfc-val-zero">—</span>' : (soma > 0 ? '+ ' : '− ') + fmtBRL(Math.abs(soma))}</td>`;
-    return `<tr class="dfc-row-sub"><td>${g.nome}</td>${cells}${mostrarAcum ? totalCell + pctVazio(true) : ''}</tr>`;
+    let soma = 0; mesesVisiveis.forEach(mes => { soma += variacaoEstoqueExibida(ano, mes); });
+    const totalCell = `<td class="dfc-col-total">${fmtDreVal(soma)}</td>`;
+    return `<tr class="dfc-row-sub"><td>${g.nome}<button type="button" class="dre-estq-btn" onclick="abrirModalEstoque()" title="Informar saldo inicial e saldo final do estoque">📦 Saldos</button></td>${cells}${mostrarAcum ? totalCell + pctVazio(true) : ''}</tr>`;
   };
 
   const linhasHtml = grupos.map(g => {
@@ -16000,8 +16131,336 @@ function clearCustosFixosFiltros() {
 }
 
 
+// ══════════════════════════════════════════════════════════════════════
+// SALDOS DE ESTOQUE → VARIAÇÃO DO ESTOQUE (DRE)
+// ----------------------------------------------------------------------
+// Igual à planilha: Saldo Inicial de cada mês = Saldo Final do mês
+// anterior; Variação = Saldo Final − Saldo Inicial.
+// No CPV entra pela regra contábil (CPV = Estoque Inicial + Compras −
+// Estoque Final): estoque que AUMENTOU reduz o CPV; que DIMINUIU aumenta.
+// Gravado na tabela `config` (key = estoque_saldos:<ano>).
+// Meses sem saldo final informado usam o valor manual antigo, se houver.
+// ══════════════════════════════════════════════════════════════════════
+var dreEstoqueSaldos = {};   // ano -> { inicial, finais: { mes: valor } }
+var _estqAnoEdit = null;
+
+function _estqNum(v) { return (v === null || v === undefined || v === '') ? null : Number(v); }
+
+function _estqIniPadraoJan(ano) {
+  const p = dreEstoqueSaldos[ano - 1];
+  return p && p.finais ? _estqNum(p.finais[12]) : null;
+}
+
+function estoqueDoMes(ano, m) {
+  const s = dreEstoqueSaldos[ano];
+  if (!s || !s.finais) return null;
+  const fin = _estqNum(s.finais[m]);
+  if (fin === null) return null;
+  let ini;
+  if (m === 1) { ini = _estqNum(s.inicial); if (ini === null) ini = _estqIniPadraoJan(ano); }
+  else ini = _estqNum(s.finais[m - 1]);
+  if (ini === null) return null;
+  return { inicial: ini, final: fin, variacao: fin - ini };
+}
+
+// Quanto entra no CPV do mês (positivo aumenta o CPV)
+function ajusteCpvEstoque(ano, m) {
+  const e = estoqueDoMes(ano, m);
+  if (e) return -e.variacao;
+  return parseFloat((dreVarEstoque[ano] || {})[m]) || 0;
+}
+// Variação exibida na linha do DRE (Saldo Final − Saldo Inicial)
+function variacaoEstoqueExibida(ano, m) { return -ajusteCpvEstoque(ano, m); }
+
+async function carregarSaldosEstoque() {
+  const rows = await sbFetch('config', 'GET', null, '?key=like.estoque_saldos:*');
+  if (rows === null) return;
+  dreEstoqueSaldos = {};
+  rows.forEach(c => {
+    const ano = parseInt(String(c.key).split(':')[1]);
+    try { const o = JSON.parse(c.value) || {}; dreEstoqueSaldos[ano] = { inicial: o.inicial ?? null, finais: o.finais || {} }; } catch(e) {}
+  });
+}
+
+function abrirModalEstoque() {
+  const ano = parseInt(document.getElementById('dre-ano').value);
+  if (!ano) { alert('Selecione um ano no DRE.'); return; }
+  _estqAnoEdit = ano;
+  document.getElementById('estq-ano').textContent = ano;
+  const s = dreEstoqueSaldos[ano] || { inicial: null, finais: {} };
+  const iniPad = _estqIniPadraoJan(ano);
+  const meses12 = Array.from({ length: 12 }, (_, i) => i + 1);
+  const valInp = v => (v === null || v === undefined) ? '' : fmtContabil(v) || '0,00';
+  document.getElementById('estq-body').innerHTML =
+    `<tr><td>Saldo inicial</td>${meses12.map(m => m === 1
+        ? `<td><input type="text" inputmode="decimal" id="estq-ini" value="${valInp(_estqNum(s.inicial))}" placeholder="${iniPad !== null ? fmtContabil(iniPad) || '0,00' : '0,00'}" oninput="_estqRecalc()" onfocus="this.select()" title="Saldo de estoque no início de janeiro${iniPad !== null ? ' (vazio = saldo final de dezembro do ano anterior)' : ''}" /></td>`
+        : `<td class="estq-auto" id="estq-ini-${m}">—</td>`).join('')}</tr>
+     <tr><td>Saldo final</td>${meses12.map(m =>
+        `<td><input type="text" inputmode="decimal" id="estq-fin-${m}" value="${valInp(_estqNum((s.finais || {})[m]))}" placeholder="—" oninput="_estqRecalc()" onfocus="this.select()" /></td>`).join('')}</tr>
+     <tr class="estq-var"><td>Variação do estoque</td>${meses12.map(m => `<td id="estq-var-${m}">—</td>`).join('')}</tr>
+     <tr><td style="font-weight:500;color:#78716c">Efeito no CPV</td>${meses12.map(m => `<td class="estq-auto" id="estq-cpv-${m}">—</td>`).join('')}</tr>`;
+  _estqRecalc();
+  openModal('modal-estoque');
+  setTimeout(() => { const el = document.getElementById('estq-ini'); if (el && !el.value) el.focus(); }, 60);
+}
+
+function _estqLer(id) {
+  const el = document.getElementById(id);
+  if (!el || !String(el.value).trim()) return null;
+  return parseContabil(el.value);
+}
+
+function _estqRecalc() {
+  const ano = _estqAnoEdit;
+  let ini = _estqLer('estq-ini');
+  if (ini === null) ini = _estqIniPadraoJan(ano);
+  let finAnt = null;
+  const fmtSinal = v => Math.abs(v) < 0.005 ? '0,00' : (v > 0 ? '+ ' : '− ') + fmtBRL(Math.abs(v));
+  for (let m = 1; m <= 12; m++) {
+    const iniM = m === 1 ? ini : finAnt;
+    const fin = _estqLer('estq-fin-' + m);
+    if (m > 1) document.getElementById('estq-ini-' + m).textContent = iniM === null ? '—' : fmtBRL(iniM);
+    const tdV = document.getElementById('estq-var-' + m);
+    const tdC = document.getElementById('estq-cpv-' + m);
+    if (fin !== null && iniM !== null) {
+      const v = fin - iniM;
+      tdV.innerHTML = `<span style="color:${v < 0 ? '#dc2626' : '#166534'}">${fmtSinal(v)}</span>`;
+      tdC.textContent = Math.abs(v) < 0.005 ? '—' : (v > 0 ? 'reduz ' : 'aumenta ') + fmtBRL(Math.abs(v));
+    } else { tdV.textContent = '—'; tdC.textContent = '—'; }
+    finAnt = fin;
+  }
+}
+
+async function salvarSaldosEstoque() {
+  const ano = _estqAnoEdit; if (!ano) return;
+  const finais = {};
+  for (let m = 1; m <= 12; m++) { const v = _estqLer('estq-fin-' + m); if (v !== null) finais[m] = v; }
+  const reg = { inicial: _estqLer('estq-ini'), finais };
+  const key = 'estoque_saldos:' + ano;
+  const value = JSON.stringify(reg);
+  const ex = await sbFetch('config', 'GET', null, `?key=eq.${encodeURIComponent(key)}&select=id`);
+  let ok = false;
+  if (ex !== null) ok = ex.length
+    ? !!(await sbFetch('config', 'PATCH', { value }, `?key=eq.${encodeURIComponent(key)}`))
+    : !!(await sbFetch('config', 'POST', { id: uid(), key, value }));
+  if (!ok) { alert('❌ Não foi possível salvar os saldos de estoque.' + sbErroMsg()); return; }
+  dreEstoqueSaldos[ano] = reg;
+  closeModal('modal-estoque');
+  renderDre();
+  if (paginaVisivel('dashboard')) renderMetasGauges();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PAINEL EXECUTIVO DO DASHBOARD
+// Usa o filtro "Ano/Mês" do topo. Sem filtro: mês atual.
+// Comparação: mês anterior (ou ano anterior, quando só o ano é escolhido).
+// ══════════════════════════════════════════════════════════════════════
+function _execPeriodo() {
+  const a = parseInt((document.getElementById('kpi-ano') || {}).value) || 0;
+  const m = parseInt((document.getElementById('kpi-mes') || {}).value) || 0;
+  const hoje = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const ult = (y, mm) => new Date(y, mm, 0).getDate();
+  const mesR = (y, mm) => ({ ini: `${y}-${pad(mm)}-01`, fim: `${y}-${pad(mm)}-${pad(ult(y, mm))}`, label: `${meses[mm]} de ${y}` });
+  if (a && !m) {
+    return { ini: `${a}-01-01`, fim: `${a}-12-31`, label: `Ano de ${a}`,
+             ant: { ini: `${a-1}-01-01`, fim: `${a-1}-12-31`, label: `ano de ${a-1}` }, fimMes: { y: a, m: 12 } };
+  }
+  const y = a || hoje.getFullYear(), mm = m || (hoje.getMonth() + 1);
+  const py = mm === 1 ? y - 1 : y, pm = mm === 1 ? 12 : mm - 1;
+  const r = mesR(y, mm); const an = mesR(py, pm);
+  return Object.assign(r, { ant: { ini: an.ini, fim: an.fim, label: `${meses[pm].toLowerCase()} de ${py}` }, fimMes: { y, m: mm }, padrao: !a && !m });
+}
+
+function _execEntre(d, r) { return !!d && d >= r.ini && d <= r.fim; }
+
+function _execCatVenda(l) { return l.cat_dre || ((db.prodvenda.find(x => x.id === l.prod) || {}).cat) || ''; }
+function _execCatCompra(l) { return l.cat_dre || ((db.produtos.find(x => x.id === l.prod) || {}).cat) || ''; }
+
+function _execNumeros(r) {
+  const vendas = db.lancreceber.filter(l => _execEntre(l.dtvenda || l.dtcompra, r));
+  const compras = db.lancamentos.filter(l => _execEntre(l.dtcompra, r));
+  const fat = vendas.reduce((s, l) => s + (l.valor || 0), 0);
+  const desp = compras.reduce((s, l) => s + (l.valor || 0), 0);
+  const rec = getParcelasReceber(true).filter(p => _execEntre(p.dtrecebido, r)).reduce((s, p) => s + p.valParc, 0);
+  const pag = getParcelas(true).filter(p => _execEntre(p.dtpago, r)).reduce((s, p) => s + p.valParc, 0);
+  return { vendas, compras, fat, desp, res: fat - desp, qtd: vendas.length, ticket: vendas.length ? fat / vendas.length : 0, rec, pag };
+}
+
+// Seta + % de variação. maiorEhMelhor define a cor.
+function _execDelta(cur, ant, maiorEhMelhor) {
+  if (!ant) return cur ? '<span class="exec-delta neutro">novo</span>' : '';
+  const pct = (cur - ant) / Math.abs(ant) * 100;
+  if (Math.abs(pct) < 0.5) return '<span class="exec-delta neutro">= 0%</span>';
+  const subiu = pct > 0;
+  const bom = subiu === maiorEhMelhor;
+  return `<span class="exec-delta ${bom ? 'bom' : 'ruim'}">${subiu ? '▲' : '▼'} ${Math.abs(pct).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</span>`;
+}
+
+function _execBarras(itens, total, cor) {
+  if (!itens.length) return '<div class="empty-state" style="padding:18px">Sem dados no período.</div>';
+  const max = Math.max(...itens.map(i => i.valor), 1);
+  return itens.map(i => `<div class="exec-bar-row" title="${esc(i.nome)}: ${fmtBRL(i.valor)}${total ? ' (' + (i.valor / total * 100).toFixed(1).replace('.', ',') + '%)' : ''}">
+      <span class="exec-bar-nome">${esc(i.nome)}</span>
+      <span class="exec-bar-trilho"><span class="exec-bar-fill" style="display:block;width:${Math.max(2, i.valor / max * 100).toFixed(1)}%;background:${i.cor || cor}"></span></span>
+      <span class="exec-bar-val">${fmtBRL(i.valor)}${total ? `<span style="color:#a8a29e;font-weight:500;font-size:10.5px;margin-left:5px">${(i.valor / total * 100).toFixed(0)}%</span>` : ''}</span>
+    </div>`).join('');
+}
+
+function renderPainelExecutivo() {
+  const box = document.getElementById('exec-painel');
+  if (!box || !paginaVisivel('dashboard')) return;
+  const P = _execPeriodo();
+  const n = _execNumeros(P), a = _execNumeros(P.ant);
+  const hoje = today();
+  const em30 = _addDias(hoje, 30), em7 = _addDias(hoje, 7);
+
+  document.getElementById('exec-periodo').innerHTML =
+    `${P.label}${P.padrao ? ' (mês atual)' : ''} · comparado com ${P.ant.label}`;
+
+  // A receber em aberto (descontando recebimentos parciais da Cobrança)
+  const abertosRec = getParcelasReceber(false).map(p => Object.assign({}, p, {
+    saldo: Math.max(0, p.valParc - (typeof cobTotalBaixas === 'function' ? cobTotalBaixas(p.lancId, p.parcIdx) : 0))
+  })).filter(p => p.saldo > 0.005);
+  const totalAberto = abertosRec.reduce((s, p) => s + p.saldo, 0);
+  const vencidosRec = abertosRec.filter(p => p.venc && p.venc < hoje);
+  const inad = vencidosRec.reduce((s, p) => s + p.saldo, 0);
+  const cliInad = new Set(vencidosRec.map(p => p.cliente)).size;
+
+  const abertosPag = getParcelas(false);
+  const vencidosPag = abertosPag.filter(p => p.venc && p.venc < hoje);
+  const totVencPag = vencidosPag.reduce((s, p) => s + p.valParc, 0);
+
+  const saldoContas = db.bancos.reduce((s, b) => s + getBancoSaldo(b), 0);
+  const margem = n.fat ? n.res / n.fat * 100 : 0;
+  const pct = v => v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+
+  const kpi = (ico, lbl, val, sub, cor) => `<div class="exec-kpi">
+      <div class="exec-kpi-lbl">${ico} ${lbl}</div>
+      <div class="exec-kpi-val"${cor ? ` style="color:${cor}"` : ''} title="${val}">${val}</div>
+      <div class="exec-kpi-sub">${sub}</div></div>`;
+
+  document.getElementById('exec-kpis').innerHTML = [
+    kpi('💰', 'Faturamento', fmtBRL(n.fat), `${_execDelta(n.fat, a.fat, true)} ${n.qtd} venda(s)`),
+    kpi('🧾', 'Compras e despesas', fmtBRL(n.desp), `${_execDelta(n.desp, a.desp, false)} ${n.compras.length} lançamento(s)`),
+    kpi('📈', 'Resultado', fmtBRL(n.res), `${_execDelta(n.res, a.res, true)} margem ${pct(margem)}`, n.res < 0 ? '#b91c1c' : '#166534'),
+    kpi('🎟️', 'Ticket médio', fmtBRL(n.ticket), `${_execDelta(n.ticket, a.ticket, true)} por venda`),
+    kpi('⬇️', 'Entradas de caixa', fmtBRL(n.rec), `${_execDelta(n.rec, a.rec, true)} valores recebidos`),
+    kpi('⬆️', 'Saídas de caixa', fmtBRL(n.pag), `${_execDelta(n.pag, a.pag, false)} valores pagos`),
+    kpi('🏦', 'Saldo em contas', fmtBRL(saldoContas), `geração de caixa no período: <b style="color:${n.rec - n.pag < 0 ? '#b91c1c' : '#166534'}">${fmtBRL(n.rec - n.pag)}</b>`, saldoContas < 0 ? '#b91c1c' : ''),
+    kpi('⚠️', 'Inadimplência', fmtBRL(inad), `${totalAberto ? pct(inad / totalAberto * 100) : '0%'} do a receber · ${cliInad} cliente(s)`, inad > 0 ? '#b91c1c' : '')
+  ].join('');
+
+  // ── Projeção 30 dias ──
+  const rec30 = abertosRec.filter(p => p.venc && p.venc >= hoje && p.venc <= em30).reduce((s, p) => s + p.saldo, 0);
+  const pag30 = abertosPag.filter(p => p.venc && p.venc >= hoje && p.venc <= em30).reduce((s, p) => s + p.valParc, 0);
+  const proj = saldoContas + rec30 - pag30;
+  document.getElementById('exec-projecao').innerHTML = `
+    <div class="exec-proj-linha"><span>Saldo atual nas contas</span><b>${fmtBRL(saldoContas)}</b></div>
+    <div class="exec-proj-linha"><span>(+) A receber até ${fmtDate(em30)}</span><b style="color:#166534">${fmtBRL(rec30)}</b></div>
+    <div class="exec-proj-linha"><span>(−) A pagar até ${fmtDate(em30)}</span><b style="color:#b91c1c">${fmtBRL(pag30)}</b></div>
+    <div class="exec-proj-total"><span>Saldo projetado</span><span style="font-family:var(--num-font);color:${proj < 0 ? '#b91c1c' : '#166534'}">${fmtBRL(proj)}</span></div>
+    <div style="font-size:11px;color:#a8a29e;margin-top:6px">Não inclui ${fmtBRL(inad)} a receber vencidos nem ${fmtBRL(totVencPag)} a pagar vencidos.</div>`;
+
+  // ── Aging dos recebíveis ──
+  const faixas = [
+    { nome: 'A vencer', cor: '#2563eb', f: d => d <= 0 },
+    { nome: '1 a 30 dias', cor: '#f59e0b', f: d => d >= 1 && d <= 30 },
+    { nome: '31 a 60 dias', cor: '#f97316', f: d => d >= 31 && d <= 60 },
+    { nome: '61 a 90 dias', cor: '#dc2626', f: d => d >= 61 && d <= 90 },
+    { nome: 'Mais de 90 dias', cor: '#991b1b', f: d => d > 90 }
+  ];
+  const aging = faixas.map(fx => ({ nome: fx.nome, cor: fx.cor,
+    valor: abertosRec.filter(p => fx.f(p.venc && p.venc < hoje ? diffDias(p.venc, hoje) : 0)).reduce((s, p) => s + p.saldo, 0) }));
+  document.getElementById('exec-aging').innerHTML = _execBarras(aging, totalAberto, '#2563eb') +
+    `<div style="font-size:11px;color:#a8a29e;margin-top:6px">Total em aberto: <b style="color:#44403c">${fmtBRL(totalAberto)}</b></div>`;
+
+  // ── Top clientes ──
+  const porCli = {};
+  n.vendas.forEach(l => { const k = l.cliente || ''; porCli[k] = (porCli[k] || 0) + (l.valor || 0); });
+  const topCli = Object.entries(porCli).map(([k, v]) => ({ nome: k ? getClienteNome(k) : '(sem cliente)', valor: v }))
+    .sort((x, y) => y.valor - x.valor).slice(0, 5);
+  document.getElementById('exec-top-clientes').innerHTML = _execBarras(topCli, n.fat, '#0f766e');
+
+  // ── Despesas por categoria ──
+  const porCat = {};
+  n.compras.forEach(l => { const k = _execCatCompra(l); porCat[k] = (porCat[k] || 0) + (l.valor || 0); });
+  const topCat = Object.entries(porCat).map(([k, v]) => ({ nome: k ? getDreCatNome(k) : 'Sem categoria', valor: v }))
+    .sort((x, y) => y.valor - x.valor).slice(0, 7);
+  document.getElementById('exec-top-despesas').innerHTML = _execBarras(topCat, n.desp, '#ea580c');
+
+  // ── Próximos pagamentos (7 dias) ──
+  const prox = abertosPag.filter(p => p.venc && p.venc >= hoje && p.venc <= em7).sort((x, y) => x.venc.localeCompare(y.venc));
+  const totProx = prox.reduce((s, p) => s + p.valParc, 0);
+  document.getElementById('exec-proximos').innerHTML = (prox.length
+    ? prox.slice(0, 8).map(p => `<div class="exec-proj-linha">
+        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:#a8a29e;font-family:var(--num-font)">${fmtDate(p.venc).slice(0, 5)}</span> &nbsp;${esc(getFornNome(p.forn))}</span>
+        <b>${fmtBRL(p.valParc)}</b></div>`).join('') +
+      (prox.length > 8 ? `<div style="font-size:11px;color:#a8a29e;padding-top:6px">+ ${prox.length - 8} outro(s)</div>` : '')
+    : '<div class="empty-state" style="padding:18px">Nada vence nos próximos 7 dias.</div>');
+  document.getElementById('exec-proximos-total').textContent = prox.length ? `${prox.length} conta(s) · ${fmtBRL(totProx)}` : '';
+
+  // ── Pontos de atenção ──
+  const al = [];
+  if (n.res < 0) al.push(['critico', '🔻', `Resultado negativo em ${P.label}: ${fmtBRL(n.res)}. As compras e despesas superaram o faturamento.`]);
+  if (proj < 0) al.push(['critico', '💸', `O saldo projetado para os próximos 30 dias fica negativo (${fmtBRL(proj)}). Antecipe recebimentos ou renegocie pagamentos.`]);
+  if (vencidosPag.length) al.push(['critico', '⏰', `${vencidosPag.length} conta(s) a pagar vencida(s), somando ${fmtBRL(totVencPag)}.`]);
+  if (totalAberto && inad / totalAberto > 0.10) al.push(['atencao', '📞', `Inadimplência de ${pct(inad / totalAberto * 100)} do a receber (${fmtBRL(inad)} em ${cliInad} cliente(s)). Veja a tela de Cobrança.`]);
+  else if (inad > 0) al.push(['atencao', '📞', `${fmtBRL(inad)} a receber vencidos, de ${cliInad} cliente(s).`]);
+  if (a.desp && (n.desp - a.desp) / a.desp > 0.15) al.push(['atencao', '📊', `Compras e despesas subiram ${pct((n.desp - a.desp) / a.desp * 100)} em relação a ${P.ant.label}.`]);
+  if (a.fat && (n.fat - a.fat) / a.fat < -0.10) al.push(['atencao', '📉', `Faturamento caiu ${pct(Math.abs((n.fat - a.fat) / a.fat * 100))} em relação a ${P.ant.label}.`]);
+  const semCatV = n.vendas.filter(l => !_execCatVenda(l)).length;
+  const semCatC = n.compras.filter(l => !_execCatCompra(l)).length;
+  if (semCatV + semCatC) al.push(['atencao', '🏷️', `${semCatV + semCatC} lançamento(s) do período sem categoria (${semCatV} venda(s), ${semCatC} compra(s)). Eles distorcem o DRE.`]);
+  if (!al.length) al.push(['ok', '✅', 'Nenhum ponto de atenção no período. Resultado positivo, caixa projetado positivo e nada vencido a pagar.']);
+  document.getElementById('exec-alertas').innerHTML = al.map(([c, i, t]) =>
+    `<div class="exec-alerta ${c}"><span class="exec-alerta-ico">${i}</span><span>${t}</span></div>`).join('');
+
+  _renderExecEvolucao(P.fimMes);
+}
+
+function _renderExecEvolucao(fimMes) {
+  const cv = document.getElementById('chart-exec-evolucao');
+  if (!cv || typeof Chart === 'undefined') return;
+  const pad = n => String(n).padStart(2, '0');
+  const labels = [], fat = [], desp = [], res = [];
+  for (let i = 11; i >= 0; i--) {
+    let y = fimMes.y, m = fimMes.m - i;
+    while (m < 1) { m += 12; y -= 1; }
+    const r = { ini: `${y}-${pad(m)}-01`, fim: `${y}-${pad(m)}-${pad(new Date(y, m, 0).getDate())}` };
+    const f = db.lancreceber.filter(l => _execEntre(l.dtvenda || l.dtcompra, r)).reduce((s, l) => s + (l.valor || 0), 0);
+    const d = db.lancamentos.filter(l => _execEntre(l.dtcompra, r)).reduce((s, l) => s + (l.valor || 0), 0);
+    labels.push(`${MESES_ABR[m]}/${String(y).slice(2)}`); fat.push(f); desp.push(d); res.push(f - d);
+  }
+  if (charts['chart-exec-evolucao']) charts['chart-exec-evolucao'].destroy();
+  const fmtK = v => 'R$ ' + (Math.abs(v) >= 1000 ? (v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' mil' : v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }));
+  charts['chart-exec-evolucao'] = new Chart(cv.getContext('2d'), {
+    data: {
+      labels,
+      datasets: [
+        { type: 'bar', label: 'Faturamento', data: fat, backgroundColor: '#16a34acc', borderRadius: 4, barPercentage: .8, categoryPercentage: .7, order: 2 },
+        { type: 'bar', label: 'Compras e despesas', data: desp, backgroundColor: '#dc2626b3', borderRadius: 4, barPercentage: .8, categoryPercentage: .7, order: 2 },
+        { type: 'line', label: 'Resultado', data: res, borderColor: '#ea580c', backgroundColor: '#ea580c', borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: .3, order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { color: '#57534e', font: { size: 12 }, usePointStyle: true, boxWidth: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtBRL(c.parsed.y)}` } },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: { ticks: { color: '#a8a29e' }, grid: { display: false } },
+        y: { ticks: { color: '#a8a29e', callback: fmtK }, grid: { color: '#f5f4f2' } }
+      }
+    }
+  });
+}
+
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-10-30 · empresa-unica';
+window.APP_BUILD = '2026-10-30 · dashboard-executivo';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
