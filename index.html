@@ -1164,6 +1164,10 @@ tr.cob-dia-vazio > td {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Auditoria
       </div>
+      <div class="nav-item" id="nav-item-backup" onclick="showPage('backup')" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+        Backup
+      </div>
       <div class="nav-item" id="nav-item-usuarios" onclick="showPage('usuarios')" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Gestão de Usuários
@@ -1523,6 +1527,7 @@ tr.cob-dia-vazio > td {
           <div class="page-title">Empresas <span class="admin-only-badge">🔒 Admin</span></div>
           <div class="page-sub" style="margin-bottom:0">Cadastro das empresas do grupo. Cada lançamento é vinculado a uma empresa; use o seletor no topo do menu para filtrar as telas ou ver o consolidado.</div>
         </div>
+        <button class="btn btn-danger" id="btn-unificar-empresas" style="display:none;margin-right:8px" onclick="unificarEmpresasAutoCenter477()">🔀 Unificar tudo em Auto Center 477</button>
         <button class="btn-novo" id="btn-nova-empresa" onclick="toggleFormPanel('form-empresa',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nova
         </button>
@@ -1929,6 +1934,66 @@ tr.cob-dia-vazio > td {
           O registro é gravado no navegador de quem faz a alteração. Ele mostra o que o sistema enviou ao banco — não
           substitui as regras de permissão (RLS) do Supabase, que são a proteção de verdade contra acesso indevido.
         </p>
+      </div>
+    </div>
+
+    <!-- ══ BACKUP ══ -->
+    <div class="page" id="page-backup">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Backup do Sistema <span class="admin-only-badge">🔒 Admin</span></div>
+          <div class="page-sub" style="margin-bottom:0">Cópia de segurança de todos os dados, de todas as empresas, em um arquivo .json</div>
+        </div>
+        <button class="btn-novo" id="btn-backup-agora" onclick="fazerBackupAgora()">⬇ Fazer backup agora</button>
+      </div>
+
+      <div id="backup-kpis" class="grid4" style="margin:20px 0;"></div>
+
+      <div class="card">
+        <div class="card-title">Backup automático — periodicidade</div>
+        <div class="grid3">
+          <div class="form-group"><label>Periodicidade</label>
+            <select id="backup-periodo" onchange="atualizarCamposBackup()">
+              <option value="desativado">Desativado</option>
+              <option value="diario">Diário</option>
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal (a cada 15 dias)</option>
+              <option value="mensal">Mensal</option>
+            </select>
+          </div>
+          <div class="form-group" id="backup-dia-semana-wrap" style="display:none"><label>Dia da semana</label>
+            <select id="backup-dia-semana">
+              <option value="1">Segunda-feira</option><option value="2">Terça-feira</option>
+              <option value="3">Quarta-feira</option><option value="4">Quinta-feira</option>
+              <option value="5">Sexta-feira</option><option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </div>
+          <div class="form-group" id="backup-dia-mes-wrap" style="display:none"><label>Dia do mês</label>
+            <input id="backup-dia-mes" type="number" min="1" max="31" step="1" placeholder="1 a 31" />
+          </div>
+        </div>
+        <p id="backup-dica" style="font-size:12px;color:#57534e;margin:-4px 0 12px;"></p>
+        <div class="btn-row"><button class="btn btn-primary" onclick="salvarAgendamentoBackup()">Salvar agendamento</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Histórico de backups (últimos 30)</div>
+        <div class="table-scroll"><table><thead><tr>
+          <th>Data e hora</th><th>Tipo</th><th>Gerado por</th><th>Arquivo</th><th style="text-align:right">Registros</th><th>Situação</th>
+        </tr></thead><tbody id="tb-backup-hist">
+          <tr><td colspan="6" class="empty-state">Nenhum backup registrado ainda.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="card" style="background:#fffbeb;border-color:#fde68a">
+        <div class="card-title" style="color:#92400e">Como funciona</div>
+        <ul style="font-size:12.5px;color:#57534e;line-height:1.7;padding-left:18px">
+          <li>O backup inclui todas as tabelas: lançamentos, clientes, fornecedores, bancos, DRE/DFC, empresas, usuários e as configurações (custos fixos, cobrança, metas, auditoria etc.).</li>
+          <li>O arquivo é baixado no computador do <b>administrador</b> que estiver com o sistema aberto, na pasta de downloads do navegador.</li>
+          <li>O sistema confere o agendamento ao entrar e a cada 30 minutos. Se ninguém abrir o sistema na data marcada, o backup é feito no próximo acesso de um administrador.</li>
+          <li>Guarde os arquivos fora do computador (pendrive, Google Drive, e-mail) — se o computador quebrar, a cópia continua segura.</li>
+        </ul>
       </div>
     </div>
 
@@ -2499,7 +2564,7 @@ tr.cob-dia-vazio > td {
       <div class="page-header">
         <div><div class="page-title">Bancos / Caixas</div><div class="page-sub" style="margin-bottom:0">Cadastro de contas bancárias e caixas</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-secondary" id="btn-corrigir-orfaos" onclick="abrirCorrigirContasExcluidas()" title="Coloca uma conta em todos os lançamentos cuja conta foi excluída">🔧 Corrigir lançamentos com conta excluída</button>
+        <button class="btn btn-secondary" id="btn-corrigir-orfaos" style="display:none" onclick="abrirCorrigirContasExcluidas()" title="Coloca uma conta em todos os lançamentos cuja conta foi excluída">🔧 Corrigir lançamentos com conta excluída</button>
         <button class="btn-novo" id="btn-novo-bnk" onclick="toggleFormPanel('form-bnk',this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Novo
         </button>
@@ -4805,7 +4870,7 @@ function _finalizarLogin(found) {
   if (sll) sll.textContent = prev ? 'Último acesso: ' + fmtTs(prev.ts) : 'Primeiro acesso';
   // Mostrar/ocultar nav admin
   const isAdmin = found.role === 'admin';
-  ['nav-label-admin','nav-item-usuarios','nav-item-empresas','nav-item-auditoria'].forEach(id => {
+  ['nav-label-admin','nav-item-usuarios','nav-item-empresas','nav-item-auditoria','nav-item-backup'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = isAdmin ? '' : 'none';
   });
@@ -4867,6 +4932,9 @@ function showPage(p) {
   if (paginaOculta(p)) return;
   // Verificar permissão (exceto admin e páginas de administração)
   // A auditoria é exclusiva do administrador
+  if (p === 'backup' && (!currentUser || currentUser.role !== 'admin')) {
+    alert('A tela de Backup é exclusiva do administrador.'); return;
+  }
   if (p === 'auditoria' && (!currentUser || currentUser.role !== 'admin')) {
     alert('A tela de Auditoria é exclusiva do administrador.'); return;
   }
@@ -4897,6 +4965,7 @@ function showPage(p) {
   if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
   if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
   if (p === 'auditoria')      renderAuditoria(true);
+  if (p === 'backup')         renderBackupPage();
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -4937,6 +5006,7 @@ function renderPaginaAtual() {
   if (p === 'areceber')       { renderAReceber(); avisoAtrasoAoEntrar(); }
   if (p === 'cobranca')       { renderCobranca(); avisoAtrasoAoEntrar(); }
   if (p === 'auditoria')      renderAuditoria(true);
+  if (p === 'backup')         renderBackupPage();
   if (p === 'recebido')       renderRecebido();
   if (p === 'pedidoscancelados') renderPedidosCancelados();
   if (p === 'reposicao')         renderReposicoes();
@@ -5705,6 +5775,18 @@ function empresasAtivas() {
 function popularSeletorEmpresa() {
   const sel = document.getElementById('empresa-ativa');
   if (!sel) return;
+  const box = document.getElementById('empresa-switch');
+  const ativas = empresasAtivas();
+  // Empresa única: não existe "Consolidado". Ela fica sempre ativa e o seletor some.
+  if (ativas.length === 1) {
+    try { localStorage.setItem(EMPRESA_KEY, ativas[0].id); } catch(e) {}
+    sel.innerHTML = `<option value="${ativas[0].id}">${ativas[0].apelido || ativas[0].nome}</option>`;
+    sel.value = ativas[0].id;
+    if (box) box.style.display = 'none';
+    atualizarTagsEmpresa();
+    return;
+  }
+  if (box) box.style.display = '';
   const atual = empresaAtual();
   sel.innerHTML = '<option value="">🏢 Consolidado (todas)</option>' +
     empresasAtivas().map(e => `<option value="${e.id}">${e.apelido || e.nome}</option>`).join('');
@@ -5919,9 +6001,80 @@ async function deleteEmpresa(id) {
   renderEmpresas();
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// UNIFICAR EMPRESAS — deixa só a "Auto Center 477"
+// Move TODOS os registros de todas as empresas (e os sem empresa) para a
+// Auto Center 477 e depois exclui as demais empresas. Antes de mexer em
+// qualquer coisa, baixa um backup completo.
+// ══════════════════════════════════════════════════════════════════════
+async function unificarEmpresasAutoCenter477() {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode fazer isso.'); return; }
+  const norm = t => normText(t || '').replace(/[^a-z0-9]/g, '');
+  const alvo = (db.empresas || []).find(e => norm(e.nome).includes('autocenter477') || norm(e.apelido).includes('autocenter477'));
+  if (!alvo) {
+    alert('Não encontrei uma empresa chamada "Auto Center 477" no cadastro.\n\nConfira o nome dela na lista e me avise. Nada foi alterado.');
+    return;
+  }
+  const outras = (db.empresas || []).filter(e => e.id !== alvo.id);
+  const nomes = outras.map(e => '  - ' + (e.apelido || e.nome)).join('\n') || '  (nenhuma)';
+  if (!confirm(
+    `Unificar tudo em "${alvo.apelido || alvo.nome}"?\n\n` +
+    `• TODOS os lançamentos (pagar, receber, DFC, faturamento, recebimentos, cancelados e reposições) de todas as empresas passam para a Auto Center 477.\n` +
+    `• Estas empresas serão EXCLUÍDAS:\n${nomes}\n• A opção "Consolidado" deixa de existir.\n\n` +
+    `Antes de começar, um backup completo será baixado automaticamente.`)) return;
+  if (prompt('Para confirmar, digite UNIFICAR') !== 'UNIFICAR') { alert('Cancelado. Nada foi alterado.'); return; }
+
+  showLoading(true);
+  try {
+    // 1) Backup de segurança
+    const bk = await gerarBackupCompleto('manual');
+    if (bk.algumaFalha) {
+      showLoading(false);
+      alert('⚠️ O backup de segurança não conseguiu ler todas as tabelas (' + bk.falhas.join(', ') + '). A unificação foi cancelada; nada foi alterado.');
+      return;
+    }
+    // 2) Mover os registros
+    const enc = encodeURIComponent(alvo.id);
+    const erros = [];
+    for (const t of TABELAS_POR_EMPRESA) {
+      const a = await sbFetch(t, 'PATCH', { empresa_id: alvo.id }, `?empresa_id=neq.${enc}`);
+      const b = await sbFetch(t, 'PATCH', { empresa_id: alvo.id }, `?empresa_id=is.null`);
+      if (!a || !b) erros.push(t);
+    }
+    if (erros.length) {
+      showLoading(false);
+      alert('❌ Não foi possível mover os registros de: ' + erros.join(', ') + '.' + sbErroMsg() +
+            '\n\nAs empresas NÃO foram excluídas. O backup baixado tem a situação anterior.');
+      await loadAllData(); renderPaginaAtual();
+      return;
+    }
+    // 3) Excluir as demais empresas
+    let falhaExc = false;
+    if (outras.length) {
+      const r = await sbDeleteMany('empresas', outras.map(e => e.id));
+      falhaExc = r.falha.length > 0;
+    }
+    // 4) Empresa ativa fixa
+    try { localStorage.setItem(EMPRESA_KEY, alvo.id); } catch(e) {}
+    await loadAllData();
+    renderPaginaAtual();
+    renderEmpresas();
+    showLoading(false);
+    alert(falhaExc
+      ? '⚠️ Os lançamentos foram movidos para a Auto Center 477, mas alguma empresa não pôde ser excluída. Tente excluí-la pela lista.'
+      : `✅ Pronto! Todos os lançamentos agora são da "${alvo.apelido || alvo.nome}" e as outras empresas foram excluídas.\n\nBackup de segurança: ${bk.nomeArquivo}`);
+  } catch(e) {
+    console.error(e);
+    showLoading(false);
+    alert('❌ Erro inesperado durante a unificação. Recarregue a página e confira os dados; o backup foi baixado antes.');
+  }
+}
+
 function renderEmpresas() {
   const tb = document.getElementById('tb-empresas');
   if (!tb) return;
+  const btnUni = document.getElementById('btn-unificar-empresas');
+  if (btnUni) btnUni.style.display = ((db.empresas || []).length > 1 && currentUser && currentUser.role === 'admin') ? '' : 'none';
   const lista = db.empresas || [];
   if (!lista.length) {
     tb.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma empresa cadastrada. Clique em “Nova” para começar.</td></tr>';
@@ -7274,34 +7427,147 @@ async function backupLancamentos() {
   alert(`Backup gerado com sucesso: ${nomeArquivo}\n${pagar.length} lançamento(s) a pagar\n${receber.length} lançamento(s) a receber\nGuarde esse arquivo antes de continuar.`);
 }
 
-// ══════════════════════════════════════════
-// BACKUP AUTOMÁTICO DIÁRIO
-// Roda sozinho, 1x por dia, no primeiro login do admin que acontecer no
-// dia (usuários não-admin não disparam o backup). Busca todas as
-// tabelas direto do banco (não da memória do app) e baixa um .json no
-// navegador de quem abriu o sistema.
-// A data do último backup fica registrada na tabela config
-// (key = 'ultimo_backup_automatico'), para não gerar backup duplicado
-// no mesmo dia mesmo com múltiplos logins do admin.
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// BACKUP COMPLETO DO SISTEMA — COM PERIODICIDADE CONFIGURÁVEL
+// ----------------------------------------------------------------------
+// Copia TODAS as tabelas do banco (de todas as empresas, ignorando o
+// seletor de empresa do topo), inclusive a tabela `config`, onde ficam
+// custos fixos, vigências, cobrança/follow-ups, metas do DRE, variação de
+// estoque, modelos de mensagem, formas de pagamento e a auditoria.
+//
+// A periodicidade (desativado, diário, semanal, quinzenal, mensal) é
+// escolhida pelo administrador na tela "Backup" e fica gravada na tabela
+// `config` (key = 'backup_config'), junto com o histórico das cópias.
+//
+// Como este sistema roda no navegador (não há servidor), o backup é feito
+// quando um ADMINISTRADOR está com o sistema aberto: ao entrar e, depois,
+// a cada 30 minutos. Se a data agendada passar sem ninguém abrir o
+// sistema, o backup é feito na próxima vez que um admin entrar.
+// ══════════════════════════════════════════════════════════════════════
+const BACKUP_CFG_KEY = 'backup_config';
+const BACKUP_TABELAS = [
+  'empresas','perfis','fornecedores','produtos','lancamentos','faturamento','recebimentos',
+  'metas','clientes','prodvenda','lancreceber','dfc_categorias','dfc_lancamentos',
+  'bancos','dre_grupos','transferencias','pedidos_cancelados','reposicoes','config'
+];
+const BACKUP_PERIODOS = {
+  desativado: 'Desativado',
+  diario:     'Diário',
+  semanal:    'Semanal',
+  quinzenal:  'Quinzenal (a cada 15 dias)',
+  mensal:     'Mensal'
+};
+const BACKUP_DIAS_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+var backupCfg = { periodicidade: 'diario', diaSemana: 1, diaMes: 1, ultimo: null, historico: [] };
+var _backupRodando = false;
+var _backupTimer = null;
 
-// Busca, direto do banco, todas as tabelas de dados do sistema.
+function _hojeLocal() { return _isoStr(new Date()); }
+
+async function carregarBackupCfg() {
+  const rows = await sbFetch('config', 'GET', null, `?key=eq.${BACKUP_CFG_KEY}&limit=1`);
+  if (rows === null) return false;
+  let obj = null;
+  if (rows[0]) { try { obj = JSON.parse(rows[0].value); } catch(e) { obj = null; } }
+  backupCfg = Object.assign({ periodicidade: 'diario', diaSemana: 1, diaMes: 1, ultimo: null, historico: [] }, obj || {});
+  if (!Array.isArray(backupCfg.historico)) backupCfg.historico = [];
+  // Compatibilidade com o backup diário antigo (chave 'ultimo_backup_automatico')
+  if (!backupCfg.ultimo) {
+    const old = await sbFetch('config', 'GET', null, '?key=eq.ultimo_backup_automatico&limit=1');
+    if (old && old[0]) {
+      try { const o = JSON.parse(old[0].value); if (o && o.data) backupCfg.ultimo = { data: o.data, ts: o.ts, arquivo: o.arquivo }; } catch(e) {}
+    }
+  }
+  return true;
+}
+
+async function salvarBackupCfg() {
+  const value = JSON.stringify(backupCfg);
+  const ex = await sbFetch('config', 'GET', null, `?key=eq.${BACKUP_CFG_KEY}&select=id`);
+  if (ex === null) return false;
+  if (ex.length) return !!(await sbFetch('config', 'PATCH', { value }, `?key=eq.${BACKUP_CFG_KEY}`));
+  return !!(await sbFetch('config', 'POST', { id: uid(), key: BACKUP_CFG_KEY, value }));
+}
+
+// Última data agendada que já chegou (<= data informada). null = nada agendado.
+function backupDataAgendadaAte(dataIso) {
+  const c = backupCfg;
+  const h = _dataLocal(dataIso);
+  const pad = n => String(n).padStart(2, '0');
+  switch (c.periodicidade) {
+    case 'diario':
+      return dataIso;
+    case 'semanal': {
+      const alvo = ((parseInt(c.diaSemana) || 0) % 7 + 7) % 7;
+      const diff = (h.getDay() - alvo + 7) % 7;
+      return _addDias(dataIso, -diff);
+    }
+    case 'quinzenal': {
+      if (!c.ultimo || !c.ultimo.data) return dataIso;
+      const prox = _addDias(c.ultimo.data, 15);
+      return prox <= dataIso ? prox : null;
+    }
+    case 'mensal': {
+      const dm = Math.min(Math.max(parseInt(c.diaMes) || 1, 1), 31);
+      let y = h.getFullYear(), m = h.getMonth() + 1;
+      let d = Math.min(dm, new Date(y, m, 0).getDate());
+      if (d > h.getDate()) {
+        m -= 1; if (m < 1) { m = 12; y -= 1; }
+        d = Math.min(dm, new Date(y, m, 0).getDate());
+      }
+      return `${y}-${pad(m)}-${pad(d)}`;
+    }
+  }
+  return null;
+}
+
+function backupEstaPendente() {
+  if (backupCfg.periodicidade === 'desativado') return false;
+  const ag = backupDataAgendadaAte(_hojeLocal());
+  if (!ag) return false;
+  const ult = backupCfg.ultimo && backupCfg.ultimo.data;
+  return !ult || ult < ag;
+}
+
+function backupProximaData() {
+  if (backupCfg.periodicidade === 'desativado') return null;
+  const hoje = _hojeLocal();
+  if (backupEstaPendente()) return hoje;
+  for (let i = 1; i <= 400; i++) {
+    const d = _addDias(hoje, i);
+    if (backupDataAgendadaAte(d) === d) return d;
+  }
+  return null;
+}
+
+// Busca uma tabela inteira, sem o filtro da empresa ativa (backup é de tudo).
+async function _fetchTabelaCompleta(tabela) {
+  const limit = 1000;
+  let all = [], offset = 0;
+  while (true) {
+    const lote = await sbFetch(tabela, 'GET', null, `?limit=${limit}&offset=${offset}`);
+    if (lote === null) throw new Error('Falha ao ler ' + tabela);
+    all = all.concat(lote);
+    if (lote.length < limit) break;
+    offset += limit;
+  }
+  return all;
+}
+
 async function buscarDadosCompletos() {
-  const nomes = ['empresas','fornecedores','produtos','lancamentos','faturamento','recebimentos',
-    'metas','clientes','prodvenda','lancreceber','dfc_categorias','dfc_lancamentos',
-    'bancos','dre_grupos','transferencias','pedidos_cancelados','reposicoes'];
-  const results = await Promise.allSettled(nomes.map(t => fetchAll(t)));
-  const dados = {};
-  let algumaFalha = false;
-  nomes.forEach((nome, i) => {
-    if (results[i].status === 'fulfilled' && results[i].value !== null) {
+  const results = await Promise.allSettled(BACKUP_TABELAS.map(_fetchTabelaCompleta));
+  const dados = {}, contagem = {}, falhas = [];
+  BACKUP_TABELAS.forEach((nome, i) => {
+    if (results[i].status === 'fulfilled') {
       dados[nome] = results[i].value;
+      contagem[nome] = results[i].value.length;
     } else {
       dados[nome] = [];
-      algumaFalha = true;
+      contagem[nome] = 0;
+      falhas.push(nome);
     }
   });
-  return { dados, algumaFalha };
+  return { dados, contagem, falhas, algumaFalha: falhas.length > 0 };
 }
 
 // Baixa o backup no navegador de quem estiver com o sistema aberto.
@@ -7314,49 +7580,184 @@ function baixarBackupLocal(nomeArquivo, jsonString) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-// Gera o backup completo agora (busca dados + baixa local).
-// Pode ser rodada manualmente a qualquer momento pelo console: gerarBackupCompleto()
-async function gerarBackupCompleto() {
+// Gera o backup completo agora. origem: 'manual' ou 'automatico'.
+async function gerarBackupCompleto(origem) {
+  origem = origem || 'manual';
   const agora = new Date();
-  const dataStr = today();
+  const dataStr = _hojeLocal();
+  const hora = String(agora.getHours()).padStart(2, '0') + String(agora.getMinutes()).padStart(2, '0');
   console.log('[BACKUP] Buscando dados completos do banco...');
-  const { dados, algumaFalha } = await buscarDadosCompletos();
-  if (algumaFalha) console.warn('[BACKUP] Uma ou mais tabelas falharam ao buscar. Backup gerado parcialmente.');
+  const { dados, contagem, falhas, algumaFalha } = await buscarDadosCompletos();
+  if (algumaFalha) console.warn('[BACKUP] Tabelas que falharam:', falhas);
 
-  const conteudo = { geradoEm: agora.toISOString(), ...dados };
+  const totalRegistros = Object.values(contagem).reduce((s, n) => s + n, 0);
+  const conteudo = {
+    sistema: 'C@P Consultoria — Sistema de Gestão',
+    formato: 2,
+    versao: window.APP_BUILD || '',
+    geradoEm: agora.toISOString(),
+    geradoPor: currentUser ? (currentUser.nome || currentUser.user) : '',
+    origem,
+    periodicidade: backupCfg.periodicidade,
+    totalRegistros,
+    contagem,
+    tabelasComFalha: falhas,
+    dados
+  };
   const jsonString = JSON.stringify(conteudo, null, 2);
-  const nomeArquivo = `backup-autocenter-${dataStr}.json`;
-
+  const nomeArquivo = `backup-cap-${dataStr}-${hora}.json`;
   baixarBackupLocal(nomeArquivo, jsonString);
 
-  console.log(`[BACKUP] Concluído. Arquivo baixado: ${nomeArquivo}${algumaFalha ? ' | Atenção: alguma tabela falhou ao buscar' : ''}.`);
-  return { nomeArquivo, algumaFalha };
+  // Registra no histórico (relê a configuração para não sobrescrever mudanças de outro admin)
+  await carregarBackupCfg();
+  const registro = {
+    data: dataStr, ts: agora.toISOString(), arquivo: nomeArquivo, origem,
+    usuario: conteudo.geradoPor, registros: totalRegistros,
+    tamanhoKB: Math.round(jsonString.length / 1024), falhas
+  };
+  backupCfg.ultimo = registro;
+  backupCfg.historico = [registro].concat(backupCfg.historico || []).slice(0, 30);
+  await salvarBackupCfg();
+
+  console.log(`[BACKUP] Concluído: ${nomeArquivo} (${totalRegistros} registros)${algumaFalha ? ' | Atenção: tabelas com falha: ' + falhas.join(', ') : ''}.`);
+  return { nomeArquivo, algumaFalha, falhas, totalRegistros };
 }
 
-// Verifica se o backup automático de hoje já foi feito (por qualquer
-// usuário); se não, roda agora, silenciosamente (sem alert). Chamada
-// no carregamento do app (initApp).
+// Confere se o backup agendado está pendente e, se estiver, faz agora.
+// Só roda para o administrador. Chamada ao entrar e a cada 30 minutos.
 async function verificarBackupAutomatico() {
+  if (!currentUser || currentUser.role !== 'admin' || _backupRodando) return;
   try {
-    const dataHoje = today();
-    const res = await sbFetch('config', 'GET', null, '?key=eq.ultimo_backup_automatico&limit=1');
-    const registro = (res && res[0]) ? JSON.parse(res[0].value) : null;
-    if (registro && registro.data === dataHoje) return; // já rodou hoje
-
-    const resultado = await gerarBackupCompleto();
-
-    await sbFetch('config', 'DELETE', null, '?key=eq.ultimo_backup_automatico');
-    await sbFetch('config', 'POST', {
-      id: uid(), key: 'ultimo_backup_automatico',
-      value: JSON.stringify({
-        data: dataHoje, ts: new Date().toISOString(), arquivo: resultado.nomeArquivo
-      })
-    });
+    const ok = await carregarBackupCfg();
+    if (!ok || !backupEstaPendente()) return;
+    _backupRodando = true;
+    const r = await gerarBackupCompleto('automatico');
+    _avisoBackup(r.algumaFalha
+      ? `⚠️ Backup automático baixado com falha em: ${r.falhas.join(', ')}`
+      : `✅ Backup automático baixado: ${r.nomeArquivo}`, r.algumaFalha);
+    if (paginaVisivel('backup')) renderBackupPage();
   } catch(e) {
-    console.error('[BACKUP] Erro na verificação do backup automático diário:', e);
+    console.error('[BACKUP] Erro no backup automático:', e);
+  } finally {
+    _backupRodando = false;
+  }
+}
+
+function iniciarAgendadorBackup() {
+  if (_backupTimer) return;
+  _backupTimer = setInterval(() => {
+    verificarBackupAutomatico().catch(e => console.error('[BACKUP] Falha inesperada:', e));
+  }, 30 * 60 * 1000);
+}
+
+// Aviso discreto no canto da tela (não trava o uso do sistema)
+function _avisoBackup(texto, erro) {
+  const el = document.createElement('div');
+  el.textContent = texto;
+  el.style.cssText = `position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9999;
+    background:${erro ? '#b91c1c' : '#166534'};color:#fff;padding:11px 18px;border-radius:9px;
+    font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:90vw;`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 7000);
+}
+
+// ── Tela de Backup ────────────────────────────────────────────────────
+function atualizarCamposBackup() {
+  const p = document.getElementById('backup-periodo').value;
+  document.getElementById('backup-dia-semana-wrap').style.display = p === 'semanal' ? '' : 'none';
+  document.getElementById('backup-dia-mes-wrap').style.display = p === 'mensal' ? '' : 'none';
+  const dica = {
+    desativado: 'O backup automático fica desligado. Você ainda pode fazer backups manuais pelo botão acima.',
+    diario:     'Um backup por dia, feito na primeira vez que um administrador abrir o sistema no dia.',
+    semanal:    'Um backup por semana, no dia escolhido. Se ninguém abrir o sistema nesse dia, é feito no próximo acesso de um administrador.',
+    quinzenal:  'Um backup a cada 15 dias, contados a partir do último backup feito.',
+    mensal:     'Um backup por mês, no dia escolhido. Em meses mais curtos (ex.: dia 31 em fevereiro), usa o último dia do mês.'
+  }[p] || '';
+  document.getElementById('backup-dica').textContent = dica;
+}
+
+async function renderBackupPage() {
+  if (!paginaVisivel('backup')) return;
+  const tb = document.getElementById('tb-backup-hist');
+  const ok = await carregarBackupCfg();
+  if (!ok) {
+    document.getElementById('backup-kpis').innerHTML = '';
+    tb.innerHTML = '<tr><td colspan="6" class="empty-state" style="color:#b91c1c">Não foi possível ler a configuração de backup. Verifique a conexão.</td></tr>';
+    return;
+  }
+  document.getElementById('backup-periodo').value = backupCfg.periodicidade;
+  document.getElementById('backup-dia-semana').value = String(backupCfg.diaSemana);
+  document.getElementById('backup-dia-mes').value = backupCfg.diaMes;
+  atualizarCamposBackup();
+
+  const ult = backupCfg.ultimo;
+  const prox = backupProximaData();
+  const pendente = backupEstaPendente();
+  let detalhe = BACKUP_PERIODOS[backupCfg.periodicidade] || '—';
+  if (backupCfg.periodicidade === 'semanal') detalhe += ' · ' + BACKUP_DIAS_SEMANA[backupCfg.diaSemana % 7];
+  if (backupCfg.periodicidade === 'mensal')  detalhe += ' · dia ' + backupCfg.diaMes;
+
+  document.getElementById('backup-kpis').innerHTML = `
+    <div class="card kpi"><div class="kpi-val" style="font-size:18px">${ult ? fmtTs(ult.ts) : '—'}</div><div class="kpi-lbl">Último backup</div></div>
+    <div class="card kpi"><div class="kpi-val" style="font-size:18px;color:${pendente ? '#d97706' : '#1f2937'}">${prox ? (pendente ? 'Pendente — hoje' : fmtDate(prox)) : 'Desativado'}</div><div class="kpi-lbl">Próximo backup automático</div></div>
+    <div class="card kpi"><div class="kpi-val" style="font-size:16px">${esc(detalhe)}</div><div class="kpi-lbl">Periodicidade</div></div>
+    <div class="card kpi"><div class="kpi-val" style="font-size:18px">${ult && ult.registros != null ? ult.registros.toLocaleString('pt-BR') : '—'}</div><div class="kpi-lbl">Registros no último backup</div></div>`;
+
+  const hist = backupCfg.historico || [];
+  if (!hist.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum backup registrado ainda.</td></tr>';
+    return;
+  }
+  tb.innerHTML = hist.map(h => `<tr>
+    <td style="font-family:DM Mono,monospace;font-size:12px;white-space:nowrap">${fmtTs(h.ts)}</td>
+    <td><span class="badge ${h.origem === 'automatico' ? 'badge-blue' : 'badge-gray'}">${h.origem === 'automatico' ? 'Automático' : 'Manual'}</span></td>
+    <td>${esc(h.usuario || '—')}</td>
+    <td style="font-family:DM Mono,monospace;font-size:12px">${esc(h.arquivo || '—')}</td>
+    <td style="text-align:right">${h.registros != null ? h.registros.toLocaleString('pt-BR') : '—'}${h.tamanhoKB != null ? ` <span style="color:#a8a29e;font-size:11px">· ${h.tamanhoKB.toLocaleString('pt-BR')} KB</span>` : ''}</td>
+    <td>${(h.falhas && h.falhas.length) ? `<span class="badge badge-red" title="${esc(h.falhas.join(', '))}">⚠ ${h.falhas.length} tabela(s) com falha</span>` : '<span class="badge badge-green">Completo</span>'}</td>
+  </tr>`).join('');
+}
+
+async function salvarAgendamentoBackup() {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode configurar o backup.'); return; }
+  const periodo = document.getElementById('backup-periodo').value;
+  const diaMes = parseInt(document.getElementById('backup-dia-mes').value);
+  if (periodo === 'mensal' && (isNaN(diaMes) || diaMes < 1 || diaMes > 31)) { alert('Informe um dia do mês entre 1 e 31.'); return; }
+  const ok = await carregarBackupCfg();
+  if (!ok) { alert('❌ Não foi possível ler a configuração atual.' + sbErroMsg()); return; }
+  backupCfg.periodicidade = periodo;
+  backupCfg.diaSemana = parseInt(document.getElementById('backup-dia-semana').value) || 0;
+  if (periodo === 'mensal') backupCfg.diaMes = diaMes;
+  if (!(await salvarBackupCfg())) { alert('❌ Não foi possível salvar o agendamento.' + sbErroMsg()); return; }
+  await renderBackupPage();
+  const prox = backupProximaData();
+  alert('✅ Agendamento salvo: ' + (BACKUP_PERIODOS[periodo] || periodo) +
+    (prox ? '\nPróximo backup automático: ' + (backupEstaPendente() ? 'agora' : fmtDate(prox)) : ''));
+  verificarBackupAutomatico();
+}
+
+async function fazerBackupAgora() {
+  if (!currentUser || currentUser.role !== 'admin') { alert('Apenas o administrador pode gerar o backup completo.'); return; }
+  if (_backupRodando) { alert('Já existe um backup em andamento. Aguarde.'); return; }
+  const btn = document.getElementById('btn-backup-agora');
+  const txt = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando backup...'; }
+  _backupRodando = true;
+  try {
+    const r = await gerarBackupCompleto('manual');
+    await renderBackupPage();
+    alert(r.algumaFalha
+      ? `⚠️ Backup baixado, mas estas tabelas não puderam ser lidas: ${r.falhas.join(', ')}.\n\nTente novamente.`
+      : `✅ Backup completo baixado: ${r.nomeArquivo}\n${r.totalRegistros.toLocaleString('pt-BR')} registros.\n\nGuarde o arquivo em local seguro (pendrive, Google Drive etc.).`);
+  } catch(e) {
+    console.error(e);
+    alert('❌ Erro ao gerar o backup. Verifique a conexão e tente novamente.');
+  } finally {
+    _backupRodando = false;
+    if (btn) { btn.disabled = false; btn.innerHTML = txt; }
   }
 }
 
@@ -13275,6 +13676,7 @@ async function initApp() {
   // Restrito ao usuário admin (outros perfis não disparam o backup).
   if (currentUser && currentUser.role === 'admin') {
     setTimeout(() => { verificarBackupAutomatico().catch(e => console.error('[BACKUP] Falha inesperada:', e)); }, 3000);
+    iniciarAgendadorBackup();
   }
 }
 
@@ -15599,7 +16001,7 @@ function clearCustosFixosFiltros() {
 
 
 // ── Marcador de versão (para confirmar qual arquivo está no ar) ──
-window.APP_BUILD = '2026-10-20 · filtro-banco-orfaos';
+window.APP_BUILD = '2026-10-30 · empresa-unica';
 (function(){ var b = document.getElementById('sidebar-build'); if (b) b.textContent = 'build ' + window.APP_BUILD; })();
 
 // Fechar modais clicando fora
